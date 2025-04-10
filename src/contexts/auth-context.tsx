@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCookie, clearAuthCookies } from '@/lib/cookies'
+import { getCookie, removeAuthCookies } from '@/lib/cookies'
 import { COOKIE_NAMES } from '@/lib/cookies'
 
 interface User {
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     // Limpiar cookies y estado
-    clearAuthCookies()
+    removeAuthCookies()
     setUser(null)
     
     // Redirigir al login

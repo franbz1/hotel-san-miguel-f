@@ -1,11 +1,11 @@
 import type React from "react"
-import { Search, Menu, User, Calendar } from "lucide-react"
+import { Search, Menu, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
+import { UserNav } from "@/components/user-nav"
 // Tipos para nuestros datos
 type RoomStatus = "available" | "occupied" | "upcoming"
 type BookingStatus = "created" | "filled" | "completed"
@@ -170,9 +170,7 @@ export default function DashboardPage() {
             <h1 className="text-xl font-bold">Hotel San Miguel</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+            <UserNav />
             <Button variant="ghost" size="icon">
               <Menu className="h-5 w-5" />
             </Button>
@@ -293,7 +291,6 @@ export default function DashboardPage() {
     </div>
   )
 }
-
 // Componente auxiliar para el icono de flecha
 function ArrowRightRight(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -316,3 +313,4 @@ function ArrowRightRight(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+

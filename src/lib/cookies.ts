@@ -1,4 +1,5 @@
 import { COOKIE_EXPIRATION_DAYS } from './constants'
+import Cookies from "js-cookie"
 
 // Nombres de las cookies
 export const COOKIE_NAMES = {
@@ -22,17 +23,7 @@ export function setCookie(name: string, value: string, days: number = COOKIE_EXP
  * Obtiene el valor de una cookie por su nombre
  */
 export function getCookie(name: string): string | null {
-  const cookieName = `${name}=`
-  const cookies = document.cookie.split(';')
-  
-  for (let i = 0; i < cookies.length; i++) {
-    let cookie = cookies[i].trim()
-    if (cookie.indexOf(cookieName) === 0) {
-      return cookie.substring(cookieName.length, cookie.length)
-    }
-  }
-  
-  return null
+  return Cookies.get(name) || null
 }
 
 /**
@@ -45,21 +36,29 @@ export function deleteCookie(name: string): void {
 /**
  * Guarda la información de autenticación en cookies
  */
-export function saveAuthCookies(token: string, userId: number, userName: string, userRole: string): void {
-  setCookie(COOKIE_NAMES.TOKEN, token)
-  setCookie(COOKIE_NAMES.USER_ID, userId.toString())
-  setCookie(COOKIE_NAMES.USER_NAME, userName)
-  setCookie(COOKIE_NAMES.USER_ROLE, userRole)
+export function saveAuthCookies(
+  token: string,
+  userId: string,
+  username: string,
+  role: string,
+  rememberMe: boolean = false
+) {
+  const expirationDays = rememberMe ? COOKIE_EXPIRATION_DAYS : 1
+
+  Cookies.set("auth_token", token, { expires: expirationDays })
+  Cookies.set("user_id", userId, { expires: expirationDays })
+  Cookies.set("user_name", username, { expires: expirationDays })
+  Cookies.set("user_role", role, { expires: expirationDays })
 }
 
 /**
  * Elimina todas las cookies de autenticación
  */
-export function clearAuthCookies(): void {
-  deleteCookie(COOKIE_NAMES.TOKEN)
-  deleteCookie(COOKIE_NAMES.USER_ID)
-  deleteCookie(COOKIE_NAMES.USER_NAME)
-  deleteCookie(COOKIE_NAMES.USER_ROLE)
+export function removeAuthCookies() {
+  Cookies.remove("auth_token")
+  Cookies.remove("user_id")
+  Cookies.remove("user_name")
+  Cookies.remove("user_role")
 }
 
 /**

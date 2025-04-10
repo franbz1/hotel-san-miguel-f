@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { saveAuthCookies } from "@/lib/cookies"
-import { ROLE_ROUTES } from "@/lib/constants"
+import { ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/constants"
 
 export function LoginForm() {
   const router = useRouter()
@@ -76,9 +76,6 @@ export function LoginForm() {
     setApiError("")
 
     try {
-      console.log("Enviando petición a:", 'http://localhost:3001/auth/login')
-      console.log("Datos enviados:", { nombre: formData.nombre, password: formData.password })
-      
       const response = await fetch('http://localhost:3001/auth/login', {
         method: 'POST',
         headers: {
@@ -90,8 +87,6 @@ export function LoginForm() {
           password: formData.password,
         }),
       })
-
-      console.log("Respuesta recibida:", response.status, response.statusText)
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
@@ -110,7 +105,6 @@ export function LoginForm() {
       }
 
       const data = await response.json()
-      console.log("Datos de respuesta:", data)
       
       // Guardar la información de autenticación en cookies
       saveAuthCookies(
@@ -121,7 +115,7 @@ export function LoginForm() {
       )
       
       // Redirigir según el rol del usuario
-      const redirectPath = ROLE_ROUTES[data.rol] || ROLE_ROUTES.DEFAULT
+      const redirectPath = data.rol ? ROLE_ROUTES[data.rol as RoleType] : DEFAULT_ROUTE
       router.push(redirectPath)
     } catch (error) {
       console.error("Error en la petición:", error)
