@@ -13,10 +13,7 @@ export const COOKIE_NAMES = {
  * Establece una cookie con el nombre, valor y tiempo de expiración especificados
  */
 export function setCookie(name: string, value: string, days: number = COOKIE_EXPIRATION_DAYS): void {
-  const date = new Date()
-  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000)
-  const expires = `expires=${date.toUTCString()}`
-  document.cookie = `${name}=${value};${expires};path=/;SameSite=Strict`
+  Cookies.set(name, value, { expires: days })
 }
 
 /**
@@ -30,7 +27,7 @@ export function getCookie(name: string): string | null {
  * Elimina una cookie por su nombre
  */
 export function deleteCookie(name: string): void {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+  Cookies.remove(name)
 }
 
 /**
@@ -45,20 +42,20 @@ export function saveAuthCookies(
 ) {
   const expirationDays = rememberMe ? COOKIE_EXPIRATION_DAYS : 1
 
-  Cookies.set("auth_token", token, { expires: expirationDays })
-  Cookies.set("user_id", userId, { expires: expirationDays })
-  Cookies.set("user_name", username, { expires: expirationDays })
-  Cookies.set("user_role", role, { expires: expirationDays })
+  setCookie(COOKIE_NAMES.TOKEN, token, expirationDays)
+  setCookie(COOKIE_NAMES.USER_ID, userId, expirationDays)
+  setCookie(COOKIE_NAMES.USER_NAME, username, expirationDays)
+  setCookie(COOKIE_NAMES.USER_ROLE, role, expirationDays)
 }
 
 /**
  * Elimina todas las cookies de autenticación
  */
 export function removeAuthCookies() {
-  Cookies.remove("auth_token")
-  Cookies.remove("user_id")
-  Cookies.remove("user_name")
-  Cookies.remove("user_role")
+  deleteCookie(COOKIE_NAMES.TOKEN)
+  deleteCookie(COOKIE_NAMES.USER_ID)
+  deleteCookie(COOKIE_NAMES.USER_NAME)
+  deleteCookie(COOKIE_NAMES.USER_ROLE)
 }
 
 /**

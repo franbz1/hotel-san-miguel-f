@@ -1,59 +1,47 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { ROLE_ROUTES, Role, RoleType, DEFAULT_ROUTE } from './lib/constants'
+import { COOKIE_NAMES } from './lib/cookies'
+import { getValidatedUser } from './lib/auth-service'
+import { Role, ROLE_ROUTES, DEFAULT_ROUTE } from './lib/constants'
 
 // Rutas públicas que no requieren autenticación
-const PUBLIC_ROUTES = ['/login', '/forgot-password', '/reset-password']
+const publicRoutes = ['/login', '/register', '/forgot-password']
 
-// Rutas que requieren autenticación pero no un rol específico
-const AUTH_ROUTES = ['/dashboard/aseo', '/dashboard/registro']
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname
 
-// Mapeo de rutas a roles permitidos
-const ROLE_PERMISSIONS: Record<string, RoleType[]> = {
-  '/dashboard': [Role.ADMINISTRADOR, Role.CAJERO],
-  '/dashboard/aseo': [Role.ASEO, Role.ADMINISTRADOR],
-  '/dashboard/registro': [Role.REGISTRO_FORMULARIO, Role.ADMINISTRADOR],
-}
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  
-  // Permitir rutas públicas
-  if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
+  // Permitir acceso a rutas públicas
+  if (publicRoutes.includes(path)) {
     return NextResponse.next()
   }
-  
-  // Verificar si el usuario está autenticado
-  const token = request.cookies.get('auth_token')
-  const userRole = request.cookies.get('user_role')
-  
-  // Si no hay token, redirigir al login
+
+  // Verificar token para rutas protegidas
+  const token = request.cookies.get(COOKIE_NAMES.TOKEN)?.value
   if (!token) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('from', pathname)
-    return NextResponse.redirect(loginUrl)
+    return NextResponse.redirect(new URL('/login', request.url))
   }
-  
-  // Si es una ruta de autenticación general, permitir acceso
-  if (AUTH_ROUTES.some(route => pathname.startsWith(route))) {
+
+  try {
+    // Validar token y obtener información del usuario
+    const user = await getValidatedUser(token)
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    // Verificar acceso a rutas según rol
+    const userRole = user.rol as keyof typeof Role
+    const defaultRoute = ROLE_ROUTES[userRole] || DEFAULT_ROUTE
+    
+    // Si la ruta actual no coincide con la ruta por defecto del rol, redirigir
+    if (!path.startsWith(defaultRoute)) {
+      return NextResponse.redirect(new URL(defaultRoute, request.url))
+    }
+    
     return NextResponse.next()
+  } catch (error) {
+    console.error('Error in middleware:', error)
+    return NextResponse.redirect(new URL('/login', request.url))
   }
-  
-  // Verificar permisos según el rol
-  const allowedRoles = ROLE_PERMISSIONS[pathname]
-  
-  // Si la ruta no tiene permisos específicos, permitir acceso
-  if (!allowedRoles) {
-    return NextResponse.next()
-  }
-  
-  // Si el usuario no tiene el rol requerido, redirigir a su dashboard
-  if (!userRole || !allowedRoles.includes(userRole.value as RoleType)) {
-    const defaultRoute = userRole?.value ? ROLE_ROUTES[userRole.value as RoleType] : DEFAULT_ROUTE
-    return NextResponse.redirect(new URL(defaultRoute, request.url))
-  }
-  
-  return NextResponse.next()
 }
 
 export const config = {

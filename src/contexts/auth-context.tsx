@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter } from 'next/navigation'
 import { getCookie, removeAuthCookies } from '@/lib/cookies'
 import { COOKIE_NAMES } from '@/lib/cookies'
+import { getValidatedUser } from '@/lib/auth-service'
 
 interface User {
   id: number
@@ -25,10 +26,12 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
 })
 
-export const useAuth = () => useContext(AuthContext)
-
 interface AuthProviderProps {
   children: ReactNode
+}
+
+export function useAuth() {
+  return useContext(AuthContext)
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -37,28 +40,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Verificar si hay un usuario autenticado al cargar la página
-    const userId = getCookie(COOKIE_NAMES.USER_ID)
-    const userName = getCookie(COOKIE_NAMES.USER_NAME)
-    const userRole = getCookie(COOKIE_NAMES.USER_ROLE)
-
-    if (userId && userName && userRole) {
-      setUser({
-        id: parseInt(userId, 10),
-        nombre: userName,
-        rol: userRole,
-      })
+    const validateAuth = async () => {
+      try {
+        const token = getCookie(COOKIE_NAMES.TOKEN)
+        if (!token) {
+          removeAuthCookies()
+          setUser(null)
+          return
+        }
+        
+        const validatedUser = await getValidatedUser(token)
+        if (validatedUser) {
+          setUser(validatedUser)
+        } else {
+          removeAuthCookies()
+          setUser(null)
+        }
+      } catch (error) {
+        console.error('Error validating auth:', error)
+        removeAuthCookies()
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    setIsLoading(false)
+    validateAuth()
   }, [])
 
   const logout = () => {
-    // Limpiar cookies y estado
     removeAuthCookies()
     setUser(null)
-    
-    // Redirigir al login
     router.push('/login')
   }
 

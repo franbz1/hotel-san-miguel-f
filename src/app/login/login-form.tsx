@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
@@ -12,9 +12,11 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { saveAuthCookies } from "@/lib/cookies"
 import { ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/constants"
+import { useAuth } from "@/contexts/auth-context"
 
 export function LoginForm() {
   const router = useRouter()
+  const { user, isAuthenticated } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -27,6 +29,15 @@ export function LoginForm() {
     password: "",
   })
   const [apiError, setApiError] = useState("")
+
+  // Verificar si hay un usuario autenticado y redirigir
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const userRole = user.rol as RoleType
+      const redirectPath = ROLE_ROUTES[userRole] || DEFAULT_ROUTE
+      router.push(redirectPath)
+    }
+  }, [isAuthenticated, user, router])
 
   const validateForm = () => {
     let valid = true
@@ -109,9 +120,10 @@ export function LoginForm() {
       // Guardar la información de autenticación en cookies
       saveAuthCookies(
         data.token,
-        data.usuarioId,
+        data.usuarioId.toString(),
         data.nombre,
-        data.rol
+        data.rol,
+        formData.rememberMe
       )
       
       // Redirigir según el rol del usuario
@@ -123,6 +135,15 @@ export function LoginForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Si está cargando la autenticación, mostrar un indicador de carga
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (
