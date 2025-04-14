@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/contexts/auth-context"
 import { removeAuthCookies, getCookie } from "@/lib/cookies"
 import { COOKIE_NAMES } from "@/lib/cookies"
+import { AUTH_ENDPOINTS } from "@/lib/api"
 
 export function UserNav() {
   const router = useRouter()
@@ -24,7 +25,7 @@ export function UserNav() {
       const token = getCookie(COOKIE_NAMES.TOKEN)
       if (token) {
         // Enviar solicitud de logout al backend
-        await fetch('http://localhost:3001/auth/logout', {
+        await fetch(AUTH_ENDPOINTS.LOGOUT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

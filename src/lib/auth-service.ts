@@ -1,3 +1,5 @@
+import { AUTH_ENDPOINTS } from './api'
+
 interface ValidationResponse {
   isValid: boolean
   user?: {
@@ -17,7 +19,7 @@ export async function validateToken(token: string): Promise<ValidationResponse> 
   }
 
   try {
-    const response = await fetch('http://localhost:3001/auth/validate', {
+    const response = await fetch(AUTH_ENDPOINTS.VALIDATE, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

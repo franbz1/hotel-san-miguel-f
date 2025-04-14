@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { saveAuthCookies } from "@/lib/cookies"
 import { ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/constants"
 import { useAuth } from "@/contexts/auth-context"
+import { AUTH_ENDPOINTS } from "@/lib/api"
 
 export function LoginForm() {
   const router = useRouter()
@@ -82,7 +83,7 @@ export function LoginForm() {
     setApiError("")
 
     try {
-      const response = await fetch('http://localhost:3001/auth/login', {
+      const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
