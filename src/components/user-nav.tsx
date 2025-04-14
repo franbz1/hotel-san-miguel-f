@@ -12,15 +12,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/contexts/auth-context"
-import { removeAuthCookies } from "@/lib/cookies"
+import { removeAuthCookies, getCookie } from "@/lib/cookies"
+import { COOKIE_NAMES } from "@/lib/cookies"
 
 export function UserNav() {
   const router = useRouter()
   const { user } = useAuth()
 
-  const handleLogout = () => {
-    removeAuthCookies()
-    router.push("/login")
+  const handleLogout = async () => {
+    try {
+      const token = getCookie(COOKIE_NAMES.TOKEN)
+      if (token) {
+        // Enviar solicitud de logout al backend
+        await fetch('http://localhost:3001/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error)
+    } finally {
+      // Siempre limpiar las cookies y redirigir, incluso si falla la solicitud
+      removeAuthCookies()
+      router.push("/login")
+    }
   }
 
   return (

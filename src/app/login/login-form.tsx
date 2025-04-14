@@ -16,7 +16,7 @@ import { useAuth } from "@/contexts/auth-context"
 
 export function LoginForm() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, login } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -125,6 +125,13 @@ export function LoginForm() {
         data.rol,
         formData.rememberMe
       )
+
+      // Actualizar el estado del usuario en el contexto
+      login({
+        id: data.usuarioId,
+        nombre: data.nombre,
+        rol: data.rol
+      })
       
       // Redirigir según el rol del usuario
       const redirectPath = data.rol ? ROLE_ROUTES[data.rol as RoleType] : DEFAULT_ROUTE

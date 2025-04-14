@@ -17,6 +17,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   logout: () => void
+  login: (userData: User) => void
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   logout: () => {},
+  login: () => {},
 })
 
 interface AuthProviderProps {
@@ -56,8 +58,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           removeAuthCookies()
           setUser(null)
         }
-      } catch (error) {
-        console.error('Error validating auth:', error)
+      } catch {
         removeAuthCookies()
         setUser(null)
       } finally {
@@ -67,6 +68,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     validateAuth()
   }, [])
+
+  const login = (userData: User) => {
+    setUser(userData)
+    setIsLoading(false)
+  }
 
   const logout = () => {
     removeAuthCookies()
@@ -81,6 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: !!user,
         isLoading,
         logout,
+        login,
       }}
     >
       {children}
