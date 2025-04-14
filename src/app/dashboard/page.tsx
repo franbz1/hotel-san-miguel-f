@@ -6,35 +6,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { UserNav } from "@/components/user-nav"
-// Tipos para nuestros datos
-type RoomStatus = "available" | "occupied" | "upcoming"
-type BookingStatus = "created" | "filled" | "completed"
-
-interface Room {
-  id: string
-  number: string
-  status: RoomStatus
-  floor: number
-}
-
-interface Booking {
-  id: string
-  guestName: string
-  startDate: string
-  endDate: string
-  status: BookingStatus
-  roomNumber?: string
-}
-
-// Datos de ejemplo
-const rooms: Room[] = [
-  { id: "1", number: "101", status: "available", floor: 1 },
-  { id: "2", number: "102", status: "available", floor: 1 },
-  { id: "3", number: "103", status: "upcoming", floor: 1 },
-  { id: "4", number: "104", status: "occupied", floor: 1 },
-  { id: "5", number: "201", status: "available", floor: 2 },
-  { id: "6", number: "202", status: "available", floor: 2 },
-]
 
 const bookings: Booking[] = [
   {
