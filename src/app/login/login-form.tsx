@@ -9,7 +9,6 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { saveAuthCookies } from "@/lib/cookies"
 import { ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/constants"
 import { useAuth } from "@/contexts/auth-context"
@@ -72,10 +71,6 @@ export function LoginForm() {
     if (apiError) {
       setApiError("")
     }
-  }
-
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, rememberMe: checked }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -198,7 +193,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             tabIndex={-1}
           >
             {showPassword ? (
@@ -217,18 +212,6 @@ export function LoginForm() {
           {apiError}
         </div>
       )}
-
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="remember-me"
-          checked={formData.rememberMe}
-          onCheckedChange={handleCheckboxChange}
-          disabled={isLoading}
-        />
-        <Label htmlFor="remember-me" className="text-sm font-normal">
-          Recordarme
-        </Label>
-      </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? (
