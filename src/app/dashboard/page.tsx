@@ -1,11 +1,14 @@
-import type React from "react"
-import { Search, Menu, Calendar } from "lucide-react"
+"use client"
+
+import { useState, useEffect } from "react"
+import { Search, Menu, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { UserNav } from "@/components/user-nav"
+import { EstadoHabitacion, getHabitaciones, Habitacion } from "@/lib/habitacion-service"
 
 const bookings: Booking[] = [
   {
@@ -56,11 +59,11 @@ const StatusBadge = ({ status }: { status: BookingStatus }) => {
   )
 }
 
-const RoomCard = ({ room }: { room: Room }) => {
+const RoomCard = ({ room }: { room: Habitacion }) => {
   const statusColors = {
-    available: "border-emerald-500 text-emerald-600",
-    occupied: "border-red-500 text-red-600",
-    upcoming: "border-amber-500 text-amber-600",
+    Disponible: "border-emerald-500 text-emerald-600",
+    Ocupada: "border-red-500 text-red-600",
+    Reservada: "border-amber-500 text-amber-600",
   }
 
   const statusText = {
@@ -74,11 +77,11 @@ const RoomCard = ({ room }: { room: Room }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg ${statusColors[room.status]} hover:bg-slate-50 transition-colors cursor-pointer`}
+            className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg ${room.estado.toString()} hover:bg-slate-50 transition-colors cursor-pointer`}
           >
             <svg
               viewBox="0 0 24 24"
-              className={`w-12 h-12 mb-2 ${room.status === "available" ? "text-emerald-500" : room.status === "occupied" ? "text-red-500" : "text-amber-500"}`}
+              className={`w-12 h-12 mb-2 ${room.estado === EstadoHabitacion.LIBRE ? "text-emerald-500" : room.estado === EstadoHabitacion.OCUPADO ? "text-red-500" : "text-amber-500"}`}
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -87,12 +90,12 @@ const RoomCard = ({ room }: { room: Room }) => {
               <path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
               <path d="M2 11h20" />
             </svg>
-            <span className="text-lg font-semibold">{room.number}</span>
+            <span className="text-lg font-semibold">{room.numero_habitacion}</span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            Habitación {room.number}: {statusText[room.status]}
+            Habitación {room.numero_habitacion}: {room.estado.toString()}
           </p>
         </TooltipContent>
       </Tooltip>
@@ -132,6 +135,31 @@ const StatCard = ({ title, value, color }: { title: string; value: string; color
 }
 
 export default function DashboardPage() {
+  const [habitaciones, setHabitaciones] = useState<Habitacion[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchHabitaciones = async () => {
+      try {
+        setIsLoading(true)
+        const response = await getHabitaciones(currentPage)
+        setHabitaciones(response.data)
+        setTotalPages(response.meta.lastPage)
+        setError(null)
+      } catch (err) {
+        setError('Error al cargar las habitaciones')
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchHabitaciones()
+  }, [currentPage])
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -168,7 +196,7 @@ export default function DashboardPage() {
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input type="search" placeholder="Buscar habitación..." className="pl-8 w-full" />
                 </div>
-                <Button>
+                <Button className="cursor-pointer">
                   <span className="mr-2">Añadir habitación</span>
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="2" y="7" width="20" height="14" rx="2" />
@@ -196,18 +224,43 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <Tabs defaultValue="all" className="mb-6">
-              <TabsList>
-                <TabsTrigger value="all">Todas</TabsTrigger>
-                <TabsTrigger value="1">Piso 1</TabsTrigger>
-                <TabsTrigger value="2">Piso 2</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+              {isLoading ? (
+                <div className="col-span-full flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : error ? (
+                <div className="col-span-full text-center text-red-500">
+                  {error}
+                </div>
+              ) : (
+                habitaciones.map((room) => (
+                  <RoomCard key={room.id} room={room} />
+                ))
+              )}
+            </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {rooms.map((room) => (
-                <RoomCard key={room.id} room={room} />
-              ))}
+            {/* Pagination */}
+            <div className="flex justify-center items-center space-x-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1 || isLoading}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages || isLoading}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
