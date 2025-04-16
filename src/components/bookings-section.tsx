@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getBookingCards } from "@/lib/bookin-card-service"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { BookingCard } from "@/Types/bookin-card"
 import BookingCardUI from "./booking-card-ui"
 
@@ -14,26 +14,68 @@ export function BookingsSection() {
   const [bookings, setBookings] = useState<BookingCard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const observer = useRef<IntersectionObserver | null>(null)
+  const loadingRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const data = await getBookingCards(1, 10)
-        setBookings(data)
-      } catch (err) {
-        setError('Error al cargar las reservas')
-        console.error(err)
-      } finally {
-        setLoading(false)
+  const fetchBookings = useCallback(async (pageNumber: number) => {
+    try {
+      setLoading(true)
+      const data = await getBookingCards(pageNumber, 10)
+      if (data.length === 0) {
+        setHasMore(false)
+        return
       }
-    }
 
-    fetchBookings()
+      setBookings(prev => {
+        const existingIds = new Set(prev.map(b => b.nombre))
+        const newBookings = data.filter(b => !existingIds.has(b.nombre))
+        return [...prev, ...newBookings]
+      })
+    } catch (err) {
+      setError('Error al cargar las reservas')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  if (loading) {
-    return <div className="p-6">Cargando reservas...</div>
-  }
+  useEffect(() => {
+    fetchBookings(1)
+  }, [fetchBookings])
+
+  useEffect(() => {
+    if (!hasMore) return
+
+    const options = {
+      root: null,
+      rootMargin: '20px',
+      threshold: 1.0
+    }
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !loading) {
+        setPage(prev => prev + 1)
+      }
+    }, options)
+
+    if (loadingRef.current) {
+      observer.current.observe(loadingRef.current)
+    }
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect()
+      }
+    }
+  }, [hasMore, loading])
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchBookings(page)
+    }
+  }, [page, fetchBookings])
 
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>
@@ -81,9 +123,14 @@ export function BookingsSection() {
 
       <ScrollArea className="h-[300px] rounded-md border">
         <div className="space-y-2 p-4">
-          {bookings.map((booking, index) => (
-            <BookingCardUI key={index} booking={booking} />
+          {bookings.map((booking) => (
+            <BookingCardUI key={`${booking.nombre}-${booking.fecha_inicio}`} booking={booking} />
           ))}
+          {hasMore && (
+            <div ref={loadingRef} className="flex justify-center py-4">
+              {loading && <div>Cargando más reservas...</div>}
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>
