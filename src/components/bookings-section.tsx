@@ -4,54 +4,17 @@ import { Search, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { getBookingCards } from "@/lib/bookin-card-service"
+import { useEffect, useState } from "react"
+import { BookingCard } from "@/Types/bookin-card"
+import { EstadosFormulario } from "@/Types/enums/estadosFormulario"
 
-type BookingStatus = 'created' | 'filled' | 'completed'
-
-interface Booking {
-  id: string
-  guestName: string
-  startDate: string
-  endDate: string
-  status: BookingStatus
-  roomNumber: string
-}
-
-const bookings: Booking[] = [
-  {
-    id: "1",
-    guestName: "MICHAELL ROGERS",
-    startDate: "12/02/2025",
-    endDate: "14/02/2025",
-    status: "completed",
-    roomNumber: "101",
-  },
-  {
-    id: "2",
-    guestName: "MICHAELL ROGERS",
-    startDate: "12/02/2025",
-    endDate: "14/02/2025",
-    status: "filled",
-    roomNumber: "102",
-  },
-  {
-    id: "3",
-    guestName: "MICHAELL ROGERS",
-    startDate: "12/02/2025",
-    endDate: "14/02/2025",
-    status: "created",
-    roomNumber: "103",
-  },
-]
-
-console.log(await getBookingCards(1, 6))
-
-const StatusBadge = ({ status }: { status: BookingStatus }) => {
-  const statusConfig: Record<BookingStatus, { color: string; text: string }> = {
-    created: { color: "bg-amber-500", text: "Reserva creada" },
-    filled: { color: "bg-blue-500", text: "Formulario completado" },
-    completed: { color: "bg-emerald-500", text: "Reserva completada" },
+const StatusBadge = ({ status }: { status: EstadosFormulario }) => {
+  const statusConfig: Record<EstadosFormulario, { color: string; text: string }> = {
+    [EstadosFormulario.COMPLETADO]: { color: "bg-emerald-500", text: "Formulario completado" },
+    [EstadosFormulario.PENDIENTE]: { color: "bg-amber-500", text: "Formulario pendiente" },
+    [EstadosFormulario.EXPIRADO]: { color: "bg-red-500", text: "Formulario expirado" },
   }
 
   return (
@@ -68,18 +31,20 @@ const StatusBadge = ({ status }: { status: BookingStatus }) => {
   )
 }
 
-const BookingCard = ({ booking }: { booking: Booking }) => {
+const BookingCardUI = ({ booking }: { booking: BookingCard }) => {
+  const fechaInicio = new Date(booking.fecha_inicio)
+  const fechaFin = new Date(booking.fecha_fin)
+
   return (
     <div className="flex items-center p-4 border rounded-lg mb-3 hover:bg-slate-50 transition-colors">
-      <StatusBadge status={booking.status} />
+      <StatusBadge status={booking.estado} />
       <div className="ml-4 flex-1">
-        <div className="font-medium">{booking.guestName}</div>
-        <div className="text-sm text-gray-500">Habitación {booking.roomNumber}</div>
+        <div className="font-medium">{booking.nombre}</div>
       </div>
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <span>{booking.startDate}</span>
+        <span>{fechaInicio.toLocaleDateString()}</span>
         <ArrowRightRight />
-        <span>{booking.endDate}</span>
+        <span>{fechaFin.toLocaleDateString()}</span>
       </div>
       <Button variant="ghost" size="icon" className="ml-2">
         <Calendar className="h-4 w-4" />
@@ -111,6 +76,34 @@ function ArrowRightRight(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function BookingsSection() {
+  const [bookings, setBookings] = useState<BookingCard[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const data = await getBookingCards(1, 10)
+        setBookings(data)
+      } catch (err) {
+        setError('Error al cargar las reservas')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [])
+
+  if (loading) {
+    return <div className="p-6">Cargando reservas...</div>
+  }
+
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>
+  }
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
       <div className="flex justify-between items-center mb-6">
@@ -130,15 +123,15 @@ export function BookingsSection() {
       <div className="mb-4 flex items-center gap-4">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-          <span className="text-xs text-gray-600">Creada</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-          <span className="text-xs text-gray-600">Formulario completado</span>
+          <span className="text-xs text-gray-600">Pendiente</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-          <span className="text-xs text-gray-600">Completada</span>
+          <span className="text-xs text-gray-600">Completado</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span className="text-xs text-gray-600">Expirado</span>
         </div>
       </div>
 
@@ -152,8 +145,8 @@ export function BookingsSection() {
       </Tabs>
 
       <div className="space-y-2">
-        {bookings.map((booking) => (
-          <BookingCard key={booking.id} booking={booking} />
+        {bookings.map((booking, index) => (
+          <BookingCardUI key={index} booking={booking} />
         ))}
       </div>
     </div>
