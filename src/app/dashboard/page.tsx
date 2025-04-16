@@ -1,21 +1,17 @@
-import type React from "react"
-import { Search, Menu, Calendar } from "lucide-react"
+"use client"
+
+import { useState, useEffect } from "react"
+import { Search, Menu, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { UserNav } from "@/components/user-nav"
-// Tipos para nuestros datos
-type RoomStatus = "available" | "occupied" | "upcoming"
-type BookingStatus = "created" | "filled" | "completed"
+import { EstadoHabitacion, getHabitaciones, Habitacion } from "@/lib/habitacion-service"
+import { RoomsSection } from "@/components/rooms-section"
 
-interface Room {
-  id: string
-  number: string
-  status: RoomStatus
-  floor: number
-}
+type BookingStatus = 'created' | 'filled' | 'completed'
 
 interface Booking {
   id: string
@@ -23,18 +19,8 @@ interface Booking {
   startDate: string
   endDate: string
   status: BookingStatus
-  roomNumber?: string
+  roomNumber: string
 }
-
-// Datos de ejemplo
-const rooms: Room[] = [
-  { id: "1", number: "101", status: "available", floor: 1 },
-  { id: "2", number: "102", status: "available", floor: 1 },
-  { id: "3", number: "103", status: "upcoming", floor: 1 },
-  { id: "4", number: "104", status: "occupied", floor: 1 },
-  { id: "5", number: "201", status: "available", floor: 2 },
-  { id: "6", number: "202", status: "available", floor: 2 },
-]
 
 const bookings: Booking[] = [
   {
@@ -65,7 +51,7 @@ const bookings: Booking[] = [
 
 // Componentes
 const StatusBadge = ({ status }: { status: BookingStatus }) => {
-  const statusConfig = {
+  const statusConfig: Record<BookingStatus, { color: string; text: string }> = {
     created: { color: "bg-amber-500", text: "Reserva creada" },
     filled: { color: "bg-blue-500", text: "Formulario completado" },
     completed: { color: "bg-emerald-500", text: "Reserva completada" },
@@ -85,11 +71,11 @@ const StatusBadge = ({ status }: { status: BookingStatus }) => {
   )
 }
 
-const RoomCard = ({ room }: { room: Room }) => {
+const RoomCard = ({ room }: { room: Habitacion }) => {
   const statusColors = {
-    available: "border-emerald-500 text-emerald-600",
-    occupied: "border-red-500 text-red-600",
-    upcoming: "border-amber-500 text-amber-600",
+    Disponible: "border-emerald-500 text-emerald-600",
+    Ocupada: "border-red-500 text-red-600",
+    Reservada: "border-amber-500 text-amber-600",
   }
 
   const statusText = {
@@ -103,11 +89,11 @@ const RoomCard = ({ room }: { room: Room }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg ${statusColors[room.status]} hover:bg-slate-50 transition-colors cursor-pointer`}
+            className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg ${room.estado.toString()} hover:bg-slate-50 transition-colors cursor-pointer`}
           >
             <svg
               viewBox="0 0 24 24"
-              className={`w-12 h-12 mb-2 ${room.status === "available" ? "text-emerald-500" : room.status === "occupied" ? "text-red-500" : "text-amber-500"}`}
+              className={`w-12 h-12 mb-2 ${room.estado === EstadoHabitacion.LIBRE ? "text-emerald-500" : room.estado === EstadoHabitacion.OCUPADO ? "text-red-500" : "text-amber-500"}`}
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -116,12 +102,12 @@ const RoomCard = ({ room }: { room: Room }) => {
               <path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
               <path d="M2 11h20" />
             </svg>
-            <span className="text-lg font-semibold">{room.number}</span>
+            <span className="text-lg font-semibold">{room.numero_habitacion}</span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            Habitación {room.number}: {statusText[room.status]}
+            Habitación {room.numero_habitacion}: {room.estado.toString()}
           </p>
         </TooltipContent>
       </Tooltip>
@@ -161,6 +147,31 @@ const StatCard = ({ title, value, color }: { title: string; value: string; color
 }
 
 export default function DashboardPage() {
+  const [habitaciones, setHabitaciones] = useState<Habitacion[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchHabitaciones = async () => {
+      try {
+        setIsLoading(true)
+        const response = await getHabitaciones(currentPage)
+        setHabitaciones(response.data)
+        setTotalPages(response.meta.lastPage)
+        setError(null)
+      } catch (err) {
+        setError('Error al cargar las habitaciones')
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchHabitaciones()
+  }, [currentPage])
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -189,56 +200,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Rooms Panel */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Habitaciones</h2>
-              <div className="flex space-x-2">
-                <div className="relative w-64">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input type="search" placeholder="Buscar habitación..." className="pl-8 w-full" />
-                </div>
-                <Button>
-                  <span className="mr-2">Añadir habitación</span>
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="2" y="7" width="20" height="14" rx="2" />
-                    <path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-                    <path d="M2 11h20" />
-                    <path d="M12 7v14" />
-                    <path d="M2 14h20" />
-                  </svg>
-                </Button>
-              </div>
-            </div>
-
-            <div className="mb-4 flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <span className="text-xs text-gray-600">Libre</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                <span className="text-xs text-gray-600">Próxima reserva</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span className="text-xs text-gray-600">Ocupada</span>
-              </div>
-            </div>
-
-            <Tabs defaultValue="all" className="mb-6">
-              <TabsList>
-                <TabsTrigger value="all">Todas</TabsTrigger>
-                <TabsTrigger value="1">Piso 1</TabsTrigger>
-                <TabsTrigger value="2">Piso 2</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {rooms.map((room) => (
-                <RoomCard key={room.id} room={room} />
-              ))}
-            </div>
-          </div>
+          <RoomsSection />
 
           {/* Bookings Panel */}
           <div className="bg-white p-6 rounded-lg shadow-sm border">
