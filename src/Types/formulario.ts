@@ -1,3 +1,4 @@
+import { LinkFormulario } from "./link-formulario"
 
 export interface Formulario {
   id: number
@@ -6,7 +7,7 @@ export interface Formulario {
   SubidoATra: boolean
   SubidoASire: boolean
   traId: number
-  linkFormulario: string
+  linkFormulario: LinkFormulario
 
   createdAt: Date
   updatedAt: Date
