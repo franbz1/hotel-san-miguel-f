@@ -9,6 +9,18 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { UserNav } from "@/components/user-nav"
 import { EstadoHabitacion, getHabitaciones, Habitacion } from "@/lib/habitacion-service"
+import { RoomsSection } from "@/components/rooms-section"
+
+type BookingStatus = 'created' | 'filled' | 'completed'
+
+interface Booking {
+  id: string
+  guestName: string
+  startDate: string
+  endDate: string
+  status: BookingStatus
+  roomNumber: string
+}
 
 const bookings: Booking[] = [
   {
@@ -39,7 +51,7 @@ const bookings: Booking[] = [
 
 // Componentes
 const StatusBadge = ({ status }: { status: BookingStatus }) => {
-  const statusConfig = {
+  const statusConfig: Record<BookingStatus, { color: string; text: string }> = {
     created: { color: "bg-amber-500", text: "Reserva creada" },
     filled: { color: "bg-blue-500", text: "Formulario completado" },
     completed: { color: "bg-emerald-500", text: "Reserva completada" },
@@ -188,81 +200,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Rooms Panel */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Habitaciones</h2>
-              <div className="flex space-x-2">
-                <div className="relative w-64">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input type="search" placeholder="Buscar habitación..." className="pl-8 w-full" />
-                </div>
-                <Button className="cursor-pointer">
-                  <span className="mr-2">Añadir habitación</span>
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="2" y="7" width="20" height="14" rx="2" />
-                    <path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-                    <path d="M2 11h20" />
-                    <path d="M12 7v14" />
-                    <path d="M2 14h20" />
-                  </svg>
-                </Button>
-              </div>
-            </div>
-
-            <div className="mb-4 flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <span className="text-xs text-gray-600">Libre</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                <span className="text-xs text-gray-600">Próxima reserva</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span className="text-xs text-gray-600">Ocupada</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
-              {isLoading ? (
-                <div className="col-span-full flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : error ? (
-                <div className="col-span-full text-center text-red-500">
-                  {error}
-                </div>
-              ) : (
-                habitaciones.map((room) => (
-                  <RoomCard key={room.id} room={room} />
-                ))
-              )}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex justify-center items-center space-x-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1 || isLoading}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm">
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages || isLoading}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <RoomsSection />
 
           {/* Bookings Panel */}
           <div className="bg-white p-6 rounded-lg shadow-sm border">
