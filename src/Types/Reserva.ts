@@ -4,17 +4,17 @@ import { Huesped } from './huesped'
 
 export interface Reserva {
   id: number
-  fechaInicio: Date
-  fechaFin: Date
+  fecha_inicio: Date
+  fecha_fin: Date
   estado: EstadosReserva
-  paisProcedencia: string
-  departamentoProcedencia: string
-  ciudadProcedencia: string
-  paisDestino: string
+  pais_procedencia: string
+  departamento_procedencia: string
+  ciudad_procedencia: string
+  pais_destino: string
   motivoViaje: MotivosViajes
   checkIn: Date
   checkOut: Date
-  costoTotal: number
+  costo: number
   numeroAcompanantes: number
   habitacionId: number
   huespedId: number

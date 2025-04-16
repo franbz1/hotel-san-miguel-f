@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { getBookingCards } from "@/lib/bookin-card-service"
 
 type BookingStatus = 'created' | 'filled' | 'completed'
 
@@ -43,6 +44,8 @@ const bookings: Booking[] = [
     roomNumber: "103",
   },
 ]
+
+console.log(await getBookingCards(1, 6))
 
 const StatusBadge = ({ status }: { status: BookingStatus }) => {
   const statusConfig: Record<BookingStatus, { color: string; text: string }> = {

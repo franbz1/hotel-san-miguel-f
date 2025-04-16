@@ -4,6 +4,7 @@ import { getFormularios } from "./formulario-service";
 import { getReservaById } from "./reservas-service";
 import { getHuespedById } from './huesped-service';
 import { EstadosFormulario } from '@/Types/enums/estadosFormulario';
+import { Formulario } from '@/Types/formulario';
 
 export async function getBookingCards(page: number, limit: number): Promise<BookingCard[]> {
   const token = getCookie(COOKIE_NAMES.TOKEN)
@@ -17,24 +18,14 @@ export async function getBookingCards(page: number, limit: number): Promise<Book
   const bookingCards = formularios.map(async (formulario) => {
     const reserva = await getReservaById(formulario.reservaId)
     const huesped = await getHuespedById(formulario.huespedId)
-    const estado = () => {
-      if (formulario.linkFormulario.completado) {
-        return EstadosFormulario.COMPLETADO
-      } else if (formulario.linkFormulario.expirado) {
-        return EstadosFormulario.EXPIRADO
-      } else {
-        return EstadosFormulario.PENDIENTE
-      }
-    }
-
 
     return {
       nombre: huesped.nombres,
-      fecha_inicio: reserva.fechaInicio,
-      fecha_fin: reserva.fechaFin,
-      estado: estado(),
-      valor: reserva.costoTotal,
-      url: formulario.linkFormulario.url,
+      fecha_inicio: reserva.fecha_inicio,
+      fecha_fin: reserva.fecha_fin,
+      estado: determinarEstadoFormulario(formulario),
+      valor: reserva.costo,
+      url: formulario.LinkFormulario.url,
       subido_sire: formulario.SubidoASire,
       subido_tra: formulario.SubidoATra,
     }
@@ -42,3 +33,14 @@ export async function getBookingCards(page: number, limit: number): Promise<Book
 
   return Promise.all(bookingCards)
 }
+
+function determinarEstadoFormulario(formulario: Formulario): EstadosFormulario {
+  if (formulario.LinkFormulario.completado) {
+    return EstadosFormulario.COMPLETADO
+  } else if (formulario.LinkFormulario.expirado) {
+    return EstadosFormulario.EXPIRADO
+  } else {
+    return EstadosFormulario.PENDIENTE
+  }
+}
+

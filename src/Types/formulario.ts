@@ -7,7 +7,7 @@ export interface Formulario {
   SubidoATra: boolean
   SubidoASire: boolean
   traId: number
-  linkFormulario: LinkFormulario
+  LinkFormulario: LinkFormulario
 
   createdAt: Date
   updatedAt: Date
