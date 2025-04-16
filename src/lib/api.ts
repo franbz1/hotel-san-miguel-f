@@ -17,3 +17,12 @@ export const HABITACION_ENDPOINTS = {
   UPDATE: (id: number) => `${API_BASE_URL}/habitaciones/${id}`,
   DELETE: (id: number) => `${API_BASE_URL}/habitaciones/${id}`,
 } as const
+
+// Endpoints de reservas
+export const RESERVA_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number) => `${API_BASE_URL}/reservas?limit=${limit}&page=${page}`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/reservas/${id}`,
+  CREATE: `${API_BASE_URL}/reservas`,
+  UPDATE: (id: number) => `${API_BASE_URL}/reservas/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/reservas/${id}`,
+} as const

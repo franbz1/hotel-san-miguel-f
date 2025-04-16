@@ -5,7 +5,9 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { EstadoHabitacion, getHabitaciones, Habitacion } from "@/lib/habitacion-service"
+import { getHabitaciones } from "@/lib/habitacion-service"
+import { Habitacion } from "@/Types/habitacion"
+import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { CreateRoomModal } from "./create-room-modal"
 
 const RoomCard = ({ room }: { room: Habitacion }) => {

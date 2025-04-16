@@ -1,48 +1,8 @@
+import { Habitacion } from '@/Types/habitacion'
 import { HABITACION_ENDPOINTS } from './api'
 import { COOKIE_NAMES, getCookie } from './cookies'
-
-
-export enum TipoHabitacion {
-  APARTAMENTO = 'APARTAMENTO',
-  HAMACA = 'HAMACA',
-  CAMPING = 'CAMPING',
-  MÚLTIPLE = 'MÚLTIPLE',
-  CASA = 'CASA',
-  FINCA = 'FINCA',
-  CAMA = 'CAMA',
-  PLAZA = 'PLAZA',
-  SENCILLA = 'SENCILLA',
-  SUITE = 'SUITE',
-  DOBLE = 'DOBLE',
-  OTRO = 'OTRO',
-}
-
-export enum EstadoHabitacion {
-  LIBRE = 'LIBRE',
-  OCUPADO = 'OCUPADO',
-  RESERVADO = 'RESERVADO',
-  EN_DESINFECCION = 'EN_DESINFECCION',
-  EN_MANTENIMIENTO = 'EN_MANTENIMIENTO',
-  EN_LIMPIEZA = 'EN_LIMPIEZA',
-}
-
-export interface Habitacion {
-  id: number;
-
-  numero_habitacion: number;
-
-  tipo: TipoHabitacion;
-
-  estado: EstadoHabitacion;
-
-  precio_por_noche: number;
-
-  created_at: string;
-
-  updated_at: string;
-
-  deleted_at: boolean;
-}
+import { TipoHabitacion } from '@/Types/enums/tiposHabitacion'
+import { EstadoHabitacion } from '@/Types/enums/estadosHabitacion'
 
 
 export interface HabitacionesResponse {

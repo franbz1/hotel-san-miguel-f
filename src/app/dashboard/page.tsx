@@ -8,7 +8,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { UserNav } from "@/components/user-nav"
-import { EstadoHabitacion, getHabitaciones, Habitacion } from "@/lib/habitacion-service"
+import { getHabitaciones } from "@/lib/habitacion-service"
+import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
+import { Habitacion } from "@/Types/habitacion"
 import { RoomsSection } from "@/components/rooms-section"
 
 type BookingStatus = 'created' | 'filled' | 'completed'
