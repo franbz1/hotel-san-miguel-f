@@ -122,6 +122,7 @@ export function RoomsSection() {
       {/* Pagination */}
       <div className="flex justify-center items-center space-x-2">
         <Button
+          className="cursor-pointer"
           variant="outline"
           size="icon"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -133,6 +134,7 @@ export function RoomsSection() {
           Página {currentPage} de {totalPages}
         </span>
         <Button
+          className="cursor-pointer"
           variant="outline"
           size="icon"
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
