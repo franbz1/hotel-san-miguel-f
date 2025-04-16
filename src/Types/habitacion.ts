@@ -15,6 +15,4 @@ export interface Habitacion {
   created_at: string;
 
   updated_at: string;
-
-  deleted_at: boolean;
 }

@@ -1,5 +1,6 @@
 import { EstadosReserva } from './enums/estadosReserva'
 import { MotivosViajes } from './enums/motivosViajes'
+import { Huesped } from './huesped'
 
 export interface Reserva {
   id: number
@@ -21,5 +22,4 @@ export interface Reserva {
   facturaId: number
   createdAt: Date
   updatedAt: Date
-  deletedAt: boolean
 }
