@@ -1,20 +1,24 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, ChevronUp, Eye, Trash2, X } from "lucide-react"
+import { ChevronDown, ChevronUp, Eye, Trash2, X, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { BookingCard } from "@/Types/bookin-card"
 import { EstadosFormulario } from "@/Types/enums/estadosFormulario"
+import { regenerateLinkFormulario } from "@/lib/link-formulario-service"
 
 interface BookingCardUIProps {
   booking: BookingCard
 }
 
-export default function BookingCardUI({ booking }: BookingCardUIProps) {
+export default function BookingCardUI({ booking: initialBooking }: BookingCardUIProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [booking, setBooking] = useState<BookingCard>(initialBooking)
+  const [isRegenerating, setIsRegenerating] = useState(false)
+  const [copySuccess, setCopySuccess] = useState(false)
 
   const statusConfig: Record<EstadosFormulario, { color: string; text: string }> = {
     [EstadosFormulario.COMPLETADO]: { color: "bg-emerald-500", text: "Formulario completado" },
@@ -24,7 +28,20 @@ export default function BookingCardUI({ booking }: BookingCardUIProps) {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(booking.url)
-    alert("Enlace copiado al portapapeles")
+    setCopySuccess(true)
+    setTimeout(() => setCopySuccess(false), 2000)
+  }
+
+  const handleRegenerateLink = async () => {
+    try {
+      setIsRegenerating(true)
+      const regeneratedLink = await regenerateLinkFormulario(booking.link_formulario_id)
+      setBooking(prev => ({ ...prev, url: regeneratedLink.url }))
+    } catch (error) {
+      console.error('Error al regenerar el enlace:', error)
+    } finally {
+      setIsRegenerating(false)
+    }
   }
 
   return (
@@ -76,7 +93,7 @@ export default function BookingCardUI({ booking }: BookingCardUIProps) {
         <div className="p-4 bg-white animate-in slide-in-from-top-2 duration-200">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 w-full">
-              <div className="flex-1 relative">
+              <div className="flex-1">
                 <input
                   type="text"
                   value={booking.url}
@@ -84,13 +101,30 @@ export default function BookingCardUI({ booking }: BookingCardUIProps) {
                   className="w-full px-3 py-2 border rounded-lg text-sm text-gray-700 bg-gray-50"
                   placeholder="link al formulario"
                 />
+              </div>
+              <div className="flex items-center gap-1">
+                <Button 
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    "cursor-pointer",
+                    isRegenerating && "animate-spin"
+                  )}
+                  onClick={handleRegenerateLink}
+                  disabled={isRegenerating}
+                >
+                  <RefreshCw size={12} />
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="cursor-pointer absolute right-1 top-1/2 transform -translate-y-1/2"
+                  className={cn(
+                    "cursor-pointer",
+                    copySuccess && "bg-green-50 text-green-700 border-green-200"
+                  )}
                   onClick={handleCopyLink}
                 >
-                  Copiar
+                  {copySuccess ? "Copiado!" : "Copiar"}
                 </Button>
               </div>
             </div>
@@ -98,7 +132,7 @@ export default function BookingCardUI({ booking }: BookingCardUIProps) {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
-                <span className="font-medium text-gray-700">TRA</span>
+                  <span className="font-medium text-gray-700">TRA</span>
                   <Badge variant="outline" className={cn(
                     "rounded-full p-1",
                     booking.subido_tra ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-red-100 text-red-700 border-red-200"

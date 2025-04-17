@@ -50,4 +50,5 @@ export const LINK_FORMULARIO_ENDPOINTS = {
   CREATE: `${API_BASE_URL}/link-formulario`,
   UPDATE: (id: number) => `${API_BASE_URL}/link-formulario/${id}`,
   DELETE: (id: number) => `${API_BASE_URL}/link-formulario/${id}`,
+  REGENERATE: (id: number) => `${API_BASE_URL}/link-formulario/${id}/regenerate`,
 } as const

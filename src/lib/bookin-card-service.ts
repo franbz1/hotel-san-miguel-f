@@ -19,6 +19,7 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
   const bookingCards = linksFormularios.map(async (linkFormulario) => {
     if (linkFormulario.formularioId === null) {
       return {
+        link_formulario_id: linkFormulario.id,
         nombre: 'Sin nombre',
         fecha_inicio: linkFormulario.fechaInicio,
         fecha_fin: linkFormulario.fechaFin,
@@ -35,6 +36,7 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
     const huesped = await getHuespedById(formulario.huespedId)
 
     return {
+      link_formulario_id: linkFormulario.id,
       nombre: huesped.nombres,
       fecha_inicio: reserva.fecha_inicio,
       fecha_fin: reserva.fecha_fin,
@@ -52,7 +54,9 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
 function determinarLinkFormulario(linkFormulario: LinkFormulario): EstadosFormulario {
   if (linkFormulario.completado) {
     return EstadosFormulario.COMPLETADO
-  } else if (linkFormulario.expirado) {
+  } else if (linkFormulario.expirado && !linkFormulario.completado) {
+    return EstadosFormulario.EXPIRADO
+  } else if (new Date(linkFormulario.vencimiento) < new Date() && !linkFormulario.completado) {
     return EstadosFormulario.EXPIRADO
   } else {
     return EstadosFormulario.PENDIENTE

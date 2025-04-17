@@ -1,6 +1,7 @@
 import { EstadosFormulario } from "./enums/estadosFormulario"
 
 export interface BookingCard {
+  link_formulario_id: number
   nombre: string
   fecha_inicio: Date
   fecha_fin: Date
