@@ -4,6 +4,10 @@ export interface LinkFormulario {
   completado: boolean
   expirado: boolean
   vencimiento: Date
+  numeroHabitacion: number
+  fechaInicio: Date
+  fechaFin: Date
+  costo: number
 
-  formularioId: number
+  formularioId: number | null
 }

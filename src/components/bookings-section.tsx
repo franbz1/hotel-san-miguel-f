@@ -22,7 +22,7 @@ export function BookingsSection() {
   const fetchBookings = useCallback(async (pageNumber: number) => {
     try {
       setLoading(true)
-      const data = await getBookingCards(pageNumber, 10)
+      const data = await getBookingCards(10, pageNumber)
       if (data.length === 0) {
         setHasMore(false)
         return

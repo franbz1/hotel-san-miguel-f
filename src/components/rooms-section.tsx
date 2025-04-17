@@ -29,7 +29,7 @@ const RoomCard = ({ room }: { room: Habitacion }) => {
           >
             <svg
               viewBox="0 0 24 24"
-              className={`w-12 h-12 mb-2 ${room.estado === EstadoHabitacion.LIBRE ? "text-emerald-500" : room.estado === EstadoHabitacion.OCUPADO ? "text-red-500" : "text-amber-500"}`}
+              className={`w-12 h-12 mb-2 ${statusColors[room.estado]}`}
               fill="none"
               stroke="currentColor"
               strokeWidth="2"

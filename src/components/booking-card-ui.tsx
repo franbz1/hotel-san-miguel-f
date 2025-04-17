@@ -85,7 +85,7 @@ export default function BookingCardUI({ booking }: BookingCardUIProps) {
                   placeholder="link al formulario"
                 />
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   className="cursor-pointer absolute right-1 top-1/2 transform -translate-y-1/2"
                   onClick={handleCopyLink}

@@ -45,6 +45,7 @@ export const FORMULARIO_ENDPOINTS = {
 } as const
 
 export const LINK_FORMULARIO_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number) => `${API_BASE_URL}/link-formulario?limit=${limit}&page=${page}`,
   GET_BY_ID: (id: number) => `${API_BASE_URL}/link-formulario/${id}`,
   CREATE: `${API_BASE_URL}/link-formulario`,
   UPDATE: (id: number) => `${API_BASE_URL}/link-formulario/${id}`,
