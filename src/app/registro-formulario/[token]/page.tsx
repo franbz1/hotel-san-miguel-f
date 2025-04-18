@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { getLinkFormularioById, validateLinkFormulario } from "@/lib/link-formulario-service"
 import { Role } from "@/lib/constants"
 import { LinkFormulario } from "@/Types/link-formulario"
+import RegistroFormulario from "@/components/registro-formulario"
 
 export default function RegistroFormularioPage() {
   const { token } = useParams()
@@ -18,11 +19,26 @@ export default function RegistroFormularioPage() {
         const data = await validateLinkFormulario(token as string)
         if (data.rol !== Role.REGISTRO_FORMULARIO) {
           setError('No tienes permiso para acceder a esta página')
+          return
         }
         const linkFormulario = await getLinkFormularioById(data.id)
+
+        const vencimientoUTC = new Date(linkFormulario.vencimiento)
+        const ahoraUTC = new Date()
+  
+        if (linkFormulario.expirado || vencimientoUTC < ahoraUTC) {
+          setError('Link inválido o expirado')
+          return
+        }
+
+        if (linkFormulario.completado) {
+          setError('Link ya completado')
+          return
+        }
+
         setLinkFormulario(linkFormulario)
       } catch (err) {
-        console.log('error', err)
+        console.error('error', err)
         setError('Link inválido o expirado')
       } finally {
         setIsLoading(false)
@@ -54,14 +70,5 @@ export default function RegistroFormularioPage() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-2xl font-bold text-center mb-8">Registro de Formulario</h1>
-        <p className="text-center text-gray-600">
-          Aquí irá el formulario de registro
-        </p>
-      </div>
-    </div>
-  )
+  return linkFormulario ? <RegistroFormulario linkFormulario={linkFormulario} /> : null
 } 

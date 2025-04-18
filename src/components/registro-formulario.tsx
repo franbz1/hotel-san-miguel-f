@@ -7,11 +7,20 @@ import { CompanionsStep } from "@/components/companions-step"
 import { SuccessStep } from "@/components/success-step"
 import { LinkFormulario } from "@/Types/link-formulario"
 import { CreateRegistroFormulario } from "@/Types/registro-formularioDto"
-
+import { useEffect } from "react"
+import { createRegistroFormulario } from "@/lib/registro-formulario-service"
+import { toast } from "sonner"
 
 export default function RegistroFormulario({ linkFormulario }: { linkFormulario: LinkFormulario }) {
   const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState<CreateRegistroFormulario>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState<Partial<CreateRegistroFormulario>>({
+    fecha_inicio: linkFormulario.fechaInicio,
+    fecha_fin: linkFormulario.fechaFin,
+    costo: linkFormulario.costo,
+    numero_habitacion: linkFormulario.numeroHabitacion,
+    numero_acompaniantes: 0,
+  })
 
   const handleNext = () => {
     setCurrentStep((prev) => prev + 1)
@@ -21,13 +30,47 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
     setCurrentStep((prev) => prev - 1)
   }
 
-  const updateFormData = (data) => {
+  const updateFormData = (data: Partial<CreateRegistroFormulario>) => {
     setFormData((prev) => ({ ...prev, ...data }))
   }
 
+  useEffect(() => {
+    // Cuando llegamos al paso final, enviamos el formulario a la API
+    const submitForm = async () => {
+      if (currentStep === 3 && !isSubmitting) {
+        try {
+          setIsSubmitting(true)
+          // Aquí enviaríamos los datos a tu API
+          // await createRegistroFormulario(linkFormulario.token, formData as CreateRegistroFormulario)
+          
+          // Simulación de envío exitoso
+          console.log("Formulario enviado:", formData)
+          
+          toast.success("Registro completado", {
+            description: "Sus datos han sido registrados correctamente",
+          })
+        } catch (error) {
+          console.error("Error al enviar el formulario:", error)
+          toast.error("Error", {
+            description: "Ocurrió un error al enviar el formulario. Por favor, intente nuevamente.",
+          })
+        } finally {
+          setIsSubmitting(false)
+        }
+      }
+    }
+
+    submitForm()
+  }, [currentStep, formData, linkFormulario, isSubmitting])
+
   const steps = [
     <WelcomeStep key="welcome" formData={formData} onNext={handleNext} />,
-    <PersonalInfoStep key="personal" formData={formData} updateFormData={updateFormData} onNext={handleNext} />,
+    <PersonalInfoStep 
+      key="personal" 
+      formData={formData} 
+      updateFormData={updateFormData} 
+      onNext={handleNext} 
+    />,
     <CompanionsStep
       key="companions"
       formData={formData}
