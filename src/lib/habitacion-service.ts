@@ -88,3 +88,25 @@ export async function getHabitacionesDisponibles(fechaInicio: Date, fechaFin: Da
 
   return response.json()
 }
+
+export async function getHabitacionByNumero(numero: number): Promise<Habitacion> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+  
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(HABITACION_ENDPOINTS.GET_BY_NUMBER(numero.toString()), {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error('Error al obtener la habitación')
+  }
+
+  return response.json()
+}
+

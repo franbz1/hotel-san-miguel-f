@@ -9,7 +9,7 @@ export interface CreateRegistroFormulario {
   fecha_fin: Date;
   motivo_viaje: MotivosViajes;
   costo: number;
-  habitacionId: number;
+  numero_habitacion: number;
   numero_acompaniantes: number;
 
   // Datos del huésped
