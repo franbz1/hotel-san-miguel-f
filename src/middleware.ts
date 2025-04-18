@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { COOKIE_NAMES } from './lib/cookies'
 import { getValidatedUser } from './lib/auth-service'
 import { Role, ROLE_ROUTES, DEFAULT_ROUTE } from './lib/constants'
+import { validateLinkFormulario } from './lib/link-formulario-service'
 
 // Rutas públicas que no requieren autenticación
 const publicRoutes = ['/login', '/register', '/forgot-password']
@@ -13,6 +14,25 @@ export async function middleware(request: NextRequest) {
   // Permitir acceso a rutas públicas
   if (publicRoutes.includes(path)) {
     return NextResponse.next()
+  }
+
+  // Verificar si es una ruta de registro de formulario
+  if (path.startsWith('/registro-formulario/')) {
+    const token = path.split('/').pop()
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    try {
+      const isValid = await validateLinkFormulario(token)
+      if (!isValid) {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+      return NextResponse.next()
+    } catch (error) {
+      console.log('error', error)
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
   // Verificar token para rutas protegidas

@@ -12,7 +12,7 @@ export const ROLE_ROUTES: Record<RoleType, string> = {
   [Role.ADMINISTRADOR]: '/dashboard',
   [Role.CAJERO]: '/dashboard',
   [Role.ASEO]: '/dashboard/aseo',
-  [Role.REGISTRO_FORMULARIO]: '/dashboard/registro',
+  [Role.REGISTRO_FORMULARIO]: '/registro-formulario/:token',
 }
 
 // Ruta por defecto si no coincide ningún rol

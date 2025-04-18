@@ -1,6 +1,7 @@
 import { LinkFormulario } from "@/Types/link-formulario";
 import { getCookie, COOKIE_NAMES } from "./cookies";
 import { LINK_FORMULARIO_ENDPOINTS } from "./api";
+import { Role, RoleType } from "./constants";
 
 export interface LinkFormularioResponse {
   data: LinkFormulario[]
@@ -15,6 +16,11 @@ export interface GenerateLinkFormularioDto {
   fechaInicio: Date
   fechaFin: Date
   costo: number
+}
+
+export interface ValidateLinkFormularioResponse {
+  id: number
+  rol: RoleType
 }
 
 export async function generateLinkFormulario(data: GenerateLinkFormularioDto): Promise<string> {
@@ -104,3 +110,25 @@ export async function regenerateLinkFormulario(id: number): Promise<LinkFormular
 
   return response.json()
 }
+
+export async function validateLinkFormulario(tokenUrl: string): Promise<ValidateLinkFormularioResponse> {
+  const response = await fetch(LINK_FORMULARIO_ENDPOINTS.VALIDATE(tokenUrl), {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error('Error al validar el link del formulario')
+  }
+
+  const data: ValidateLinkFormularioResponse = await response.json()
+
+  if (data.rol !== Role.REGISTRO_FORMULARIO) {
+    throw new Error('El rol del link del formulario no es válido')
+  }
+
+  return data
+}
+
