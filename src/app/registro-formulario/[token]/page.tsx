@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { validateLinkFormulario } from "@/lib/link-formulario-service"
+import { getLinkFormularioById, validateLinkFormulario } from "@/lib/link-formulario-service"
 import { Role } from "@/lib/constants"
+import { LinkFormulario } from "@/Types/link-formulario"
 
 export default function RegistroFormularioPage() {
   const { token } = useParams()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [linkFormulario, setLinkFormulario] = useState<LinkFormulario | null>(null)
 
   useEffect(() => {
     const validateToken = async () => {
@@ -17,6 +19,8 @@ export default function RegistroFormularioPage() {
         if (data.rol !== Role.REGISTRO_FORMULARIO) {
           setError('No tienes permiso para acceder a esta página')
         }
+        const linkFormulario = await getLinkFormularioById(data.id)
+        setLinkFormulario(linkFormulario)
       } catch (err) {
         console.log('error', err)
         setError('Link inválido o expirado')

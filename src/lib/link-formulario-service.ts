@@ -21,6 +21,8 @@ export interface GenerateLinkFormularioDto {
 export interface ValidateLinkFormularioResponse {
   id: number
   rol: RoleType
+  exp: number
+  iat: number
 }
 
 export async function generateLinkFormulario(data: GenerateLinkFormularioDto): Promise<string> {
@@ -123,12 +125,14 @@ export async function validateLinkFormulario(tokenUrl: string): Promise<Validate
     throw new Error('Error al validar el link del formulario')
   }
 
-  const data: ValidateLinkFormularioResponse = await response.json()
+  const data = await response.json()
 
-  if (data.rol !== Role.REGISTRO_FORMULARIO) {
+  const responseData: ValidateLinkFormularioResponse = data
+
+  if (responseData.rol !== Role.REGISTRO_FORMULARIO) {
     throw new Error('El rol del link del formulario no es válido')
   }
 
-  return data
+  return responseData
 }
 
