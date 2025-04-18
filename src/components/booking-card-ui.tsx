@@ -67,6 +67,7 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
 
         <div className="ml-4 flex-1">
           <div className="font-medium">{booking.nombre}</div>
+          <div className="text-sm text-gray-500">Habitación: {booking.numero_habitacion}</div>
         </div>
 
         <div className="flex items-center gap-1 text-s text-gray-500">

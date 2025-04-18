@@ -1,7 +1,6 @@
 "use client"
 
-import { Search, Calendar } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -9,6 +8,7 @@ import { getBookingCards } from "@/lib/bookin-card-service"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { BookingCard } from "@/Types/bookin-card"
 import BookingCardUI from "./booking-card-ui"
+import { CreateBookingModal } from "./create-booking-modal"
 
 export function BookingsSection() {
   const [bookings, setBookings] = useState<BookingCard[]>([])
@@ -77,6 +77,13 @@ export function BookingsSection() {
     }
   }, [page, fetchBookings])
 
+  const handleBookingCreated = () => {
+    setPage(1)
+    setHasMore(true)
+    setBookings([])
+    fetchBookings(1)
+  }
+
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>
   }
@@ -90,10 +97,7 @@ export function BookingsSection() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input type="search" placeholder="Buscar reserva..." className="pl-8 w-full" />
           </div>
-          <Button>
-            <span className="mr-2">Crear reserva</span>
-            <Calendar className="h-4 w-4" />
-          </Button>
+          <CreateBookingModal onBookingCreated={handleBookingCreated} />
         </div>
       </div>
 
@@ -123,8 +127,8 @@ export function BookingsSection() {
 
       <ScrollArea className="h-[300px] rounded-md border">
         <div className="space-y-2 p-4">
-          {bookings.map((booking) => (
-            <BookingCardUI key={`${booking.nombre}-${booking.fecha_inicio}`} booking={booking} />
+          {bookings.map((booking, index) => (
+            <BookingCardUI key={`${booking.nombre}-${booking.fecha_inicio}-${index}`} booking={booking} />
           ))}
           {hasMore && (
             <div ref={loadingRef} className="flex justify-center py-4">

@@ -64,4 +64,27 @@ export async function createHabitacion(data: CreateHabitacionDto): Promise<Habit
   }
 
   return response.json()
-} 
+}
+
+export async function getHabitacionesDisponibles(fechaInicio: Date, fechaFin: Date): Promise<Habitacion[]> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+  
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(HABITACION_ENDPOINTS.POST_ALL_AVAILABLE_BY_DATE_RANGE, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ fechaInicio: fechaInicio, fechaFin: fechaFin })
+  })
+
+  if (!response.ok) {
+    throw new Error('Error al obtener las habitaciones disponibles')
+  }
+
+  return response.json()
+}

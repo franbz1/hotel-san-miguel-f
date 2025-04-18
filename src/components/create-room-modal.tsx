@@ -69,6 +69,7 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
       form.reset()
       onRoomCreated?.()
     } catch (error) {
+      console.error(error)
       toast.error("Error", {
         description: "Hubo un error al crear la habitación.",
       })

@@ -16,6 +16,7 @@ export const HABITACION_ENDPOINTS = {
   CREATE: `${API_BASE_URL}/habitaciones`,
   UPDATE: (id: number) => `${API_BASE_URL}/habitaciones/${id}`,
   DELETE: (id: number) => `${API_BASE_URL}/habitaciones/${id}`,
+  POST_ALL_AVAILABLE_BY_DATE_RANGE: `${API_BASE_URL}/habitaciones/disponibles`,
 } as const
 
 // Endpoints de reservas

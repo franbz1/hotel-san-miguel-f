@@ -1,6 +1,5 @@
 import { LinkFormulario } from "@/Types/link-formulario";
-import { getCookie } from "./cookies";
-import { COOKIE_NAMES } from "./cookies";
+import { getCookie, COOKIE_NAMES } from "./cookies";
 import { LINK_FORMULARIO_ENDPOINTS } from "./api";
 
 export interface LinkFormularioResponse {
@@ -11,7 +10,14 @@ export interface LinkFormularioResponse {
   }
 }
 
-export async function createLinkFormulario(): Promise<LinkFormulario> {
+export interface GenerateLinkFormularioDto {
+  numeroHabitacion: number
+  fechaInicio: Date
+  fechaFin: Date
+  costo: number
+}
+
+export async function generateLinkFormulario(data: GenerateLinkFormularioDto): Promise<string> {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -24,12 +30,16 @@ export async function createLinkFormulario(): Promise<LinkFormulario> {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify(data)
   })
 
   if (!response.ok) {
-    throw new Error('Error al crear el link del formulario')
+    console.log(await response.json())
+    throw new Error('Error al generar el enlace del formulario')
   }
-  return response.json()
+
+  const url = await response.text()
+  return url
 }
 
 export async function getLinksFormulario(limit: number, page: number): Promise<LinkFormularioResponse> {

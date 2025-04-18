@@ -8,6 +8,7 @@ export interface BookingCard {
   estado: EstadosFormulario
   valor: number
   url: string
+  numero_habitacion: number
   subido_sire: boolean
   subido_tra: boolean
 }

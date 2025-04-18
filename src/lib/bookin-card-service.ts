@@ -26,6 +26,7 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
         estado: determinarLinkFormulario(linkFormulario),
         valor: linkFormulario.costo,
         url: linkFormulario.url,
+        numero_habitacion: linkFormulario.numeroHabitacion,
         subido_sire: false,
         subido_tra: false,
       }
@@ -43,6 +44,7 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
       estado: determinarLinkFormulario(linkFormulario),
       valor: reserva.costo,
       url: linkFormulario.url,
+      numero_habitacion: linkFormulario.numeroHabitacion,
       subido_sire: formulario?.SubidoASire,
       subido_tra: formulario?.SubidoATra
     }
