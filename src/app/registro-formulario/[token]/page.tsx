@@ -19,7 +19,7 @@ export default function RegistroFormularioPage() {
         }
       } catch (err) {
         console.log('error', err)
-        setError('Token inválido o expirado')
+        setError('Link inválido o expirado')
       } finally {
         setIsLoading(false)
       }

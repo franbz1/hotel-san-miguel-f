@@ -54,3 +54,7 @@ export const LINK_FORMULARIO_ENDPOINTS = {
   VALIDATE: (token: string) => `${API_BASE_URL}/link-formulario/validate-token/${token}`,
   REGENERATE: (id: number) => `${API_BASE_URL}/link-formulario/${id}/regenerate`,
 } as const
+
+export const REGISTRO_FORMULARIO_ENDPOINTS = {
+  CREATE: (token: string) => `${API_BASE_URL}/registro-formulario/${token}`,
+} as const

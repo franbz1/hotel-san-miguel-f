@@ -24,13 +24,8 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      const isValid = await validateLinkFormulario(token)
-      if (!isValid) {
-        return NextResponse.redirect(new URL('/login', request.url))
-      }
       return NextResponse.next()
     } catch (error) {
-      console.log('error', error)
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
