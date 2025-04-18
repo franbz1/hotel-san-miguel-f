@@ -1,0 +1,67 @@
+import { BookingCard } from './../Types/bookin-card';
+import { getCookie, COOKIE_NAMES } from "./cookies";
+import { getFormularioById } from "./formulario-service";
+import { getReservaById } from "./reservas-service";
+import { getHuespedById } from './huesped-service';
+import { EstadosFormulario } from '@/Types/enums/estadosFormulario';
+import { getLinksFormulario } from './link-formulario-service';
+import { LinkFormulario } from '@/Types/link-formulario';
+
+export async function getBookingCards(limit: number, page: number): Promise<BookingCard[]> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const { data: linksFormularios } = await getLinksFormulario(limit, page)
+
+  const bookingCards = linksFormularios.map(async (linkFormulario) => {
+    if (linkFormulario.formularioId === null) {
+      return {
+        link_formulario_id: linkFormulario.id,
+        nombre: 'Sin nombre',
+        fecha_inicio: linkFormulario.fechaInicio,
+        fecha_fin: linkFormulario.fechaFin,
+        estado: determinarLinkFormulario(linkFormulario),
+        valor: linkFormulario.costo,
+        url: linkFormulario.url,
+        numero_habitacion: linkFormulario.numeroHabitacion,
+        subido_sire: false,
+        subido_tra: false,
+      }
+    }
+
+    const formulario = await getFormularioById(linkFormulario.formularioId)
+    const reserva = await getReservaById(formulario.reservaId)
+    const huesped = await getHuespedById(formulario.huespedId)
+
+    return {
+      link_formulario_id: linkFormulario.id,
+      nombre: huesped.nombres,
+      fecha_inicio: reserva.fecha_inicio,
+      fecha_fin: reserva.fecha_fin,
+      estado: determinarLinkFormulario(linkFormulario),
+      valor: reserva.costo,
+      url: linkFormulario.url,
+      numero_habitacion: linkFormulario.numeroHabitacion,
+      subido_sire: formulario?.SubidoASire,
+      subido_tra: formulario?.SubidoATra
+    }
+  })
+
+  return Promise.all(bookingCards)
+}
+
+function determinarLinkFormulario(linkFormulario: LinkFormulario): EstadosFormulario {
+  if (linkFormulario.completado) {
+    return EstadosFormulario.COMPLETADO
+  } else if (linkFormulario.expirado && !linkFormulario.completado) {
+    return EstadosFormulario.EXPIRADO
+  } else if (new Date(linkFormulario.vencimiento) < new Date() && !linkFormulario.completado) {
+    return EstadosFormulario.EXPIRADO
+  } else {
+    return EstadosFormulario.PENDIENTE
+  }
+}
+

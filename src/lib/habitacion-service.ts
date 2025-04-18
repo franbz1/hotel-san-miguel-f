@@ -1,48 +1,8 @@
+import { Habitacion } from '@/Types/habitacion'
 import { HABITACION_ENDPOINTS } from './api'
 import { COOKIE_NAMES, getCookie } from './cookies'
-
-
-export enum TipoHabitacion {
-  APARTAMENTO = 'APARTAMENTO',
-  HAMACA = 'HAMACA',
-  CAMPING = 'CAMPING',
-  MÚLTIPLE = 'MÚLTIPLE',
-  CASA = 'CASA',
-  FINCA = 'FINCA',
-  CAMA = 'CAMA',
-  PLAZA = 'PLAZA',
-  SENCILLA = 'SENCILLA',
-  SUITE = 'SUITE',
-  DOBLE = 'DOBLE',
-  OTRO = 'OTRO',
-}
-
-export enum EstadoHabitacion {
-  LIBRE = 'LIBRE',
-  OCUPADO = 'OCUPADO',
-  RESERVADO = 'RESERVADO',
-  EN_DESINFECCION = 'EN_DESINFECCION',
-  EN_MANTENIMIENTO = 'EN_MANTENIMIENTO',
-  EN_LIMPIEZA = 'EN_LIMPIEZA',
-}
-
-export interface Habitacion {
-  id: number;
-
-  numero_habitacion: number;
-
-  tipo: TipoHabitacion;
-
-  estado: EstadoHabitacion;
-
-  precio_por_noche: number;
-
-  created_at: string;
-
-  updated_at: string;
-
-  deleted_at: boolean;
-}
+import { TipoHabitacion } from '@/Types/enums/tiposHabitacion'
+import { EstadoHabitacion } from '@/Types/enums/estadosHabitacion'
 
 
 export interface HabitacionesResponse {
@@ -104,4 +64,27 @@ export async function createHabitacion(data: CreateHabitacionDto): Promise<Habit
   }
 
   return response.json()
-} 
+}
+
+export async function getHabitacionesDisponibles(fechaInicio: Date, fechaFin: Date): Promise<Habitacion[]> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+  
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(HABITACION_ENDPOINTS.POST_ALL_AVAILABLE_BY_DATE_RANGE, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ fechaInicio: fechaInicio, fechaFin: fechaFin })
+  })
+
+  if (!response.ok) {
+    throw new Error('Error al obtener las habitaciones disponibles')
+  }
+
+  return response.json()
+}

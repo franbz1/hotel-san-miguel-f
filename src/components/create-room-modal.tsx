@@ -30,7 +30,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { createHabitacion, EstadoHabitacion, TipoHabitacion } from "@/lib/habitacion-service"
+import { createHabitacion } from "@/lib/habitacion-service"
+import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
+import { TipoHabitacion } from "@/Types/enums/tiposHabitacion"
 import { toast } from "sonner"
 
 const formSchema = z.object({
@@ -67,6 +69,7 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
       form.reset()
       onRoomCreated?.()
     } catch (error) {
+      console.error(error)
       toast.error("Error", {
         description: "Hubo un error al crear la habitación.",
       })

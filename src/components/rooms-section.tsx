@@ -5,7 +5,9 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { EstadoHabitacion, getHabitaciones, Habitacion } from "@/lib/habitacion-service"
+import { getHabitaciones } from "@/lib/habitacion-service"
+import { Habitacion } from "@/Types/habitacion"
+import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { CreateRoomModal } from "./create-room-modal"
 
 const RoomCard = ({ room }: { room: Habitacion }) => {
@@ -27,7 +29,7 @@ const RoomCard = ({ room }: { room: Habitacion }) => {
           >
             <svg
               viewBox="0 0 24 24"
-              className={`w-12 h-12 mb-2 ${room.estado === EstadoHabitacion.LIBRE ? "text-emerald-500" : room.estado === EstadoHabitacion.OCUPADO ? "text-red-500" : "text-amber-500"}`}
+              className={`w-12 h-12 mb-2 ${statusColors[room.estado]}`}
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
