@@ -64,7 +64,6 @@ const personalInfoSchema = z.object({
   motivo_viaje: z.nativeEnum(MotivosViajes, {
     required_error: "Seleccione el motivo del viaje",
   }),
-  numero_acompaniantes: z.number().min(0),
 })
 
 type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>
@@ -89,7 +88,6 @@ export function PersonalInfoStep({ formData, updateFormData, onNext }: PersonalI
       telefono: formData.telefono || "",
       correo: formData.correo || "",
       motivo_viaje: formData.motivo_viaje || undefined,
-      numero_acompaniantes: formData.numero_acompaniantes || 0,
     },
   })
 
@@ -390,34 +388,6 @@ export function PersonalInfoStep({ formData, updateFormData, onNext }: PersonalI
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Información de acompañantes</h3>
-              
-              <div className="grid grid-cols-1 gap-4">
-                <FormField
-                  control={form.control}
-                  name="numero_acompaniantes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número de acompañantes</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field} 
-                          min={0} 
-                          value={field.value || 0}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
