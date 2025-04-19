@@ -64,7 +64,7 @@ const personalInfoSchema = z.object({
   motivo_viaje: z.nativeEnum(MotivosViajes, {
     required_error: "Seleccione el motivo del viaje",
   }),
-  numero_acompaniantes: z.number().min(0).default(0),
+  numero_acompaniantes: z.number().min(0),
 })
 
 type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>
