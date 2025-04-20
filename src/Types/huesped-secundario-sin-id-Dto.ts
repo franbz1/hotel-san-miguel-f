@@ -1,4 +1,3 @@
 import { CreateHuespedSecundario } from "./huesped-secundarioDto";
 
-export interface CreateHuespedSecundarioWithoutIdDto extends Omit<CreateHuespedSecundario, 'huespedId'> {
-}
+export type CreateHuespedSecundarioWithoutIdDto = Omit<CreateHuespedSecundario, 'huespedId'>

@@ -15,7 +15,7 @@ import { TipoDoc } from "@/Types/enums/tiposDocumento"
 import { Genero } from "@/Types/enums/generos"
 import { CreateHuespedSecundarioWithoutIdDto } from "@/Types/huesped-secundario-sin-id-Dto"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronDown, ChevronUp, Pencil, Trash2, Plus, UserPlus } from "lucide-react"
+import { ChevronUp, Pencil, Trash2, Plus, UserPlus } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 
@@ -53,13 +53,10 @@ const companionSchema = z.object({
   ciudad_procedencia: z.string().min(2, {
     message: "La ciudad de procedencia es requerida",
   }),
-  lugar_nacimiento: z.string().min(2, {
-    message: "El lugar de nacimiento es requerido",
-  }),
   fecha_nacimiento: z.date({
     required_error: "La fecha de nacimiento es requerida",
   })
-  .max(new Date(), { message: "La fecha de nacimiento no puede ser futura" }),
+    .max(new Date(), { message: "La fecha de nacimiento no puede ser futura" }),
   nacionalidad: z.string().min(2, {
     message: "La nacionalidad es requerida",
   }),
@@ -96,23 +93,23 @@ function CompanionCard({ companion, index, onEdit, onDelete }: CompanionCardProp
               Documento: {companion.numero_documento}
             </p>
             <p className="text-sm text-gray-500">
-              Fecha de nacimiento: {companion.fecha_nacimiento instanceof Date 
-                ? companion.fecha_nacimiento.toLocaleDateString() 
+              Fecha de nacimiento: {companion.fecha_nacimiento instanceof Date
+                ? companion.fecha_nacimiento.toLocaleDateString()
                 : new Date(companion.fecha_nacimiento).toLocaleDateString()}
             </p>
           </div>
           <div className="flex space-x-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onEdit(index)}
               className="hover:bg-gray-100"
             >
               <Pencil className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onDelete(index)}
               className="hover:bg-red-50 hover:text-red-600"
             >
@@ -146,7 +143,6 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       departamento_residencia: "",
       ciudad_residencia: "",
       ciudad_procedencia: "",
-      lugar_nacimiento: "",
       fecha_nacimiento: undefined,
       nacionalidad: "",
       ocupacion: "",
@@ -163,11 +159,13 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       form.setValue('departamento_residencia', formData.departamento_residencia || '', { shouldValidate: true })
       form.setValue('ciudad_residencia', formData.ciudad_residencia || '', { shouldValidate: true })
       form.setValue('nacionalidad', formData.nacionalidad || '', { shouldValidate: true })
+      form.setValue('ciudad_procedencia', formData.ciudad_procedencia || '', { shouldValidate: true })
     } else {
       form.setValue('pais_residencia', '', { shouldValidate: true })
       form.setValue('departamento_residencia', '', { shouldValidate: true })
       form.setValue('ciudad_residencia', '', { shouldValidate: true })
       form.setValue('nacionalidad', '', { shouldValidate: true })
+      form.setValue('ciudad_procedencia', '', { shouldValidate: true })
     }
   }
 
@@ -182,7 +180,6 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       departamento_residencia: "",
       ciudad_residencia: "",
       ciudad_procedencia: "",
-      lugar_nacimiento: "",
       fecha_nacimiento: undefined,
       nacionalidad: "",
       ocupacion: "",
@@ -202,25 +199,26 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
   const handleEditCompanion = (index: number) => {
     const companion = companions[index]
     const primaryData = formData
-    
+
     const isSame = !!primaryData.pais_residencia &&
-                   companion.pais_residencia === primaryData.pais_residencia &&
-                   companion.departamento_residencia === primaryData.departamento_residencia &&
-                   companion.ciudad_residencia === primaryData.ciudad_residencia &&
-                   companion.nacionalidad === primaryData.nacionalidad
-                   
-    setUseSameInfoAsPrimary(isSame) 
+      companion.pais_residencia === primaryData.pais_residencia &&
+      companion.departamento_residencia === primaryData.departamento_residencia &&
+      companion.ciudad_residencia === primaryData.ciudad_residencia &&
+      companion.nacionalidad === primaryData.nacionalidad &&
+      companion.ciudad_procedencia === primaryData.ciudad_procedencia
+
+    setUseSameInfoAsPrimary(isSame)
 
     form.reset({
       ...companion,
-      fecha_nacimiento: companion.fecha_nacimiento instanceof Date 
-        ? companion.fecha_nacimiento 
+      fecha_nacimiento: companion.fecha_nacimiento instanceof Date
+        ? companion.fecha_nacimiento
         : new Date(companion.fecha_nacimiento),
       segundo_apellido: companion.segundo_apellido || "",
       telefono: companion.telefono || "",
       correo: companion.correo || "",
     })
-    
+
     setEditingIndex(index)
     setIsAddingCompanion(true)
   }
@@ -234,20 +232,22 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       setEditingIndex(-1)
       resetCompanionForm()
     } else if (editingIndex === index) {
-        setIsAddingCompanion(false)
-        setEditingIndex(-1)
-        resetCompanionForm()
+      setIsAddingCompanion(false)
+      setEditingIndex(-1)
+      resetCompanionForm()
     }
   }
 
   const onSubmit = (data: CompanionFormValue) => {
     const finalData = useSameInfoAsPrimary
-      ? { ...data, 
-          pais_residencia: formData.pais_residencia || data.pais_residencia,
-          departamento_residencia: formData.departamento_residencia || data.departamento_residencia,
-          ciudad_residencia: formData.ciudad_residencia || data.ciudad_residencia,
-          nacionalidad: formData.nacionalidad || data.nacionalidad,
-        }
+      ? {
+        ...data,
+        pais_residencia: formData.pais_residencia || data.pais_residencia,
+        departamento_residencia: formData.departamento_residencia || data.departamento_residencia,
+        ciudad_residencia: formData.ciudad_residencia || data.ciudad_residencia,
+        nacionalidad: formData.nacionalidad || data.nacionalidad,
+        ciudad_procedencia: formData.ciudad_procedencia || data.ciudad_procedencia,
+      }
       : data
 
     if (editingIndex >= 0) {
@@ -257,7 +257,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
     } else {
       setCompanions([...companions, finalData as CreateHuespedSecundarioWithoutIdDto])
     }
-    
+
     resetCompanionForm()
     setIsAddingCompanion(false)
     setEditingIndex(-1)
@@ -293,9 +293,9 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       <Card className="mb-6">
         <CardContent className="pt-6">
           <div className="flex items-center gap-2 mb-4">
-            <Checkbox 
-              id="has-companions" 
-              checked={hasCompanions} 
+            <Checkbox
+              id="has-companions"
+              checked={hasCompanions}
               onCheckedChange={handleHasCompanionsChange}
             />
             <label
@@ -314,8 +314,8 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                     Número de acompañantes: <span className="text-primary font-bold">{companions.length}</span>
                   </p>
                   {!isAddingCompanion && (
-                    <Button 
-                      onClick={handleAddCompanion} 
+                    <Button
+                      onClick={handleAddCompanion}
                       className="gap-2"
                     >
                       <UserPlus className="h-4 w-4" />
@@ -329,7 +329,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                 <Alert className="mb-4">
                   <AlertTitle>No hay acompañantes registrados</AlertTitle>
                   <AlertDescription>
-                    Haga clic en "Agregar Acompañante" para registrar a las personas que le acompañan.
+                    Haga clic en &quot;Agregar Acompañante&quot; para registrar a las personas que le acompañan.
                   </AlertDescription>
                 </Alert>
               )}
@@ -364,9 +364,9 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                   Complete los datos del acompañante
                 </p>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => {
                   setIsAddingCompanion(false)
                   setEditingIndex(-1)
@@ -387,8 +387,8 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                     onCheckedChange={handleSameInfoChange}
                     disabled={!formData.pais_residencia}
                   />
-                  <label 
-                    htmlFor="same-info-checkbox" 
+                  <label
+                    htmlFor="same-info-checkbox"
                     className={`text-sm font-medium ${!formData.pais_residencia ? 'text-gray-400 cursor-not-allowed' : ''}`}
                   >
                     Usar la misma información de residencia y nacionalidad que el huésped principal
@@ -596,26 +596,12 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
 
                   <FormField
                     control={form.control}
-                    name="lugar_nacimiento"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Lugar de nacimiento</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ciudad, País" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="ciudad_procedencia"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Ciudad de procedencia</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Ciudad, País" />
+                          <Input {...field} placeholder="Ciudad, País" disabled={useSameInfoAsPrimary} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -652,8 +638,8 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                 </div>
 
                 <div className="flex justify-end space-x-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={() => {
                       setIsAddingCompanion(false)
