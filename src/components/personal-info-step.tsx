@@ -45,7 +45,8 @@ const personalInfoSchema = z.object({
   }),
   fecha_nacimiento: z.date({
     required_error: "La fecha de nacimiento es requerida",
-  }),
+  })
+  .max(new Date(), { message: "La fecha de nacimiento no puede ser futura" }),
   nacionalidad: z.string().min(2, {
     message: "La nacionalidad es requerida",
   }),

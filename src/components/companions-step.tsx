@@ -26,7 +26,7 @@ interface CompanionsStepProps {
   onPrevious: () => void
 }
 
-// Schema para cada acompañante
+// Schema Zod que refleja CreateHuespedSecundarioWithoutIdDto
 const companionSchema = z.object({
   tipo_documento: z.nativeEnum(TipoDoc, {
     required_error: "Seleccione el tipo de documento",
@@ -41,12 +41,36 @@ const companionSchema = z.object({
   nombres: z.string().min(2, {
     message: "El nombre es requerido",
   }),
+  pais_residencia: z.string().min(2, {
+    message: "El país de residencia es requerido",
+  }),
+  departamento_residencia: z.string().min(2, {
+    message: "El departamento de residencia es requerido",
+  }),
+  ciudad_residencia: z.string().min(2, {
+    message: "La ciudad de residencia es requerida",
+  }),
+  ciudad_procedencia: z.string().min(2, {
+    message: "La ciudad de procedencia es requerida",
+  }),
+  lugar_nacimiento: z.string().min(2, {
+    message: "El lugar de nacimiento es requerido",
+  }),
   fecha_nacimiento: z.date({
     required_error: "La fecha de nacimiento es requerida",
+  })
+  .max(new Date(), { message: "La fecha de nacimiento no puede ser futura" }),
+  nacionalidad: z.string().min(2, {
+    message: "La nacionalidad es requerida",
+  }),
+  ocupacion: z.string().min(2, {
+    message: "La ocupación es requerida",
   }),
   genero: z.nativeEnum(Genero, {
     required_error: "Seleccione el género",
   }),
+  telefono: z.string().optional(),
+  correo: z.string().email({ message: "El correo electrónico es inválido" }).optional(),
 })
 
 type CompanionFormValue = z.infer<typeof companionSchema>
@@ -108,6 +132,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
   const [hasCompanions, setHasCompanions] = useState<boolean>(companions.length > 0)
   const [isAddingCompanion, setIsAddingCompanion] = useState<boolean>(false)
   const [editingIndex, setEditingIndex] = useState<number>(-1)
+  const [useSameInfoAsPrimary, setUseSameInfoAsPrimary] = useState<boolean>(false)
 
   const form = useForm<CompanionFormValue>({
     resolver: zodResolver(companionSchema),
@@ -117,33 +142,85 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       primer_apellido: "",
       segundo_apellido: "",
       nombres: "",
+      pais_residencia: "",
+      departamento_residencia: "",
+      ciudad_residencia: "",
+      ciudad_procedencia: "",
+      lugar_nacimiento: "",
       fecha_nacimiento: undefined,
+      nacionalidad: "",
+      ocupacion: "",
       genero: undefined,
+      telefono: "",
+      correo: "",
     },
   })
 
-  const handleAddCompanion = () => {
+  const handleSameInfoChange = (checked: boolean) => {
+    setUseSameInfoAsPrimary(checked)
+    if (checked) {
+      form.setValue('pais_residencia', formData.pais_residencia || '', { shouldValidate: true })
+      form.setValue('departamento_residencia', formData.departamento_residencia || '', { shouldValidate: true })
+      form.setValue('ciudad_residencia', formData.ciudad_residencia || '', { shouldValidate: true })
+      form.setValue('nacionalidad', formData.nacionalidad || '', { shouldValidate: true })
+    } else {
+      form.setValue('pais_residencia', '', { shouldValidate: true })
+      form.setValue('departamento_residencia', '', { shouldValidate: true })
+      form.setValue('ciudad_residencia', '', { shouldValidate: true })
+      form.setValue('nacionalidad', '', { shouldValidate: true })
+    }
+  }
+
+  const resetCompanionForm = () => {
     form.reset({
       tipo_documento: undefined,
       numero_documento: "",
       primer_apellido: "",
       segundo_apellido: "",
       nombres: "",
+      pais_residencia: "",
+      departamento_residencia: "",
+      ciudad_residencia: "",
+      ciudad_procedencia: "",
+      lugar_nacimiento: "",
       fecha_nacimiento: undefined,
+      nacionalidad: "",
+      ocupacion: "",
       genero: undefined,
+      telefono: "",
+      correo: "",
     })
+    setUseSameInfoAsPrimary(false)
+  }
+
+  const handleAddCompanion = () => {
+    resetCompanionForm()
     setEditingIndex(-1)
     setIsAddingCompanion(true)
   }
 
   const handleEditCompanion = (index: number) => {
     const companion = companions[index]
+    const primaryData = formData
+    
+    const isSame = !!primaryData.pais_residencia &&
+                   companion.pais_residencia === primaryData.pais_residencia &&
+                   companion.departamento_residencia === primaryData.departamento_residencia &&
+                   companion.ciudad_residencia === primaryData.ciudad_residencia &&
+                   companion.nacionalidad === primaryData.nacionalidad
+                   
+    setUseSameInfoAsPrimary(isSame) 
+
     form.reset({
       ...companion,
       fecha_nacimiento: companion.fecha_nacimiento instanceof Date 
         ? companion.fecha_nacimiento 
-        : new Date(companion.fecha_nacimiento)
+        : new Date(companion.fecha_nacimiento),
+      segundo_apellido: companion.segundo_apellido || "",
+      telefono: companion.telefono || "",
+      correo: companion.correo || "",
     })
+    
     setEditingIndex(index)
     setIsAddingCompanion(true)
   }
@@ -155,39 +232,33 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       setHasCompanions(false)
       setIsAddingCompanion(false)
       setEditingIndex(-1)
-      form.reset({
-        tipo_documento: undefined,
-        numero_documento: "",
-        primer_apellido: "",
-        segundo_apellido: "",
-        nombres: "",
-        fecha_nacimiento: undefined,
-        genero: undefined,
-      })
+      resetCompanionForm()
+    } else if (editingIndex === index) {
+        setIsAddingCompanion(false)
+        setEditingIndex(-1)
+        resetCompanionForm()
     }
   }
 
   const onSubmit = (data: CompanionFormValue) => {
+    const finalData = useSameInfoAsPrimary
+      ? { ...data, 
+          pais_residencia: formData.pais_residencia || data.pais_residencia,
+          departamento_residencia: formData.departamento_residencia || data.departamento_residencia,
+          ciudad_residencia: formData.ciudad_residencia || data.ciudad_residencia,
+          nacionalidad: formData.nacionalidad || data.nacionalidad,
+        }
+      : data
+
     if (editingIndex >= 0) {
-      // Actualizar acompañante existente
       const updatedCompanions = [...companions]
-      updatedCompanions[editingIndex] = data as CreateHuespedSecundarioWithoutIdDto
+      updatedCompanions[editingIndex] = finalData as CreateHuespedSecundarioWithoutIdDto
       setCompanions(updatedCompanions)
     } else {
-      // Agregar nuevo acompañante
-      setCompanions([...companions, data as CreateHuespedSecundarioWithoutIdDto])
+      setCompanions([...companions, finalData as CreateHuespedSecundarioWithoutIdDto])
     }
     
-    // Reset form and state
-    form.reset({
-      tipo_documento: undefined,
-      numero_documento: "",
-      primer_apellido: "",
-      segundo_apellido: "",
-      nombres: "",
-      fecha_nacimiento: undefined,
-      genero: undefined,
-    })
+    resetCompanionForm()
     setIsAddingCompanion(false)
     setEditingIndex(-1)
   }
@@ -206,15 +277,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       setCompanions([])
       setIsAddingCompanion(false)
       setEditingIndex(-1)
-      form.reset({
-        tipo_documento: undefined,
-        numero_documento: "",
-        primer_apellido: "",
-        segundo_apellido: "",
-        nombres: "",
-        fecha_nacimiento: undefined,
-        genero: undefined,
-      })
+      resetCompanionForm()
     }
   }
 
@@ -290,7 +353,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       </Card>
 
       {isAddingCompanion && (
-        <Card className="mb-6">
+        <Card className="mb-6 border-primary">
           <CardContent className="pt-6">
             <div className="flex justify-between items-center mb-4">
               <div className="space-y-1">
@@ -307,7 +370,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                 onClick={() => {
                   setIsAddingCompanion(false)
                   setEditingIndex(-1)
-                  form.reset()
+                  resetCompanionForm()
                 }}
                 className="hover:bg-gray-100"
               >
@@ -317,7 +380,22 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-1 md:col-span-3 flex items-center space-x-2 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <Checkbox
+                    id="same-info-checkbox"
+                    checked={useSameInfoAsPrimary}
+                    onCheckedChange={handleSameInfoChange}
+                    disabled={!formData.pais_residencia}
+                  />
+                  <label 
+                    htmlFor="same-info-checkbox" 
+                    className={`text-sm font-medium ${!formData.pais_residencia ? 'text-gray-400 cursor-not-allowed' : ''}`}
+                  >
+                    Usar la misma información de residencia y nacionalidad que el huésped principal
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="tipo_documento"
@@ -445,15 +523,142 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="pais_residencia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>País de residencia</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese país" disabled={useSameInfoAsPrimary} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="departamento_residencia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Departamento de residencia</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese departamento" disabled={useSameInfoAsPrimary} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ciudad_residencia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ciudad de residencia</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese ciudad" disabled={useSameInfoAsPrimary} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="nacionalidad"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nacionalidad</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese nacionalidad" disabled={useSameInfoAsPrimary} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ocupacion"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ocupación</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese ocupación" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="lugar_nacimiento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Lugar de nacimiento</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ciudad, País" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ciudad_procedencia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ciudad de procedencia</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ciudad, País" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="telefono"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Teléfono</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese teléfono (opcional)" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="correo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correo electrónico</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese correo (opcional)" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="flex justify-end space-x-2">
                   <Button 
                     variant="outline" 
+                    type="button"
                     onClick={() => {
                       setIsAddingCompanion(false)
                       setEditingIndex(-1)
-                      form.reset()
+                      resetCompanionForm()
                     }}
                   >
                     Cancelar
