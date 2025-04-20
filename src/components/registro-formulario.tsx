@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { WelcomeStep } from "@/components/welcome-step"
 import { PersonalInfoStep } from "@/components/personal-info-step"
 import { CompanionsStep } from "@/components/companions-step"
@@ -28,7 +28,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
       {formSteps.map((step, index) => {
         const isCompleted = index < currentStep
         const isCurrent = index === currentStep
-        const Icon = step.icon
 
         return (
           <div key={step.name} className="flex items-center">
@@ -49,7 +48,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                     : "bg-gray-200 text-gray-600"
                 )}
               >
-                {isCompleted ? <Check className="h-4 w-4 md:h-5 md:h-5" /> : index + 1}
+                {isCompleted ? <Check className="h-4 w-4 md:h-5" /> : index + 1}
               </div>
               <span 
                 className={clsx(
@@ -70,6 +69,8 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 export default function RegistroFormulario({ linkFormulario }: { linkFormulario: LinkFormulario }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [formData, setFormData] = useState<Partial<CreateRegistroFormulario>>({
     fecha_inicio: linkFormulario.fechaInicio,
     fecha_fin: linkFormulario.fechaFin,
@@ -77,6 +78,14 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
     numero_habitacion: linkFormulario.numeroHabitacion,
     numero_acompaniantes: 0,
   })
+
+  const token = useMemo(() => {
+    const token = linkFormulario.url.split('/').pop()
+    if (!token) {
+      throw new Error("Token no encontrado en la URL")
+    }
+    return token
+  }, [linkFormulario.url])
 
   const handleNext = () => {
     setCurrentStep((prev) => (prev < formSteps.length - 1 ? prev + 1 : prev))
@@ -91,15 +100,14 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
   }
 
   useEffect(() => {
-    // Cuando llegamos al paso final (índice 3), enviamos el formulario a la API
     const submitForm = async () => {
-      if (currentStep === formSteps.length -1 && !isSubmitting) { // Índice del último paso
+      if (currentStep === formSteps.length - 1 && !isSubmitting && !hasAttemptedSubmit) {
+        setSubmitError(null)
         try {
           setIsSubmitting(true)
-          // Aquí enviaríamos los datos a tu API
-          // await createRegistroFormulario(linkFormulario.token, formData as CreateRegistroFormulario)
+          setHasAttemptedSubmit(true)
+          await createRegistroFormulario(token, formData as CreateRegistroFormulario)
           
-          // Simulación de envío exitoso
           console.log("Formulario enviado:", formData)
           
           toast.success("Registro completado", {
@@ -107,11 +115,11 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
           })
         } catch (error) {
           console.error("Error al enviar el formulario:", error)
-          toast.error("Error", {
-            description: "Ocurrió un error al enviar el formulario. Por favor, intente nuevamente.",
+          const errorMessage = error instanceof Error ? error.message : "Ocurrió un error desconocido."
+          setSubmitError(errorMessage)
+          toast.error("Error al enviar el formulario", {
+            description: errorMessage,
           })
-          // Opcional: retroceder al paso anterior en caso de error
-          // handlePrevious()
         } finally {
           setIsSubmitting(false)
         }
@@ -119,7 +127,7 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
     }
 
     submitForm()
-  }, [currentStep, formData, linkFormulario, isSubmitting])
+  }, [currentStep, formData, linkFormulario, isSubmitting, token, hasAttemptedSubmit])
 
   const steps = [
     <WelcomeStep key="welcome" formData={formData} onNext={handleNext} />,
@@ -136,7 +144,13 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
       onNext={handleNext}
       onPrevious={handlePrevious}
     />,
-    <SuccessStep key="success" formData={formData} />, // El último paso es la pantalla de éxito
+    <SuccessStep 
+      key="success" 
+      formData={formData} 
+      isSubmitting={isSubmitting} 
+      hasAttemptedSubmit={hasAttemptedSubmit}
+      submitError={submitError}
+    />,
   ]
 
   return (
@@ -149,12 +163,10 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
           </button>
         </header>
         
-        {/* Indicador de pasos centralizado */}
         <div className="py-6">
           <StepIndicator currentStep={currentStep} />
         </div>
 
-        {/* Renderizar el contenido del paso actual */}
         {steps[currentStep]}
       </div>
     </div>

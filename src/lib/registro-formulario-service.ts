@@ -15,6 +15,7 @@ export async function createRegistroFormulario(token: string, data: CreateRegist
     })
 
     if (!response.ok) {
+      console.log(await response.json())
       throw new Error(`Error al crear registro: ${response.status}`)
     }
 
