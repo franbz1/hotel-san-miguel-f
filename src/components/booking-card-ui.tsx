@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { BookingCard } from "@/Types/bookin-card"
 import { EstadosFormulario } from "@/Types/enums/estadosFormulario"
 import { regenerateLinkFormulario } from "@/lib/link-formulario-service"
+import { getBookingCardByLinkId } from "@/lib/bookin-card-service"
 
 interface BookingCardUIProps {
   booking: BookingCard
@@ -36,7 +37,8 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
     try {
       setIsRegenerating(true)
       const regeneratedLink = await regenerateLinkFormulario(booking.link_formulario_id)
-      setBooking(prev => ({ ...prev, url: regeneratedLink.url }))
+      const bookingRegenerated = await getBookingCardByLinkId(regeneratedLink.id)
+      setBooking(bookingRegenerated)
     } catch (error) {
       console.error('Error al regenerar el enlace:', error)
     } finally {

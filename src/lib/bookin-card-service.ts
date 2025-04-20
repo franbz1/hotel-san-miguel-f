@@ -4,7 +4,7 @@ import { getFormularioById } from "./formulario-service";
 import { getReservaById } from "./reservas-service";
 import { getHuespedById } from './huesped-service';
 import { EstadosFormulario } from '@/Types/enums/estadosFormulario';
-import { getLinksFormulario } from './link-formulario-service';
+import { getLinkFormularioById, getLinksFormulario } from './link-formulario-service';
 import { LinkFormulario } from '@/Types/link-formulario';
 
 export async function getBookingCards(limit: number, page: number): Promise<BookingCard[]> {
@@ -51,6 +51,68 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
   })
 
   return Promise.all(bookingCards)
+}
+
+export async function getBookingCardByLinkId(id: number): Promise<BookingCard> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const linkFormulario = await getLinkFormularioById(id)
+
+  if (linkFormulario === null) {
+    throw new Error('No se encontró el enlace de formulario')
+  }
+
+  if (linkFormulario.formularioId === null) {
+    return {
+      link_formulario_id: linkFormulario.id,
+      nombre: 'Sin nombre',
+      fecha_inicio: linkFormulario.fechaInicio,
+      fecha_fin: linkFormulario.fechaFin,
+      estado: determinarLinkFormulario(linkFormulario),
+      valor: linkFormulario.costo,
+      url: linkFormulario.url,
+      numero_habitacion: linkFormulario.numeroHabitacion,
+      subido_sire: false,
+      subido_tra: false,
+    }
+  }
+
+  try {
+    const formulario = await getFormularioById(linkFormulario.formularioId)
+    if (!formulario) {
+      throw new Error('No se encontró el formulario asociado')
+    }
+
+    const reserva = await getReservaById(formulario.reservaId)
+    if (!reserva) {
+      throw new Error('No se encontró la reserva asociada')
+    }
+
+    const huesped = await getHuespedById(formulario.huespedId)
+    if (!huesped) {
+      throw new Error('No se encontró el huésped asociado')
+    }
+
+    return {
+      link_formulario_id: linkFormulario.id,
+      nombre: huesped.nombres,
+      fecha_inicio: reserva.fecha_inicio,
+      fecha_fin: reserva.fecha_fin,
+      estado: determinarLinkFormulario(linkFormulario),
+      valor: reserva.costo,
+      url: linkFormulario.url,
+      numero_habitacion: linkFormulario.numeroHabitacion,
+      subido_sire: formulario?.SubidoASire ?? false,
+      subido_tra: formulario?.SubidoATra ?? false
+    }
+  } catch (error) {
+    console.error('Error al obtener los datos del booking card:', error)
+    throw new Error('Error al obtener los datos del booking card')
+  }
 }
 
 function determinarLinkFormulario(linkFormulario: LinkFormulario): EstadosFormulario {
