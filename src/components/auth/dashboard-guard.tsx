@@ -20,43 +20,38 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
   }
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (!user) {
-          router.push('/login')
-          return
-        }
-        
-        // Si está autenticado pero no tiene un rol con acceso al dashboard, redirigir a su ruta específica
-        if (!hasDashboardAccess(user.rol)) {
-          // Redirigir según el rol
-          const userRole = user.rol as keyof typeof Role
-          const redirectPath = ROLE_ROUTES[userRole] || DEFAULT_ROUTE
-          router.push(redirectPath)
-        }
-      } catch (error) {
-        console.error('Error validating auth:', error)
-        router.push('/login')
-      }
+    if (isLoading) {
+      return;
     }
 
-    checkAuth()
-  }, [router, user])
+    const checkAuthStatus = () => {
+      if (!user) {
+        router.push('/login');
+        return;
+      }
 
-  // Mostrar un indicador de carga mientras se verifica la autenticación
+      if (!hasDashboardAccess(user.rol)) {
+        const userRole = user.rol as keyof typeof Role;
+        const redirectPath = ROLE_ROUTES[userRole] || DEFAULT_ROUTE;
+        router.push(redirectPath);
+      }
+    };
+
+    checkAuthStatus();
+  }, [isLoading, user, router]);
+
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
-  // Si no está autenticado o no tiene acceso, no renderizar nada (la redirección se maneja en el useEffect)
-  if (!user || !hasDashboardAccess(user.rol)) {
-    return null
+  if (user && hasDashboardAccess(user.rol)) {
+    return <>{children}</>;
   }
 
-  // Si está autenticado y tiene acceso, renderizar el contenido
-  return <>{children}</>
+  return null;
 } 

@@ -128,10 +128,6 @@ export function LoginForm() {
         nombre: data.nombre,
         rol: data.rol
       })
-      
-      // Redirigir según el rol del usuario
-      const redirectPath = data.rol ? ROLE_ROUTES[data.rol as RoleType] : DEFAULT_ROUTE
-      router.push(redirectPath)
     } catch (error) {
       console.error("Error en la petición:", error)
       setApiError("Error de conexión. Verifica que el servidor esté en funcionamiento.")
