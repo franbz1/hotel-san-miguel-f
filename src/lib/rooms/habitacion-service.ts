@@ -1,6 +1,6 @@
 import { Habitacion } from '@/Types/habitacion'
-import { HABITACION_ENDPOINTS } from './api'
-import { COOKIE_NAMES, getCookie } from './cookies'
+import { HABITACION_ENDPOINTS } from '@/lib/common/api'
+import { COOKIE_NAMES, getCookie } from '@/lib/common/cookies'
 import { TipoHabitacion } from '@/Types/enums/tiposHabitacion'
 import { EstadoHabitacion } from '@/Types/enums/estadosHabitacion'
 

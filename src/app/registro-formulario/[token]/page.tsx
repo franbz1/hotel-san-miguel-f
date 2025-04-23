@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { getLinkFormularioById, validateLinkFormulario } from "@/lib/link-formulario-service"
-import { Role } from "@/lib/constants"
+import { getLinkFormularioById, validateLinkFormulario } from "@/lib/formulario/link-formulario-service"
+import { Role } from "@/lib/common/constants"
 import { LinkFormulario } from "@/Types/link-formulario"
-import RegistroFormulario from "@/components/registro-formulario"
+import RegistroFormulario from "@/components/formulario-steps/registro-formulario"
 
 export default function RegistroFormularioPage() {
   const { token } = useParams()

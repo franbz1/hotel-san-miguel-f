@@ -4,11 +4,11 @@ import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { getBookingCards } from "@/lib/bookin-card-service"
+import { getBookingCards } from "@/lib/bookings/bookin-card-service"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { BookingCard } from "@/Types/bookin-card"
-import BookingCardUI from "./booking-card-ui"
-import { CreateBookingModal } from "./create-booking-modal"
+import BookingCardUI from "@/components/bookings/booking-card-ui"
+import { CreateBookingModal } from "@/components/bookings/create-booking-modal"
 
 export function BookingsSection() {
   const [bookings, setBookings] = useState<BookingCard[]>([])

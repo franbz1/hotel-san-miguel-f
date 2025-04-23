@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { COOKIE_NAMES } from './lib/cookies'
-import { getValidatedUser } from './lib/auth-service'
-import { Role, ROLE_ROUTES, DEFAULT_ROUTE } from './lib/constants'
-import { validateLinkFormulario } from './lib/link-formulario-service'
+import { COOKIE_NAMES } from './lib/common/cookies'
+import { getValidatedUser } from './lib/auth/auth-service'
+import { Role, ROLE_ROUTES, DEFAULT_ROUTE } from './lib/common/constants'
 
 // Rutas públicas que no requieren autenticación
 const publicRoutes = ['/login', '/register', '/forgot-password']
@@ -26,6 +25,7 @@ export async function middleware(request: NextRequest) {
     try {
       return NextResponse.next()
     } catch (error) {
+      console.error('Error in middleware:', error)
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }

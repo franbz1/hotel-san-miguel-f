@@ -1,7 +1,7 @@
 import { Reserva } from "@/Types/Reserva"
-import { COOKIE_NAMES } from "./cookies"
-import { getCookie } from "./cookies"
-import { RESERVA_ENDPOINTS } from "./api"
+import { COOKIE_NAMES } from "@/lib/common/cookies"
+import { getCookie } from "@/lib/common/cookies"
+import { RESERVA_ENDPOINTS } from "@/lib/common/api"
 
 export interface ReservasResponse {
   data: Reserva[]

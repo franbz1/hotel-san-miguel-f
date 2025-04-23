@@ -1,4 +1,4 @@
-import { AUTH_ENDPOINTS } from './api'
+import { AUTH_ENDPOINTS } from '@/lib/common/api'
 
 interface ValidationResponse {
   isValid: boolean

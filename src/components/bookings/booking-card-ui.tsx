@@ -5,11 +5,11 @@ import { ChevronDown, ChevronUp, Eye, Trash2, X, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/common/utils"
 import { BookingCard } from "@/Types/bookin-card"
 import { EstadosFormulario } from "@/Types/enums/estadosFormulario"
-import { regenerateLinkFormulario } from "@/lib/link-formulario-service"
-import { getBookingCardByLinkId } from "@/lib/bookin-card-service"
+import { regenerateLinkFormulario } from "@/lib/formulario/link-formulario-service"
+import { getBookingCardByLinkId } from "@/lib/bookings/bookin-card-service"
 
 interface BookingCardUIProps {
   booking: BookingCard

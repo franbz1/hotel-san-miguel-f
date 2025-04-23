@@ -1,10 +1,10 @@
-import { BookingCard } from './../Types/bookin-card';
-import { getCookie, COOKIE_NAMES } from "./cookies";
-import { getFormularioById } from "./formulario-service";
-import { getReservaById } from "./reservas-service";
-import { getHuespedById } from './huesped-service';
+import { BookingCard } from '../../Types/bookin-card';
+import { getCookie, COOKIE_NAMES } from "@/lib/common/cookies";
+import { getFormularioById } from "@/lib/formulario/formulario-service";
+import { getReservaById } from "@/lib/bookings/reservas-service";
+import { getHuespedById } from "@/lib/huespedes/huesped-service";
 import { EstadosFormulario } from '@/Types/enums/estadosFormulario';
-import { getLinkFormularioById, getLinksFormulario } from './link-formulario-service';
+import { getLinkFormularioById, getLinksFormulario } from "@/lib/formulario/link-formulario-service";
 import { LinkFormulario } from '@/Types/link-formulario';
 
 export async function getBookingCards(limit: number, page: number): Promise<BookingCard[]> {

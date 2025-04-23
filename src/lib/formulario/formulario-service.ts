@@ -1,7 +1,7 @@
 import { Formulario } from "@/Types/formulario"
-import { getCookie } from "./cookies"
-import { COOKIE_NAMES } from "./cookies"
-import { FORMULARIO_ENDPOINTS } from "./api"
+import { getCookie } from "@/lib/common/cookies"
+import { COOKIE_NAMES } from "@/lib/common/cookies"
+import { FORMULARIO_ENDPOINTS } from "@/lib/common/api"
 
 export interface FormulariosResponse {
   data: Formulario[]

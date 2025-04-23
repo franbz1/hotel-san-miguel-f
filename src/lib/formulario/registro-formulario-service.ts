@@ -1,4 +1,4 @@
-import { REGISTRO_FORMULARIO_ENDPOINTS } from './api'
+import { REGISTRO_FORMULARIO_ENDPOINTS } from '@/lib/common/api'
 import { CreateRegistroFormulario } from '@/Types/registro-formularioDto'
 
 /**

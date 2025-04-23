@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCookie, removeAuthCookies } from '@/lib/cookies'
-import { COOKIE_NAMES } from '@/lib/cookies'
-import { getValidatedUser } from '@/lib/auth-service'
+import { getCookie, removeAuthCookies } from '@/lib/common/cookies'
+import { COOKIE_NAMES } from '@/lib/common/cookies'
+import { getValidatedUser } from '@/lib/auth/auth-service'
 
 interface User {
   id: number

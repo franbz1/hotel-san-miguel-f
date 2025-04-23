@@ -32,9 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Calendar } from "lucide-react"
-import { generateLinkFormulario } from "@/lib/link-formulario-service"
+import { generateLinkFormulario } from "@/lib/formulario/link-formulario-service"
 import { toast } from "sonner"
-import { getHabitacionesDisponibles } from "@/lib/habitacion-service"
+import { getHabitacionesDisponibles } from "@/lib/rooms/habitacion-service"
 import { Habitacion } from "@/Types/habitacion"
 import { ScrollArea } from "@/components/ui/scroll-area"
 

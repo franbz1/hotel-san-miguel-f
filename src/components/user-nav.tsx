@@ -12,9 +12,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/contexts/auth-context"
-import { removeAuthCookies, getCookie } from "@/lib/cookies"
-import { COOKIE_NAMES } from "@/lib/cookies"
-import { AUTH_ENDPOINTS } from "@/lib/api"
+import { removeAuthCookies, getCookie } from "@/lib/common/cookies"
+import { COOKIE_NAMES } from "@/lib/common/cookies"
+import { AUTH_ENDPOINTS } from "@/lib/common/api"
 
 export function UserNav() {
   const router = useRouter()

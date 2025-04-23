@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { CreateRegistroFormulario } from "@/Types/registro-formularioDto"
-import { formatDate, formatCurrency } from "@/lib/utils"
+import { formatDate, formatCurrency } from "@/lib/common/utils"
 
 interface SuccessStepProps {
   formData: Partial<CreateRegistroFormulario>

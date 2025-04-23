@@ -1,4 +1,4 @@
-import { COOKIE_EXPIRATION_DAYS } from './constants'
+import { COOKIE_EXPIRATION_DAYS } from '@/lib/common/constants'
 import Cookies from "js-cookie"
 
 // Nombres de las cookies
