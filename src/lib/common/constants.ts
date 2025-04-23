@@ -18,6 +18,9 @@ export const ROLE_ROUTES: Record<RoleType, string> = {
 // Ruta por defecto si no coincide ningún rol
 export const DEFAULT_ROUTE = '/dashboard'
 
+// Rutas públicas que no requieren autenticación
+export const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password']
+
 // Roles existentes en la base de datos
 export const EXISTENT_ROLES = [Role.ADMINISTRADOR, Role.CAJERO, Role.ASEO, Role.REGISTRO_FORMULARIO]
 

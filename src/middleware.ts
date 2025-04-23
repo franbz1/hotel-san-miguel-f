@@ -2,16 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { COOKIE_NAMES } from './lib/common/cookies'
 import { getValidatedUser } from './lib/auth/auth-service'
-import { Role, ROLE_ROUTES, DEFAULT_ROUTE } from './lib/common/constants'
+import { Role, ROLE_ROUTES, DEFAULT_ROUTE, PUBLIC_ROUTES } from './lib/common/constants'
 
-// Rutas públicas que no requieren autenticación
-const publicRoutes = ['/login', '/register', '/forgot-password']
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Permitir acceso a rutas públicas
-  if (publicRoutes.includes(path)) {
+  if (PUBLIC_ROUTES.includes(path)) {
     return NextResponse.next()
   }
 
