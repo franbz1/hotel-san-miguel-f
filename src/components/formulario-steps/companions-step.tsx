@@ -44,9 +44,6 @@ const companionSchema = z.object({
   pais_residencia: z.string().min(2, {
     message: "El país de residencia es requerido",
   }),
-  departamento_residencia: z.string().min(2, {
-    message: "El departamento de residencia es requerido",
-  }),
   ciudad_residencia: z.string().min(2, {
     message: "La ciudad de residencia es requerida",
   }),
@@ -140,7 +137,6 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       segundo_apellido: "",
       nombres: "",
       pais_residencia: "",
-      departamento_residencia: "",
       ciudad_residencia: "",
       ciudad_procedencia: "",
       fecha_nacimiento: undefined,
@@ -156,13 +152,11 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
     setUseSameInfoAsPrimary(checked)
     if (checked) {
       form.setValue('pais_residencia', formData.pais_residencia || '', { shouldValidate: true })
-      form.setValue('departamento_residencia', formData.departamento_residencia || '', { shouldValidate: true })
       form.setValue('ciudad_residencia', formData.ciudad_residencia || '', { shouldValidate: true })
       form.setValue('nacionalidad', formData.nacionalidad || '', { shouldValidate: true })
       form.setValue('ciudad_procedencia', formData.ciudad_procedencia || '', { shouldValidate: true })
     } else {
       form.setValue('pais_residencia', '', { shouldValidate: true })
-      form.setValue('departamento_residencia', '', { shouldValidate: true })
       form.setValue('ciudad_residencia', '', { shouldValidate: true })
       form.setValue('nacionalidad', '', { shouldValidate: true })
       form.setValue('ciudad_procedencia', '', { shouldValidate: true })
@@ -177,7 +171,6 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       segundo_apellido: "",
       nombres: "",
       pais_residencia: "",
-      departamento_residencia: "",
       ciudad_residencia: "",
       ciudad_procedencia: "",
       fecha_nacimiento: undefined,
@@ -202,7 +195,6 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
 
     const isSame = !!primaryData.pais_residencia &&
       companion.pais_residencia === primaryData.pais_residencia &&
-      companion.departamento_residencia === primaryData.departamento_residencia &&
       companion.ciudad_residencia === primaryData.ciudad_residencia &&
       companion.nacionalidad === primaryData.nacionalidad &&
       companion.ciudad_procedencia === primaryData.ciudad_procedencia
@@ -243,7 +235,6 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       ? {
         ...data,
         pais_residencia: formData.pais_residencia || data.pais_residencia,
-        departamento_residencia: formData.departamento_residencia || data.departamento_residencia,
         ciudad_residencia: formData.ciudad_residencia || data.ciudad_residencia,
         nacionalidad: formData.nacionalidad || data.nacionalidad,
         ciudad_procedencia: formData.ciudad_procedencia || data.ciudad_procedencia,
@@ -532,20 +523,6 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
                         <FormLabel>País de residencia</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Ingrese país" disabled={useSameInfoAsPrimary} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="departamento_residencia"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Departamento de residencia</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ingrese departamento" disabled={useSameInfoAsPrimary} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
