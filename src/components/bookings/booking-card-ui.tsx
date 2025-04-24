@@ -10,6 +10,7 @@ import { BookingCard } from "@/Types/bookin-card"
 import { EstadosFormulario } from "@/Types/enums/estadosFormulario"
 import { regenerateLinkFormulario } from "@/lib/formulario/link-formulario-service"
 import { getBookingCardByLinkId } from "@/lib/bookings/bookin-card-service"
+import { toast } from "sonner"
 
 interface BookingCardUIProps {
   booking: BookingCard
@@ -35,6 +36,11 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
 
   const handleRegenerateLink = async () => {
     try {
+      if (booking.estado === EstadosFormulario.COMPLETADO) {
+        toast.error("No se puede regenerar el enlace porque el formulario ya ha sido completado")
+        return
+      }
+
       setIsRegenerating(true)
       const regeneratedLink = await regenerateLinkFormulario(booking.link_formulario_id)
       const bookingRegenerated = await getBookingCardByLinkId(regeneratedLink.id)
