@@ -114,25 +114,45 @@ export async function regenerateLinkFormulario(id: number): Promise<LinkFormular
 }
 
 export async function validateLinkFormulario(tokenUrl: string): Promise<ValidateLinkFormularioResponse> {
-  const response = await fetch(LINK_FORMULARIO_ENDPOINTS.VALIDATE(tokenUrl), {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
+  try {
+    const response = await fetch(LINK_FORMULARIO_ENDPOINTS.VALIDATE(tokenUrl), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error('Error al validar el link del formulario')
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error('Error al procesar la respuesta del servidor');
+    }
+
+    // Manejo de errores basado en códigos HTTP
+    if (!response.ok) {
+      const errorMessage = data.message || 'Error al validar el link del formulario';
+      throw new Error(
+        errorMessage === 'Formulario ya completado' || 
+        errorMessage === 'Link inválido o expirado' 
+          ? errorMessage 
+          : 'Error al validar el link del formulario'
+      );
+    }
+
+    // Verificar el rol
+    if (data.rol !== Role.REGISTRO_FORMULARIO) {
+      throw new Error('El rol del link del formulario no es válido');
+    }
+
+    return data;
+  } catch (error) {
+    // Re-lanzar el error original o crear uno nuevo según el caso
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error('Error de conexión al validar el formulario');
+    }
   }
-
-  const data = await response.json()
-
-  const responseData: ValidateLinkFormularioResponse = data
-
-  if (responseData.rol !== Role.REGISTRO_FORMULARIO) {
-    throw new Error('El rol del link del formulario no es válido')
-  }
-
-  return responseData
 }
 

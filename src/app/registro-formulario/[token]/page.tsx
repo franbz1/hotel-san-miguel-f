@@ -13,33 +13,52 @@ export default function RegistroFormularioPage() {
   const [error, setError] = useState<string | null>(null)
   const [linkFormulario, setLinkFormulario] = useState<LinkFormulario | null>(null)
 
+  const validateLinkAccess = async (token: string) => {
+    const data = await validateLinkFormulario(token)
+    if (data.rol !== Role.REGISTRO_FORMULARIO) {
+      throw new Error('No tienes permiso para acceder a esta página')
+    }
+    return data
+  }
+
+  const validateLinkExpiration = (linkFormulario: LinkFormulario) => {
+    const vencimientoUTC = new Date(linkFormulario.vencimiento)
+    const ahoraUTC = new Date()
+
+    if (linkFormulario.completado) {
+      throw new Error('Link ya completado')
+    }
+
+    if (linkFormulario.expirado || vencimientoUTC < ahoraUTC) {
+      throw new Error('Link inválido o expirado')
+    }
+  }
+
+  const handleValidationError = (err: unknown) => {
+    if (err instanceof Error) {
+      switch (err.message) {
+        case 'Link inválido o expirado':
+        case 'Formulario ya completado':
+        case 'No tienes permiso para acceder a esta página':
+          setError(err.message)
+          break
+        default:
+          setError('Error al validar el link del formulario')
+      }
+    } else {
+      setError('Error al validar el link del formulario')
+    }
+  }
+
   useEffect(() => {
     const validateToken = async () => {
       try {
-        const data = await validateLinkFormulario(token as string)
-        if (data.rol !== Role.REGISTRO_FORMULARIO) {
-          setError('No tienes permiso para acceder a esta página')
-          return
-        }
+        const data = await validateLinkAccess(token as string)
         const linkFormulario = await getLinkFormularioById(data.id)
-
-        const vencimientoUTC = new Date(linkFormulario.vencimiento)
-        const ahoraUTC = new Date()
-  
-        if (linkFormulario.expirado || vencimientoUTC < ahoraUTC) {
-          setError('Link inválido o expirado')
-          return
-        }
-
-        if (linkFormulario.completado) {
-          setError('Link ya completado')
-          return
-        }
-
+        validateLinkExpiration(linkFormulario)
         setLinkFormulario(linkFormulario)
       } catch (err) {
-        console.error('error', err)
-        setError('Link inválido o expirado')
+        handleValidationError(err)
       } finally {
         setIsLoading(false)
       }
