@@ -8,7 +8,6 @@ export interface CreateHuespedSecundario {
   segundo_apellido?: string;
   nombres: string;
   pais_residencia: string;
-  departamento_residencia: string;
   ciudad_residencia: string;
   ciudad_procedencia: string;
   fecha_nacimiento: Date

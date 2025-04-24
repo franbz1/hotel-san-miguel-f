@@ -41,6 +41,9 @@ const personalInfoSchema = z.object({
   ciudad_residencia: z.string().min(2, {
     message: "La ciudad de residencia es requerida",
   }),
+  pais_procedencia: z.string().min(2, {
+    message: "El país de procedencia es requerido",
+  }),
   ciudad_procedencia: z.string().min(2, {
     message: "La ciudad de procedencia es requerida",
   }),
@@ -81,6 +84,7 @@ export function PersonalInfoStep({ formData, updateFormData, onNext }: PersonalI
       nombres: formData.nombres || "",
       pais_residencia: formData.pais_residencia || "",
       ciudad_residencia: formData.ciudad_residencia || "",
+      pais_procedencia: formData.pais_procedencia || "",
       ciudad_procedencia: formData.ciudad_procedencia || "",
       fecha_nacimiento: formData.fecha_nacimiento || undefined,
       nacionalidad: formData.nacionalidad || "",
@@ -359,6 +363,20 @@ export function PersonalInfoStep({ formData, updateFormData, onNext }: PersonalI
                       <FormLabel>Ciudad de residencia</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Ingrese su ciudad de residencia" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="pais_procedencia"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>País de procedencia</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Ingrese su país de procedencia" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

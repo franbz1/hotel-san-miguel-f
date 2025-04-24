@@ -20,6 +20,7 @@ export interface CreateRegistroFormulario {
   nombres: string;
   pais_residencia: string;
   ciudad_residencia: string;
+  pais_procedencia: string;
   ciudad_procedencia: string;
   fecha_nacimiento: Date;
   nacionalidad: string;

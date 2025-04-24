@@ -47,6 +47,9 @@ const companionSchema = z.object({
   ciudad_residencia: z.string().min(2, {
     message: "La ciudad de residencia es requerida",
   }),
+  pais_procedencia: z.string().min(2, {
+    message: "El país de procedencia es requerido",
+  }),
   ciudad_procedencia: z.string().min(2, {
     message: "La ciudad de procedencia es requerida",
   }),
@@ -138,6 +141,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       nombres: "",
       pais_residencia: "",
       ciudad_residencia: "",
+      pais_procedencia: "",
       ciudad_procedencia: "",
       fecha_nacimiento: undefined,
       nacionalidad: "",
@@ -154,11 +158,13 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       form.setValue('pais_residencia', formData.pais_residencia || '', { shouldValidate: true })
       form.setValue('ciudad_residencia', formData.ciudad_residencia || '', { shouldValidate: true })
       form.setValue('nacionalidad', formData.nacionalidad || '', { shouldValidate: true })
+      form.setValue('pais_procedencia', formData.pais_procedencia || '', { shouldValidate: true })
       form.setValue('ciudad_procedencia', formData.ciudad_procedencia || '', { shouldValidate: true })
     } else {
       form.setValue('pais_residencia', '', { shouldValidate: true })
       form.setValue('ciudad_residencia', '', { shouldValidate: true })
       form.setValue('nacionalidad', '', { shouldValidate: true })
+      form.setValue('pais_procedencia', '', { shouldValidate: true })
       form.setValue('ciudad_procedencia', '', { shouldValidate: true })
     }
   }
@@ -172,6 +178,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       nombres: "",
       pais_residencia: "",
       ciudad_residencia: "",
+      pais_procedencia: "",
       ciudad_procedencia: "",
       fecha_nacimiento: undefined,
       nacionalidad: "",
@@ -237,6 +244,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
         pais_residencia: formData.pais_residencia || data.pais_residencia,
         ciudad_residencia: formData.ciudad_residencia || data.ciudad_residencia,
         nacionalidad: formData.nacionalidad || data.nacionalidad,
+        pais_procedencia: formData.pais_procedencia || data.pais_procedencia,
         ciudad_procedencia: formData.ciudad_procedencia || data.ciudad_procedencia,
       }
       : data
@@ -573,12 +581,26 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
 
                   <FormField
                     control={form.control}
+                    name="pais_procedencia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>País de procedencia</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ingrese país de procedencia" disabled={useSameInfoAsPrimary} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="ciudad_procedencia"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Ciudad de procedencia</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Ciudad, País" disabled={useSameInfoAsPrimary} />
+                          <Input {...field} placeholder="Ingrese ciudad de procedencia" disabled={useSameInfoAsPrimary} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
