@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form"
 import { TipoDoc } from "@/Types/enums/tiposDocumento"
 import { Genero } from "@/Types/enums/generos"
 import { MotivosViajes } from "@/Types/enums/motivosViajes"
+import { COUNTRY_CODES } from "@/lib/common/constants"
 
 interface PersonalInfoStepProps {
   formData: Partial<CreateRegistroFormulario>
@@ -60,6 +61,7 @@ const personalInfoSchema = z.object({
     required_error: "Seleccione el género",
   }),
   telefono: z.string().optional(),
+  country_code: z.string().optional(),
   correo: z.string().email({
     message: "El correo electrónico es inválido",
   }).optional(),
@@ -88,15 +90,25 @@ export function PersonalInfoStep({ formData, updateFormData, onNext }: PersonalI
       nacionalidad: formData.nacionalidad || "",
       ocupacion: formData.ocupacion || "",
       genero: formData.genero || undefined,
-      telefono: formData.telefono || "",
+      telefono: formData.telefono?.replace(/^\+\d+\s*/, '') || "",
+      country_code: formData.telefono?.match(/^\+\d+/)?.[0] || "+57",
       correo: formData.correo || "",
       motivo_viaje: formData.motivo_viaje || undefined,
     },
   })
 
   function onSubmit(values: PersonalInfoFormValues) {
-    updateFormData(values)
-    onNext()
+    // Combine country code with phone number for the final formData
+    const combinedData = { ...values };
+    if (values.telefono && values.country_code) {
+      combinedData.telefono = `${values.country_code} ${values.telefono}`;
+    }
+    
+    // Remove the temporary country_code field before updating
+    delete combinedData.country_code;
+    
+    updateFormData(combinedData);
+    onNext();
   }
 
   return (
@@ -251,19 +263,47 @@ export function PersonalInfoStep({ formData, updateFormData, onNext }: PersonalI
               <h3 className="text-lg font-semibold mb-4">Información de contacto</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="telefono"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Teléfono</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Ingrese su número de teléfono" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FormItem className="flex flex-col space-y-2">
+                  <FormLabel>Teléfono</FormLabel>
+                  <div className="flex gap-2">
+                    <div className="w-1/3">
+                      <FormField
+                        control={form.control}
+                        name="country_code"
+                        render={({ field }) => (
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Código" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[200px]">
+                              {COUNTRY_CODES.map(({ code, country }) => (
+                                <SelectItem key={code} value={code}>
+                                  <span className="whitespace-nowrap">
+                                    {code} <span className="text-muted-foreground text-xs">{country}</span>
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                    <div className="w-2/3">
+                      <FormField
+                        control={form.control}
+                        name="telefono"
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input {...field} placeholder="Número de teléfono" />
+                          </FormControl>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <FormMessage />
+                </FormItem>
 
                 <FormField
                   control={form.control}
