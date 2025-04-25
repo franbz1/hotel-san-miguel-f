@@ -38,8 +38,9 @@ export default function RegistroFormularioPage() {
     if (err instanceof Error) {
       switch (err.message) {
         case 'Link inválido o expirado':
+        case 'Link invalido':
+        case 'Link expirado':
         case 'Formulario ya completado':
-        case 'No tienes permiso para acceder a esta página':
           setError(err.message)
           break
         default:

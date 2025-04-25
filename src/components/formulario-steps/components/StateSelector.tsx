@@ -1,0 +1,72 @@
+import { IState } from "country-state-city";
+import { 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage
+} from "@/components/ui/form";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { UseFormReturn } from "react-hook-form";
+
+interface StateSelectorProps {
+  form: UseFormReturn<any>;
+  name: string;
+  label: string;
+  placeholder?: string;
+  states: IState[];
+  onStateChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+export const StateSelector = ({
+  form,
+  name,
+  label,
+  placeholder = "Seleccione estado/departamento",
+  states,
+  onStateChange,
+  disabled = false,
+  className
+}: StateSelectorProps) => {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={className}>
+          <FormLabel>{label}</FormLabel>
+          <Select 
+            onValueChange={(value) => {
+              field.onChange(value);
+              onStateChange(value);
+            }} 
+            value={field.value}
+            disabled={disabled}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="max-h-[200px]">
+              {states.map((state) => (
+                <SelectItem key={state.isoCode} value={state.isoCode}>
+                  {state.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}; 

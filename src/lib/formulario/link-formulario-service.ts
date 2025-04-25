@@ -131,10 +131,13 @@ export async function validateLinkFormulario(tokenUrl: string): Promise<Validate
 
     // Manejo de errores basado en códigos HTTP
     if (!response.ok) {
+      console.log(data.message)
       const errorMessage = data.message || 'Error al validar el link del formulario';
       throw new Error(
         errorMessage === 'Formulario ya completado' || 
-        errorMessage === 'Link inválido o expirado' 
+        errorMessage === 'Link expirado' ||
+        errorMessage === 'Link invalido' ||
+        errorMessage === 'Link inválido o expirado'
           ? errorMessage 
           : 'Error al validar el link del formulario'
       );
