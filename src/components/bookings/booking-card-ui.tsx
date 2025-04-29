@@ -54,7 +54,6 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
 
   return (
     <div className="border rounded-lg overflow-hidden mb-3 transition-all duration-200 hover:shadow-md">
-      {/* Cabecera de la tarjeta (siempre visible) */}
       <div
         className={cn(
           "flex items-center p-4 cursor-pointer bg-white hover:bg-slate-50 transition-colors",

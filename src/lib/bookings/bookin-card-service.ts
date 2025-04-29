@@ -127,3 +127,6 @@ function determinarLinkFormulario(linkFormulario: LinkFormulario): EstadosFormul
   }
 }
 
+function deleteBookingCard(link_formulario_id: number) {
+  
+}

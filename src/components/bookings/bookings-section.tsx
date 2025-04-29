@@ -1,6 +1,6 @@
 "use client"
 
-import { Search } from "lucide-react"
+import { RefreshCcw, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -9,6 +9,8 @@ import { useEffect, useState, useRef, useCallback } from "react"
 import { BookingCard } from "@/Types/bookin-card"
 import BookingCardUI from "@/components/bookings/booking-card-ui"
 import { CreateBookingModal } from "@/components/bookings/create-booking-modal"
+import { Button } from "../ui/button"
+import { cn } from "@/lib/common/utils"
 
 export function BookingsSection() {
   const [bookings, setBookings] = useState<BookingCard[]>([])
@@ -28,9 +30,11 @@ export function BookingsSection() {
         return
       }
 
+      const dataOrdered = data.sort((a, b) => new Date(b.fecha_inicio).getTime() - new Date(a.fecha_inicio).getTime())
+
       setBookings(prev => {
         const existingIds = new Set(prev.map(b => b.nombre))
-        const newBookings = data.filter(b => !existingIds.has(b.nombre))
+        const newBookings = dataOrdered.filter(b => !existingIds.has(b.nombre))
         return [...prev, ...newBookings]
       })
     } catch (err) {
@@ -84,6 +88,11 @@ export function BookingsSection() {
     fetchBookings(1)
   }
 
+  const handleRefresh = () => {
+    setBookings([])
+    fetchBookings(1)
+  }
+
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>
   }
@@ -92,11 +101,26 @@ export function BookingsSection() {
     <div className="bg-white p-6 rounded-lg shadow-sm border">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Reservas</h2>
-        <div className="flex space-x-2">
-          <div className="relative w-64">
+        <div className="flex items-center gap-3">
+          <div className="relative max-w-[200px] sm:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input type="search" placeholder="Buscar reserva..." className="pl-8 w-full" />
           </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className={cn(
+              "h-9 w-9 rounded-full transition-all duration-200 shrink-0",
+              "hover:bg-slate-100 hover:text-slate-900",
+              "active:scale-95",
+              loading && "animate-spin bg-slate-100"
+            )}
+            onClick={handleRefresh}
+            disabled={loading}
+            title="Actualizar reservas"
+          >
+            <RefreshCcw size={14} className="text-slate-600" />
+          </Button>
           <CreateBookingModal onBookingCreated={handleBookingCreated} />
         </div>
       </div>
@@ -124,6 +148,7 @@ export function BookingsSection() {
           <TabsTrigger value="past">Pasadas</TabsTrigger>
         </TabsList>
       </Tabs>
+
 
       <ScrollArea className="h-[300px] rounded-md border">
         <div className="space-y-2 p-4">
