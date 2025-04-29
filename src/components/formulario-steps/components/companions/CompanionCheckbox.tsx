@@ -10,7 +10,8 @@ interface CompanionCheckboxProps {
 export function CompanionCheckbox({ hasCompanions, onChange }: CompanionCheckboxProps) {
   return (
     <div className="flex items-center space-x-2 p-4 bg-muted/10 rounded-lg">
-      <Checkbox 
+      <Checkbox
+        className="cursor-pointer"
         id="hasCompanions" 
         checked={hasCompanions}
         onCheckedChange={(checked) => {

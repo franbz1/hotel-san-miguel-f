@@ -14,7 +14,7 @@ export function TabNav({ activeTab, tabErrors = {} }: TabNavProps) {
     <TabsList className="grid grid-cols-4 w-full mb-6">
       <TabsTrigger 
         value="personal" 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 cursor-pointer"
         data-state={activeTab === "personal" ? "active" : "inactive"}
       >
         <User className="h-4 w-4" />
@@ -25,7 +25,7 @@ export function TabNav({ activeTab, tabErrors = {} }: TabNavProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="contacto" 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 cursor-pointer"
         data-state={activeTab === "contacto" ? "active" : "inactive"}
       >
         <Phone className="h-4 w-4" />
@@ -36,7 +36,7 @@ export function TabNav({ activeTab, tabErrors = {} }: TabNavProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="ubicacion" 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 cursor-pointer"
         data-state={activeTab === "ubicacion" ? "active" : "inactive"}
       >
         <MapPin className="h-4 w-4" />
@@ -47,7 +47,7 @@ export function TabNav({ activeTab, tabErrors = {} }: TabNavProps) {
       </TabsTrigger>
       <TabsTrigger 
         value="viaje" 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 cursor-pointer"
         data-state={activeTab === "viaje" ? "active" : "inactive"}
       >
         <Globe className="h-4 w-4" />

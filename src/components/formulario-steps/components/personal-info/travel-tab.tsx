@@ -10,6 +10,19 @@ import { PersonalInfoFormValues } from "../../../../Types/personal-info-types"
 import { MotivosViajes } from "@/Types/enums/motivosViajes"
 import { CreateRegistroFormulario } from "@/Types/registro-formularioDto"
 
+// Mapeo para mostrar los motivos de viaje de forma más legible
+const motivosViajesMap: Record<MotivosViajes, string> = {
+  [MotivosViajes.NEGOCIOS_Y_MOTIVOS_PROFESIONALES]: "Negocios y motivos profesionales",
+  [MotivosViajes.VACACIONES_RECREO_Y_OCIO]: "Vacaciones, recreo y ocio",
+  [MotivosViajes.VISITAS_A_FAMILIARES_Y_AMIGOS]: "Visitas a familiares y amigos",
+  [MotivosViajes.EDUCACION_Y_FORMACION]: "Educación y formación",
+  [MotivosViajes.SALUD_Y_ATENCION_MEDICA]: "Salud y atención médica",
+  [MotivosViajes.RELIGION_Y_PEREGRINACIONES]: "Religión y peregrinaciones",
+  [MotivosViajes.COMPRAS]: "Compras",
+  [MotivosViajes.TRANSITO]: "Tránsito",
+  [MotivosViajes.OTROS_MOTIVOS]: "Otros motivos",
+}
+
 interface TravelTabProps {
   form: UseFormReturn<PersonalInfoFormValues>
   formData: Partial<CreateRegistroFormulario>
@@ -29,23 +42,23 @@ export function TravelTab({ form, formData, onPrevious, onSubmit }: TravelTabPro
           Detalles sobre su estadía y motivo de viaje
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6 grid gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg flex items-start space-x-3">
-            <Info className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-700 dark:text-blue-300">Fecha de estadía</h4>
-              <p className="text-sm text-blue-600 dark:text-blue-400">
+      <CardContent className="pt-4 sm:pt-6 grid gap-4 sm:gap-6 px-4 sm:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="bg-blue-50 dark:bg-blue-950/30 p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row sm:items-start sm:space-x-3">
+            <Info className="h-5 w-5 text-blue-500 dark:text-blue-400 mb-2 sm:mb-0 sm:mt-0.5" />
+            <div className="mt-1 sm:mt-0">
+              <h4 className="font-medium text-blue-700 dark:text-blue-300 text-sm sm:text-base">Fecha de estadía</h4>
+              <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400">
                 {new Date(formData.fecha_inicio!).toLocaleDateString()} - {new Date(formData.fecha_fin!).toLocaleDateString()}
               </p>
             </div>
           </div>
           
-          <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg flex items-start space-x-3">
-            <FileText className="h-5 w-5 text-green-500 dark:text-green-400 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-green-700 dark:text-green-300">Habitación</h4>
-              <p className="text-sm text-green-600 dark:text-green-400">
+          <div className="bg-green-50 dark:bg-green-950/30 p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row sm:items-start sm:space-x-3">
+            <FileText className="h-5 w-5 text-green-500 dark:text-green-400 mb-2 sm:mb-0 sm:mt-0.5" />
+            <div className="mt-1 sm:mt-0">
+              <h4 className="font-medium text-green-700 dark:text-green-300 text-sm sm:text-base">Habitación</h4>
+              <p className="text-xs sm:text-sm text-green-600 dark:text-green-400">
                 Número {formData.numero_habitacion}
               </p>
             </div>
@@ -66,7 +79,7 @@ export function TravelTab({ form, formData, onPrevious, onSubmit }: TravelTabPro
                   <SelectContent>
                     {Object.values(MotivosViajes).map((value) => (
                       <SelectItem key={value} value={value}>
-                        {value}
+                        {motivosViajesMap[value]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -90,7 +103,7 @@ export function TravelTab({ form, formData, onPrevious, onSubmit }: TravelTabPro
           <Button 
             type="submit" 
             size="lg" 
-            className="min-w-[200px]"
+            className="flex items-center gap-2 w-full sm:w-auto"
             onClick={onSubmit}
           >
             Continuar

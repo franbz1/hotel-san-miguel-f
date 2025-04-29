@@ -23,9 +23,9 @@ export function CompanionsList({
   if (companions.length === 0) {
     return (
       <Card className="bg-muted/5 border-dashed">
-        <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center">
-          <p className="text-gray-500 mb-4">No ha agregado ningún acompañante</p>
-          <Button onClick={onAddCompanion} className="px-6">
+        <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6 flex flex-col items-center justify-center">
+          <p className="text-gray-500 mb-4 text-sm sm:text-base">No ha agregado ningún acompañante</p>
+          <Button onClick={onAddCompanion} className="px-4 sm:px-6 w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Agregar acompañante
           </Button>

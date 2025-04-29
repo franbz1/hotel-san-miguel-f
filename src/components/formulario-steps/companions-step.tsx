@@ -236,7 +236,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
         </p>
       </div>
 
-      <div className="space-y-6">
+                    <div className="space-y-6">
         {/* Checkbox para indicar si tiene acompañantes */}
         <CompanionCheckbox 
           hasCompanions={hasCompanions} 

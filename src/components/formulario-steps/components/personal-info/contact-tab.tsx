@@ -42,13 +42,17 @@ export function ContactTab({ form, onNext, onPrevious, hideButtons = false }: Co
           Datos para poder comunicarnos con usted
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6 grid gap-6">
+      <CardContent className="pt-4 sm:pt-6 grid gap-6 px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Campo de teléfono */}
           <div>
-            <FormItem className="flex flex-col space-y-2">
-              <FormLabel>Teléfono</FormLabel>
-              <div className="flex gap-2">
-                <div className="w-1/3">
+            <FormItem className="flex flex-col">
+              <FormLabel className="mb-2">Teléfono</FormLabel>
+              
+              {/* Contenedor para el teléfono con espaciado consistente */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Selector de código de país */}
+                <div className="w-full sm:w-1/3">
                   <CountrySelector
                     form={form}
                     name="country_code"
@@ -56,10 +60,12 @@ export function ContactTab({ form, onNext, onPrevious, hideButtons = false }: Co
                     placeholder="Código"
                     countries={phoneCountryCodes}
                     onCountryChange={() => {}}
-                    className="mt-0"
+                    className="gap-0"
                   />
                 </div>
-                <div className="w-2/3">
+                
+                {/* Número de teléfono */}
+                <div className="w-full sm:w-2/3">
                   <FormField
                     control={form.control}
                     name="telefono"
@@ -71,19 +77,22 @@ export function ContactTab({ form, onNext, onPrevious, hideButtons = false }: Co
                   />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
+              
+              {/* Texto informativo */}
+              <p className="text-sm text-muted-foreground mt-2">
                 Su número será utilizado solo para comunicaciones relacionadas con su reserva
               </p>
-              <FormMessage />
+              <FormMessage className="mt-1" />
             </FormItem>
           </div>
 
+          {/* Campo de correo electrónico */}
           <FormField
             control={form.control}
             name="correo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Correo electrónico</FormLabel>
+                <FormLabel className="mb-2">Correo electrónico</FormLabel>
                 <div className="relative">
                   <FormControl>
                     <Input 
@@ -97,19 +106,19 @@ export function ContactTab({ form, onNext, onPrevious, hideButtons = false }: Co
                 <p className="text-sm text-muted-foreground mt-2">
                   Enviaremos la confirmación de su reserva a este correo
                 </p>
-                <FormMessage />
+                <FormMessage className="mt-1" />
               </FormItem>
             )}
           />
         </div>
 
         {!hideButtons && (
-          <div className="flex justify-between mt-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
             <Button 
               type="button" 
               variant="outline" 
               onClick={onPrevious}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 justify-center w-full sm:w-auto sm:min-w-[120px]"
             >
               <ChevronLeft className="h-4 w-4" />
               Anterior
@@ -117,7 +126,7 @@ export function ContactTab({ form, onNext, onPrevious, hideButtons = false }: Co
             <Button 
               type="button" 
               onClick={onNext}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 justify-center w-full sm:w-auto sm:min-w-[120px]"
             >
               Siguiente
               <ChevronRight className="h-4 w-4" />

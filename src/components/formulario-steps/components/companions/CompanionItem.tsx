@@ -18,7 +18,7 @@ export function CompanionItem({ companion, index, onEdit, onDelete }: CompanionI
       value={`companion-${index}`} 
       className="border border-muted rounded-md mb-2 overflow-hidden"
     >
-      <AccordionTrigger className="px-4 hover:bg-muted/20 py-3 rounded-t-md">
+      <AccordionTrigger className="px-4 hover:bg-muted/20 py-3 rounded-t-md cursor-pointer">
         <div className="flex justify-between w-full items-center">
           <span className="font-medium">
             {companion.nombres} {companion.primer_apellido} {companion.segundo_apellido || ""}

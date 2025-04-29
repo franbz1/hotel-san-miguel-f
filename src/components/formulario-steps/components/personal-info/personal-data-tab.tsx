@@ -20,17 +20,17 @@ interface PersonalDataTabProps {
 
 export function PersonalDataTab({ form, onNext, hideButtons = false }: PersonalDataTabProps) {
   return (
-    <Card>
-      <CardHeader className="bg-muted/50">
-        <CardTitle className="flex items-center text-lg">
-          <User className="mr-2 h-5 w-5" />
+    <Card className="w-full">
+      <CardHeader className="bg-muted/50 px-4 sm:px-6">
+        <CardTitle className="flex items-center text-base sm:text-lg">
+          <User className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Datos Personales
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs sm:text-sm">
           Información básica de identificación
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6 grid gap-6">
+      <CardContent className="pt-4 sm:pt-6 grid gap-4 sm:gap-6 px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -136,10 +136,10 @@ export function PersonalDataTab({ form, onNext, hideButtons = false }: PersonalD
                         const date = e.target.value ? new Date(e.target.value) : undefined
                         field.onChange(date)
                       }}
-                      className="pl-10"
+                      className="pl-10 cursor-pointer"
                     />
                   </FormControl>
-                  <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" />
                 </div>
                 <FormMessage />
               </FormItem>
@@ -191,7 +191,7 @@ export function PersonalDataTab({ form, onNext, hideButtons = false }: PersonalD
             <Button 
               type="button" 
               onClick={onNext}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto"
             >
               Siguiente
               <ChevronRight className="h-4 w-4" />
