@@ -1,7 +1,7 @@
 import { LinkFormulario } from "@/Types/link-formulario";
 import { getCookie, COOKIE_NAMES } from "@/lib/common/cookies";
 import { LINK_FORMULARIO_ENDPOINTS } from "@/lib/common/api";
-import { Role, RoleType } from "@/lib/common/constants";
+import { Role, RoleType } from "@/lib/common/constants/constants";
 
 export interface LinkFormularioResponse {
   data: LinkFormulario[]

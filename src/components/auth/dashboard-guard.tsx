@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2 } from "lucide-react"
-import { Role, ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/common/constants"
+import { Role, ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/common/constants/constants"
 
 interface DashboardGuardProps {
   children: React.ReactNode

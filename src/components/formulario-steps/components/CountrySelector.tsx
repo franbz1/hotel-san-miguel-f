@@ -13,11 +13,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
+import { Path, UseFormReturn } from "react-hook-form";
 
-interface CountrySelectorProps {
-  form: UseFormReturn<any>;
-  name: string;
+// Make this component accept any form type
+interface CountrySelectorProps<TFieldValues extends Record<string, unknown>> {
+  form: UseFormReturn<TFieldValues>;
+  name: Path<TFieldValues>;
   label: string;
   placeholder?: string;
   countries: ICountry[];
@@ -26,7 +27,7 @@ interface CountrySelectorProps {
   className?: string;
 }
 
-export const CountrySelector = ({
+export const CountrySelector = <TFieldValues extends Record<string, unknown>>({
   form,
   name,
   label,
@@ -35,7 +36,7 @@ export const CountrySelector = ({
   onCountryChange,
   disabled = false,
   className
-}: CountrySelectorProps) => {
+}: CountrySelectorProps<TFieldValues>) => {
   return (
     <FormField
       control={form.control}
@@ -48,7 +49,7 @@ export const CountrySelector = ({
               field.onChange(value);
               onCountryChange(value);
             }} 
-            value={field.value}
+            value={field.value as string}
             disabled={disabled}
           >
             <FormControl>

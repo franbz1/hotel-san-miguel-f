@@ -14,11 +14,12 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
+import { Path, UseFormReturn } from "react-hook-form";
 
-interface CitySelectorProps {
-  form: UseFormReturn<any>;
-  name: string;
+// Make this component accept any form type
+interface CitySelectorProps<TFieldValues extends Record<string, unknown>> {
+  form: UseFormReturn<TFieldValues>;
+  name: Path<TFieldValues>;
   label: string;
   placeholder?: string;
   cities: ICity[];
@@ -27,7 +28,7 @@ interface CitySelectorProps {
   className?: string;
 }
 
-export const CitySelector = ({
+export const CitySelector = <TFieldValues extends Record<string, unknown>>({
   form,
   name,
   label,
@@ -36,7 +37,7 @@ export const CitySelector = ({
   onCityChange,
   disabled = false,
   className
-}: CitySelectorProps) => {
+}: CitySelectorProps<TFieldValues>) => {
   return (
     <FormField
       control={form.control}
@@ -50,7 +51,7 @@ export const CitySelector = ({
                 field.onChange(value);
                 if (onCityChange) onCityChange(value);
               }} 
-              value={field.value}
+              value={field.value as string}
               disabled={disabled}
             >
               <FormControl>
@@ -70,6 +71,7 @@ export const CitySelector = ({
             <FormControl>
               <Input 
                 {...field} 
+                value={field.value as string}
                 placeholder={`Ingrese ${label.toLowerCase()}`} 
                 disabled={disabled}
               />

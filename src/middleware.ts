@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { COOKIE_NAMES } from './lib/common/cookies'
 import { getValidatedUser } from './lib/auth/auth-service'
-import { Role, ROLE_ROUTES, DEFAULT_ROUTE, PUBLIC_ROUTES } from './lib/common/constants'
+import { Role, ROLE_ROUTES, DEFAULT_ROUTE, PUBLIC_ROUTES } from './lib/common/constants/constants'
 
 
 export async function middleware(request: NextRequest) {

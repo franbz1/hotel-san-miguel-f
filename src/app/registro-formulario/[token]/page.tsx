@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { getLinkFormularioById, validateLinkFormulario } from "@/lib/formulario/link-formulario-service"
-import { Role } from "@/lib/common/constants"
+import { Role } from "@/lib/common/constants/constants"
 import { LinkFormulario } from "@/Types/link-formulario"
 import RegistroFormulario from "@/components/formulario-steps/registro-formulario"
 

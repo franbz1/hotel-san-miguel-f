@@ -201,7 +201,7 @@ export function CompanionsStep({ formData, updateFormData, onNext, onPrevious }:
       ocupacion: "",
       genero: undefined,
       telefono: "",
-      correo: "",
+      correo: undefined,
     },
   })
 

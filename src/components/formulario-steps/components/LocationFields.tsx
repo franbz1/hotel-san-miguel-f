@@ -1,17 +1,17 @@
 import { ICountry, IState, ICity } from "country-state-city";
-import { UseFormReturn } from "react-hook-form";
+import { Path, UseFormReturn } from "react-hook-form";
 import { CountrySelector } from "./CountrySelector";
 import { StateSelector } from "./StateSelector";
 import { CitySelector } from "./CitySelector";
 
-interface LocationFieldsProps {
-  form: UseFormReturn<any>;
+interface LocationFieldsProps<TFieldValues extends Record<string, unknown>> {
+  form: UseFormReturn<TFieldValues>;
   countries: ICountry[];
   states: IState[];
   cities: ICity[];
-  countryCodeName: string;
-  stateCodeName: string;
-  cityName: string;
+  countryCodeName: Path<TFieldValues>;
+  stateCodeName: Path<TFieldValues>;
+  cityName: Path<TFieldValues>;
   countryLabel: string;
   stateLabel: string;
   cityLabel: string;
@@ -22,7 +22,7 @@ interface LocationFieldsProps {
   className?: string;
 }
 
-export const LocationFields = ({
+export const LocationFields = <TFieldValues extends Record<string, unknown>>({
   form,
   countries,
   states,
@@ -38,7 +38,7 @@ export const LocationFields = ({
   onCityChange,
   disabled = false,
   className
-}: LocationFieldsProps) => {
+}: LocationFieldsProps<TFieldValues>) => {
   return (
     <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className || ''}`}>
       <CountrySelector

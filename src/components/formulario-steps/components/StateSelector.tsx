@@ -13,11 +13,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
+import { Path, UseFormReturn } from "react-hook-form";
 
-interface StateSelectorProps {
-  form: UseFormReturn<any>;
-  name: string;
+// Make this component accept any form type
+interface StateSelectorProps<TFieldValues extends Record<string, unknown>> {
+  form: UseFormReturn<TFieldValues>;
+  name: Path<TFieldValues>;
   label: string;
   placeholder?: string;
   states: IState[];
@@ -26,7 +27,7 @@ interface StateSelectorProps {
   className?: string;
 }
 
-export const StateSelector = ({
+export const StateSelector = <TFieldValues extends Record<string, unknown>>({
   form,
   name,
   label,
@@ -35,7 +36,7 @@ export const StateSelector = ({
   onStateChange,
   disabled = false,
   className
-}: StateSelectorProps) => {
+}: StateSelectorProps<TFieldValues>) => {
   return (
     <FormField
       control={form.control}
@@ -48,7 +49,7 @@ export const StateSelector = ({
               field.onChange(value);
               onStateChange(value);
             }} 
-            value={field.value}
+            value={field.value as string}
             disabled={disabled}
           >
             <FormControl>
