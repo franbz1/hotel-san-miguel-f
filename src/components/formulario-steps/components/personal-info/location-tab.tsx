@@ -19,13 +19,14 @@ interface LocationTabProps {
   residenciaCities: ICity[]
   procedenciaStates: IState[]
   procedenciaCities: ICity[]
-  handleCountryResidenciaChange: (value: string) => void
-  handleStateResidenciaChange: (value: string) => void
-  handleCityResidenciaChange: (value: string) => void
-  handleCountryProcedenciaChange: (value: string) => void
-  handleStateProcedenciaChange: (value: string) => void
-  handleCityProcedenciaChange: (value: string) => void
-  handleNacionalidadChange: (value: string) => void
+  handleCountryResidenciaChange: (countryCode: string) => void
+  handleStateResidenciaChange: (stateCode: string) => void
+  handleCityResidenciaChange: (cityCode: string) => void
+  handleCountryProcedenciaChange: (countryCode: string) => void
+  handleStateProcedenciaChange: (stateCode: string) => void
+  handleCityProcedenciaChange: (cityCode: string) => void
+  handleNacionalidadChange: (countryCode: string) => void
+  hideButtons?: boolean
 }
 
 export function LocationTab({ 
@@ -43,7 +44,8 @@ export function LocationTab({
   handleCountryProcedenciaChange,
   handleStateProcedenciaChange,
   handleCityProcedenciaChange,
-  handleNacionalidadChange
+  handleNacionalidadChange,
+  hideButtons = false
 }: LocationTabProps) {
   return (
     <Card>
@@ -117,25 +119,27 @@ export function LocationTab({
           </div>
         </div>
 
-        <div className="flex justify-between mt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onPrevious}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Anterior
-          </Button>
-          <Button 
-            type="button" 
-            onClick={onNext}
-            className="flex items-center gap-2"
-          >
-            Siguiente
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {!hideButtons && (
+          <div className="flex justify-between mt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onPrevious}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </Button>
+            <Button 
+              type="button" 
+              onClick={onNext}
+              className="flex items-center gap-2"
+            >
+              Siguiente
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

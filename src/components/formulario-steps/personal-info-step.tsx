@@ -28,7 +28,7 @@ interface PersonalInfoStepProps {
 const personalFields = [
   "tipo_documento", "numero_documento", "primer_apellido", 
   "segundo_apellido", "nombres", "fecha_nacimiento", 
-  "nacionalidad", "genero"
+  "genero", "ocupacion"
 ];
 
 const contactFields = [
@@ -37,7 +37,7 @@ const contactFields = [
 
 const ubicacionFields = [
   "pais_residencia", "ciudad_residencia", "pais_procedencia", 
-  "ciudad_procedencia", "ocupacion"
+  "ciudad_procedencia", "nacionalidad"
 ];
 
 const viajeFields = [

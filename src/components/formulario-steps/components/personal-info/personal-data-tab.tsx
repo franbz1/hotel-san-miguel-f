@@ -15,9 +15,10 @@ import { PersonalInfoFormValues } from "../../../../Types/personal-info-types"
 interface PersonalDataTabProps {
   form: UseFormReturn<PersonalInfoFormValues>
   onNext: () => void
+  hideButtons?: boolean
 }
 
-export function PersonalDataTab({ form, onNext }: PersonalDataTabProps) {
+export function PersonalDataTab({ form, onNext, hideButtons = false }: PersonalDataTabProps) {
   return (
     <Card>
       <CardHeader className="bg-muted/50">
@@ -185,16 +186,18 @@ export function PersonalDataTab({ form, onNext }: PersonalDataTabProps) {
           )}
         />
 
-        <div className="flex justify-end mt-4">
-          <Button 
-            type="button" 
-            onClick={onNext}
-            className="flex items-center gap-2"
-          >
-            Siguiente
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {!hideButtons && (
+          <div className="flex justify-end mt-4">
+            <Button 
+              type="button" 
+              onClick={onNext}
+              className="flex items-center gap-2"
+            >
+              Siguiente
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

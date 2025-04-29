@@ -27,9 +27,10 @@ interface ContactTabProps {
   form: UseFormReturn<PersonalInfoFormValues>
   onNext: () => void
   onPrevious: () => void
+  hideButtons?: boolean
 }
 
-export function ContactTab({ form, onNext, onPrevious }: ContactTabProps) {
+export function ContactTab({ form, onNext, onPrevious, hideButtons = false }: ContactTabProps) {
   return (
     <Card>
       <CardHeader className="bg-muted/50">
@@ -102,25 +103,27 @@ export function ContactTab({ form, onNext, onPrevious }: ContactTabProps) {
           />
         </div>
 
-        <div className="flex justify-between mt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onPrevious}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Anterior
-          </Button>
-          <Button 
-            type="button" 
-            onClick={onNext}
-            className="flex items-center gap-2"
-          >
-            Siguiente
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {!hideButtons && (
+          <div className="flex justify-between mt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onPrevious}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </Button>
+            <Button 
+              type="button" 
+              onClick={onNext}
+              className="flex items-center gap-2"
+            >
+              Siguiente
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
