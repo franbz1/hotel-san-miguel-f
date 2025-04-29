@@ -6,6 +6,8 @@ import { getHuespedById } from "@/lib/huespedes/huesped-service";
 import { EstadosFormulario } from '@/Types/enums/estadosFormulario';
 import { getLinkFormularioById, getLinksFormulario } from "@/lib/formulario/link-formulario-service";
 import { LinkFormulario } from '@/Types/link-formulario';
+import { BOOKING_ENDPOINTS } from '../common/api';
+import { RemoveBookingResponse } from '@/Types/response-delete-booking';
 
 export async function getBookingCards(limit: number, page: number): Promise<BookingCard[]> {
   const token = getCookie(COOKIE_NAMES.TOKEN)
@@ -127,6 +129,23 @@ function determinarLinkFormulario(linkFormulario: LinkFormulario): EstadosFormul
   }
 }
 
-function deleteBookingCard(link_formulario_id: number) {
-  
+export async function deleteBookingCard(link_formulario_id: number): Promise<LinkFormulario | RemoveBookingResponse> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(BOOKING_ENDPOINTS.DELETE(link_formulario_id), {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    }
+  })
+
+  if (!response.ok) {
+    console.log(await response.json());
+    throw new Error('Error al eliminar el booking')
+  }
+  return await response.json()
 }

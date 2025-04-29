@@ -58,3 +58,7 @@ export const LINK_FORMULARIO_ENDPOINTS = {
 export const REGISTRO_FORMULARIO_ENDPOINTS = {
   CREATE: (token: string) => `${API_BASE_URL}/registro-formulario/${token}`,
 } as const
+
+export const BOOKING_ENDPOINTS = {
+  DELETE: (id: number) => `${API_BASE_URL}/eliminar-booking/${id}`,
+} as const

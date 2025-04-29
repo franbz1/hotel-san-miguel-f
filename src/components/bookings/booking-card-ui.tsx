@@ -9,17 +9,19 @@ import { cn } from "@/lib/common/utils"
 import { BookingCard } from "@/Types/bookin-card"
 import { EstadosFormulario } from "@/Types/enums/estadosFormulario"
 import { regenerateLinkFormulario } from "@/lib/formulario/link-formulario-service"
-import { getBookingCardByLinkId } from "@/lib/bookings/bookin-card-service"
+import { deleteBookingCard, getBookingCardByLinkId } from "@/lib/bookings/bookin-card-service"
 import { toast } from "sonner"
 
 interface BookingCardUIProps {
   booking: BookingCard
+  onDeleted?: () => void
 }
 
-export default function BookingCardUI({ booking: initialBooking }: BookingCardUIProps) {
+export default function BookingCardUI({ booking: initialBooking, onDeleted }: BookingCardUIProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [booking, setBooking] = useState<BookingCard>(initialBooking)
   const [isRegenerating, setIsRegenerating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
 
   const statusConfig: Record<EstadosFormulario, { color: string; text: string }> = {
@@ -49,6 +51,28 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
       console.error('Error al regenerar el enlace:', error)
     } finally {
       setIsRegenerating(false)
+    }
+  }
+
+  const handleDeleteBookingCard = async () => {
+    try {
+      const confirmed = window.confirm(
+        `¿Estás seguro que deseas eliminar la reserva de ${booking.nombre}? Esta acción no se puede deshacer.`
+      )
+
+      if (!confirmed) return
+
+      setIsDeleting(true)
+      await deleteBookingCard(booking.link_formulario_id)
+      toast.success("Reserva eliminada exitosamente")
+      onDeleted?.() // Notify parent component to refresh the list
+    } catch (error: any) {
+      console.error('Error al eliminar la reserva:', error)
+      toast.error(
+        error?.message || "Error al eliminar la reserva. Por favor, inténtalo de nuevo."
+      )
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -170,7 +194,15 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="cursor-pointer h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className={cn(
+                      "cursor-pointer h-8 w-8 rounded-full transition-all duration-200",
+                      "text-red-500 hover:text-red-600 hover:bg-red-50",
+                      "active:scale-95 disabled:opacity-50 disabled:pointer-events-none",
+                      isDeleting && "animate-pulse bg-red-50"
+                    )}
+                    onClick={handleDeleteBookingCard}
+                    disabled={isDeleting}
+                    title={"Eliminar reserva"}
                   >
                     <Trash2 className="h-6 w-6" />
                   </Button>

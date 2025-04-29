@@ -153,7 +153,11 @@ export function BookingsSection() {
       <ScrollArea className="h-[300px] rounded-md border">
         <div className="space-y-2 p-4">
           {bookings.map((booking, index) => (
-            <BookingCardUI key={`${booking.nombre}-${booking.fecha_inicio}-${index}`} booking={booking} />
+            <BookingCardUI 
+              key={`${booking.nombre}-${booking.fecha_inicio}-${index}`} 
+              booking={booking}
+              onDeleted={handleRefresh}
+            />
           ))}
           {hasMore && (
             <div ref={loadingRef} className="flex justify-center py-4">
