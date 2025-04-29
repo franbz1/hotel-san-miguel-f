@@ -1,18 +1,31 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { COOKIE_NAMES } from './lib/cookies'
-import { getValidatedUser } from './lib/auth-service'
-import { Role, ROLE_ROUTES, DEFAULT_ROUTE } from './lib/constants'
+import { COOKIE_NAMES } from './lib/common/cookies'
+import { getValidatedUser } from './lib/auth/auth-service'
+import { Role, ROLE_ROUTES, DEFAULT_ROUTE, PUBLIC_ROUTES } from './lib/common/constants/constants'
 
-// Rutas públicas que no requieren autenticación
-const publicRoutes = ['/login', '/register', '/forgot-password']
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Permitir acceso a rutas públicas
-  if (publicRoutes.includes(path)) {
+  if (PUBLIC_ROUTES.includes(path)) {
     return NextResponse.next()
+  }
+
+  // Verificar si es una ruta de registro de formulario
+  if (path.startsWith('/registro-formulario/')) {
+    const token = path.split('/').pop()
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    try {
+      return NextResponse.next()
+    } catch (error) {
+      console.error('Error in middleware:', error)
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
   // Verificar token para rutas protegidas

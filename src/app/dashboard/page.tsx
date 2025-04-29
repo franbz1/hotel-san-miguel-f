@@ -4,8 +4,8 @@ import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { UserNav } from "@/components/user-nav"
-import { RoomsSection } from "@/components/rooms-section"
-import { BookingsSection } from "@/components/bookings-section"
+import { RoomsSection } from "@/components/rooms/rooms-section"
+import { BookingsSection } from "@/components/bookings/bookings-section"
 
 const StatCard = ({ title, value, color }: { title: string; value: string; color: string }) => {
   return (

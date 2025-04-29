@@ -9,10 +9,10 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { saveAuthCookies } from "@/lib/cookies"
-import { ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/constants"
+import { saveAuthCookies } from "@/lib/common/cookies"
+import { ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/common/constants/constants"
 import { useAuth } from "@/contexts/auth-context"
-import { AUTH_ENDPOINTS } from "@/lib/api"
+import { AUTH_ENDPOINTS } from "@/lib/common/api"
 
 export function LoginForm() {
   const router = useRouter()
@@ -128,10 +128,6 @@ export function LoginForm() {
         nombre: data.nombre,
         rol: data.rol
       })
-      
-      // Redirigir según el rol del usuario
-      const redirectPath = data.rol ? ROLE_ROUTES[data.rol as RoleType] : DEFAULT_ROUTE
-      router.push(redirectPath)
     } catch (error) {
       console.error("Error en la petición:", error)
       setApiError("Error de conexión. Verifica que el servidor esté en funcionamiento.")

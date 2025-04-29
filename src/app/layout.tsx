@@ -1,23 +1,23 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { AuthProvider } from "@/contexts/auth-context";
-import { Toaster } from "sonner";
+import './globals.css'
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { AuthProvider } from '@/contexts/auth-context'
+import { Toaster } from '@/components/ui/sonner'
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
-  title: "Hotel San Miguel",
-  description: "Sistema de gestión para Hotel San Miguel",
-};
+  title: 'Hotel San Miguel',
+  description: 'Sistema de gestión para Hotel San Miguel',
+}
 
 export default function RootLayout({
   children,
@@ -35,5 +35,5 @@ export default function RootLayout({
         <Toaster />
       </body>
     </html>
-  );
+  )
 }

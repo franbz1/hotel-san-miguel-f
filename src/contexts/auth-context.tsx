@@ -1,10 +1,10 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
-import { getCookie, removeAuthCookies } from '@/lib/cookies'
-import { COOKIE_NAMES } from '@/lib/cookies'
-import { getValidatedUser } from '@/lib/auth-service'
+import { getCookie, removeAuthCookies } from '@/lib/common/cookies'
+import { COOKIE_NAMES } from '@/lib/common/cookies'
+import { getValidatedUser } from '@/lib/auth/auth-service'
+import { AUTH_ENDPOINTS } from '@/lib/common/api'
 
 interface User {
   id: number
@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  logout: () => void
+  logout: () => Promise<void>
   login: (userData: User) => void
 }
 
@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  logout: () => {},
+  logout: async () => {},
   login: () => {},
 })
 
@@ -37,7 +37,6 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -74,10 +73,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(false)
   }
 
-  const logout = () => {
-    removeAuthCookies()
-    setUser(null)
-    router.push('/login')
+  const logout = async () => {
+    const token = getCookie(COOKIE_NAMES.TOKEN)
+
+    try {
+      if (token) {
+        await fetch(AUTH_ENDPOINTS.LOGOUT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Backend logout request failed:', error)
+    } finally {
+      removeAuthCookies()
+      setUser(null)
+    }
   }
 
   return (
