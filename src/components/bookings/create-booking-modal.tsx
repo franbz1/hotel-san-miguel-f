@@ -112,17 +112,18 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
   const watchFechaFin = form.watch("fechaFin")
   const watchNumeroHabitacion = form.watch("numeroHabitacion")
 
-  useEffect(() => {
-    const fetchHabitaciones = async () => {
-      try {
-        const data = await getHabitacionesDisponibles(parseDateString(watchFechaInicio), parseDateString(watchFechaFin))
-        setHabitaciones(data)
-      } catch {
-        toast.error("Error", {
-          description: "No se pudieron cargar las habitaciones.",
-        })
-      }
+  const fetchHabitaciones = async () => {
+    try {
+      const data = await getHabitacionesDisponibles(parseDateString(watchFechaInicio), parseDateString(watchFechaFin))
+      setHabitaciones(data)
+    } catch {
+      toast.error("Error", {
+        description: "No se pudieron cargar las habitaciones.",
+      })
     }
+  }
+
+  useEffect(() => {
     fetchHabitaciones()
   }, [watchFechaFin, watchFechaInicio])
   // Calcular días de estancia y costo sugerido cuando cambien las fechas o la habitación
@@ -139,6 +140,11 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
       }
     }
   }, [watchFechaInicio, watchFechaFin, watchNumeroHabitacion, habitaciones, form])
+
+  //Hacer fetch siempre que la modal se abra
+  useEffect(() => {
+    fetchHabitaciones()
+  }, [open])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -160,8 +166,7 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
       toast.success("Link generado", {
         description: (
           <div className="mt-2">
-            <p>El link del formulario ha sido generado exitosamente.</p>
-            <p className="mt-2 text-sm text-muted-foreground break-all">{url}</p>
+            <p className="text-sm text-black">El link del formulario ha sido generado exitosamente.</p>
             <p className="mt-2 text-sm text-emerald-600">¡Link copiado al portapapeles!</p>
           </div>
         ),
