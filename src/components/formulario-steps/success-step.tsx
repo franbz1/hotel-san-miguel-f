@@ -96,15 +96,37 @@ export function SuccessStep({ formData, isSubmitting, hasAttemptedSubmit, submit
           </div>
           <h2 className="text-2xl font-bold mb-2 text-center">Error al enviar el formulario</h2>
           <p className="text-gray-600 text-center max-w-md mb-4">
-            Ocurrió un problema al intentar registrar sus datos. Por favor, revise el mensaje de error e intente contactar a soporte si el problema persiste.
+            Ocurrió un problema al intentar registrar sus datos. Por favor, revise el mensaje de error a continuación.
           </p>
-          <Card className="w-full max-w-md bg-red-50 border border-red-200">
+          
+          <Card className="w-full max-w-md bg-red-50 border border-red-200 mb-6">
             <CardHeader>
               <CardTitle className="text-red-700 text-lg">Detalle del Error</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-red-600 text-sm">{submitError}</p>
             </CardContent>
+            <CardFooter className="border-t border-red-200 pt-4 flex flex-col gap-3">
+              <p className="text-sm text-red-700">
+                Si el problema persiste, puede intentar alguna de las siguientes opciones:
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <Button 
+                  variant="outline" 
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                  onClick={() => window.location.reload()}
+                >
+                  Intentar de nuevo
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                  onClick={() => window.open("https://wa.me/573216611888", "_blank")}
+                >
+                  Contactar soporte
+                </Button>
+              </div>
+            </CardFooter>
           </Card>
         </div>
       )}

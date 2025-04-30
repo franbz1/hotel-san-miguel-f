@@ -6,8 +6,9 @@ import { getHuespedById } from "@/lib/huespedes/huesped-service";
 import { EstadosFormulario } from '@/Types/enums/estadosFormulario';
 import { getLinkFormularioById, getLinksFormulario } from "@/lib/formulario/link-formulario-service";
 import { LinkFormulario } from '@/Types/link-formulario';
-import { BOOKING_ENDPOINTS } from '../common/api';
+import { BOOKING_ENDPOINTS, REGISTRO_FORMULARIO_ENDPOINTS } from '../common/api';
 import { RemoveBookingResponse } from '@/Types/response-delete-booking';
+import { RegisterFormularioInTraResponse } from '@/Types/tra-upload-response';
 
 export async function getBookingCards(limit: number, page: number): Promise<BookingCard[]> {
   const token = getCookie(COOKIE_NAMES.TOKEN)
@@ -31,6 +32,7 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
         numero_habitacion: linkFormulario.numeroHabitacion,
         subido_sire: false,
         subido_tra: false,
+        formulario_id: null
       }
     }
 
@@ -48,7 +50,8 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
       url: linkFormulario.url,
       numero_habitacion: linkFormulario.numeroHabitacion,
       subido_sire: formulario?.SubidoASire,
-      subido_tra: formulario?.SubidoATra
+      subido_tra: formulario?.SubidoATra,
+      formulario_id: formulario?.id ?? null
     }
   })
 
@@ -80,6 +83,7 @@ export async function getBookingCardByLinkId(id: number): Promise<BookingCard> {
       numero_habitacion: linkFormulario.numeroHabitacion,
       subido_sire: false,
       subido_tra: false,
+      formulario_id: null
     }
   }
 
@@ -109,7 +113,8 @@ export async function getBookingCardByLinkId(id: number): Promise<BookingCard> {
       url: linkFormulario.url,
       numero_habitacion: linkFormulario.numeroHabitacion,
       subido_sire: formulario?.SubidoASire ?? false,
-      subido_tra: formulario?.SubidoATra ?? false
+      subido_tra: formulario?.SubidoATra ?? false,
+      formulario_id: formulario.id ?? null
     }
   } catch (error) {
     console.error('Error al obtener los datos del booking card:', error)
@@ -147,5 +152,27 @@ export async function deleteBookingCard(link_formulario_id: number): Promise<Lin
     console.log(await response.json());
     throw new Error('Error al eliminar el booking')
   }
+  return await response.json()
+}
+
+export async function tryUploadTra(link_formulario_id: number): Promise<RegisterFormularioInTraResponse> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(REGISTRO_FORMULARIO_ENDPOINTS.TRY_UPLOAD_TRA(link_formulario_id), {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    }
+  })
+
+  if (!response.ok) {
+    console.log(await response.json())
+    throw new Error('Error al subir el archivo')
+  }
+
   return await response.json()
 }
