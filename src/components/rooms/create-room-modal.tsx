@@ -138,30 +138,6 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
             />
             <FormField
               control={form.control}
-              name="estado"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estado</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="cursor-pointer">
-                        <SelectValue placeholder="Seleccione un estado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(EstadoHabitacion).map((estado) => (
-                        <SelectItem key={estado} value={estado} className="cursor-pointer">
-                          {estado}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="precio_por_noche"
               render={({ field }) => (
                 <FormItem>
