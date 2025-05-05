@@ -127,7 +127,7 @@ function determinarLinkFormulario(linkFormulario: LinkFormulario): EstadosFormul
     return EstadosFormulario.COMPLETADO
   } else if (linkFormulario.expirado && !linkFormulario.completado) {
     return EstadosFormulario.EXPIRADO
-  } else if (new Date(linkFormulario.vencimiento) < new Date() && !linkFormulario.completado) {
+  } else if (new Date(linkFormulario.vencimiento) < new Date(new Date().toISOString()) && !linkFormulario.completado) {
     return EstadosFormulario.EXPIRADO
   } else {
     return EstadosFormulario.PENDIENTE
