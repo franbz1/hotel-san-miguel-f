@@ -37,52 +37,22 @@ import { toast } from "sonner"
 import { getHabitacionesDisponibles } from "@/lib/rooms/habitacion-service"
 import { Habitacion } from "@/Types/habitacion"
 import { ScrollArea } from "@/components/ui/scroll-area"
-
-// Función para obtener la fecha en formato local sin hora
-function getLocalDateString(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-// Función para convertir un string de fecha en un objeto Date preservando la zona horaria local
-function parseDateString(dateString: string): Date {
-  if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
-    return new Date(year, month - 1, day);
-  }
-  return new Date(dateString);
-}
+import { DateTimePicker } from "../ui/dateTimePicker"
 
 // Definir schema con manejo específico para fechas
 const formSchema = z.object({
   numeroHabitacion: z.coerce.number().min(1, "Debe seleccionar una habitación"),
-  fechaInicio: z.string().min(1, "La fecha de inicio es requerida"),
-  fechaFin: z.string().min(1, "La fecha de fin es requerida"),
+  fechaInicio: z.string().min(1, "Debe seleccionar una fecha de inicio"),
+  fechaFin: z.string().min(1, "Debe seleccionar una fecha de fin"),
   costo: z.coerce.number().min(0, "El costo debe ser mayor o igual a 0"),
 }).refine((data) => {
-  const inicio = parseDateString(data.fechaInicio);
-  const fin = parseDateString(data.fechaFin);
+  const inicio = new Date(data.fechaInicio);
+  const fin = new Date(data.fechaFin);
   return fin > inicio;
 }, {
   message: "La fecha de fin debe ser posterior a la fecha de inicio",
-  path: ["fechaFin"],
+  path: ["fechaFin"]
 });
-
-// Función para calcular días entre fechas usando strings de fecha
-function calcularDiasEntreFechas(fechaInicioStr: string, fechaFinStr: string): number {
-  const inicio = parseDateString(fechaInicioStr);
-  const fin = parseDateString(fechaFinStr);
-  
-  inicio.setHours(0, 0, 0, 0);
-  fin.setHours(0, 0, 0, 0);
-  
-  const diffTime = fin.getTime() - inicio.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  return diffDays;
-}
 
 interface CreateBookingModalProps {
   onBookingCreated?: () => void
@@ -94,16 +64,16 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
   const [costoSugerido, setCostoSugerido] = useState<number>(0)
   const [diasEstancia, setDiasEstancia] = useState<number>(0)
 
-  const hoy = getLocalDateString(new Date());
-  const manana = getLocalDateString(new Date(new Date().setDate(new Date().getDate() + 1)));
+  const hoy = new Date(new Date().toISOString())
+  const manana = new Date(new Date().setDate(new Date().getDate() + 1))
 
   // Usar el formulario con tipos de string para las fechas
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       numeroHabitacion: 0,
-      fechaInicio: hoy,
-      fechaFin: manana,
+      fechaInicio: hoy.toISOString(),
+      fechaFin: manana.toISOString(),
       costo: 0,
     },
   })
@@ -114,7 +84,10 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
 
   const fetchHabitaciones = async () => {
     try {
-      const data = await getHabitacionesDisponibles(parseDateString(watchFechaInicio), parseDateString(watchFechaFin))
+      const data = await getHabitacionesDisponibles(
+        new Date(watchFechaInicio), 
+        new Date(watchFechaFin)
+      )
       setHabitaciones(data)
     } catch {
       toast.error("Error", {
@@ -123,25 +96,32 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
     }
   }
 
+  // Calcular días de estancia y costo sugerido
   useEffect(() => {
-    fetchHabitaciones()
-  }, [watchFechaFin, watchFechaInicio])
-  // Calcular días de estancia y costo sugerido cuando cambien las fechas o la habitación
-  useEffect(() => {
-    if (watchFechaInicio && watchFechaFin && watchNumeroHabitacion) {
-      const dias = calcularDiasEntreFechas(watchFechaInicio, watchFechaFin);
-      setDiasEstancia(dias > 0 ? dias : 0);
+    if (watchFechaInicio && watchFechaFin) {
+      const inicio = new Date(watchFechaInicio)
+      const fin = new Date(watchFechaFin)
+      const diffTime = Math.abs(fin.getTime() - inicio.getTime())
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      setDiasEstancia(diffDays)
 
-      const habitacionSeleccionada = habitaciones.find(h => h.numero_habitacion === watchNumeroHabitacion)
-      if (habitacionSeleccionada && dias > 0) {
-        const costoTotal = habitacionSeleccionada.precio_por_noche * dias
-        setCostoSugerido(costoTotal)
-        form.setValue("costo", costoTotal)
+      if (watchNumeroHabitacion > 0) {
+        const habitacionSeleccionada = habitaciones.find(h => h.numero_habitacion === watchNumeroHabitacion)
+        if (habitacionSeleccionada) {
+          const costo = habitacionSeleccionada.precio_por_noche * diffDays
+          setCostoSugerido(costo)
+          form.setValue("costo", costo)
+        }
       }
     }
-  }, [watchFechaInicio, watchFechaFin, watchNumeroHabitacion, habitaciones, form])
+  }, [watchFechaInicio, watchFechaFin, watchNumeroHabitacion, habitaciones])
 
-  //Hacer fetch siempre que la modal se abra
+  // Cargar habitaciones disponibles cuando cambien las fechas
+  useEffect(() => {
+    fetchHabitaciones()
+  }, [watchFechaInicio, watchFechaFin])
+
+  // Hacer fetch siempre que la modal se abra
   useEffect(() => {
     fetchHabitaciones()
   }, [open])
@@ -149,9 +129,8 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       // Convertir strings de fecha a objetos Date
-      const fechaInicio = parseDateString(values.fechaInicio);
-      const fechaFin = parseDateString(values.fechaFin);
-      
+      const fechaInicio = new Date(values.fechaInicio);
+      const fechaFin = new Date(values.fechaFin);
       
       const datosAEnviar = {
         numeroHabitacion: values.numeroHabitacion,
@@ -175,9 +154,9 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
       
       setOpen(false)
       form.reset({
-        numeroHabitacion: habitaciones[0].numero_habitacion,
-        fechaInicio: getLocalDateString(new Date()),
-        fechaFin: getLocalDateString(new Date(new Date().setDate(new Date().getDate() + 1))),
+        numeroHabitacion: habitaciones[0]?.numero_habitacion || 0,
+        fechaInicio: new Date().toISOString(),
+        fechaFin: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
         costo: 0,
       })
       onBookingCreated?.()
@@ -197,7 +176,7 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
           <Calendar className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Crear nueva reserva</DialogTitle>
           <DialogDescription>
@@ -244,7 +223,10 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
                   <FormItem>
                     <FormLabel>Fecha de inicio</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <DateTimePicker 
+                        onChange={(date) => field.onChange(date)} 
+                        initialDate={field.value}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -257,7 +239,10 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
                   <FormItem>
                     <FormLabel>Fecha de fin</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <DateTimePicker 
+                        onChange={(date) => field.onChange(date)} 
+                        initialDate={field.value}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
