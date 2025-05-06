@@ -5,7 +5,7 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getHabitaciones } from "@/lib/rooms/habitacion-service"
+import { getHabitaciones, getHabitacionesCambios } from "@/lib/rooms/habitacion-service"
 import { Habitacion } from "@/Types/habitacion"
 import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { CreateRoomModal } from "./create-room-modal"
@@ -75,6 +75,10 @@ export function RoomsSection() {
 
   useEffect(() => {
     fetchHabitaciones()
+  }, [currentPage])
+
+  useEffect(() => {
+    getHabitacionesCambios()
   }, [currentPage])
 
   return (

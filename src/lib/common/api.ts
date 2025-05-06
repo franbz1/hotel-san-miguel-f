@@ -64,3 +64,8 @@ export const REGISTRO_FORMULARIO_ENDPOINTS = {
 export const BOOKING_ENDPOINTS = {
   DELETE: (id: number) => `${API_BASE_URL}/eliminar-booking/${id}`,
 } as const
+
+export const SSE_ENDPOINTS = {
+  HABITACIONES_CAMBIOS: `${API_BASE_URL}/sse/habitaciones-cambios`,
+} as const
+
