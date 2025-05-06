@@ -28,7 +28,7 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
           <div
             className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg ${
               statusColors[room.estado]
-            } hover:bg-slate-50 transition-all duration-500 cursor-pointer ${
+            } cursor-pointer ${
               isAnimated ? 'shadow-md' : ''
             }`}
             style={{
