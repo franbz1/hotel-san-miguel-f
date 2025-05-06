@@ -110,19 +110,21 @@ export async function getHabitacionByNumero(numero: number): Promise<Habitacion>
   return response.json()
 }
 
-export async function getHabitacionesCambios() {
+export interface HabitacionesCambio {
+  habitacionId: number;
+  nuevoEstado: EstadoHabitacion;
+}
+
+export function getHabitacionesCambios(
+  onCambio: (cambios: HabitacionesCambio[]) => void
+): EventSource {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
     throw new Error('No hay token de autenticación')
   }
 
-
   const es = new EventSource(SSE_ENDPOINTS.HABITACIONES_CAMBIOS, {withCredentials: true})
-
-  es.onopen = () => {
-    console.log('EventSource abierto')
-  }
 
   es.onerror = (event) => {
     console.error('Error en EventSource', event)
@@ -130,10 +132,12 @@ export async function getHabitacionesCambios() {
 
   es.onmessage = (event) => {
     try {
-      const data = JSON.parse(event.data)
-      console.log(data)
+      const cambios: HabitacionesCambio[] = JSON.parse(event.data)
+      onCambio(cambios)
     } catch (error) {
-      console.error('Error al procesar el mensaje', error)
+      console.error('Error al procesar el mensaje SSE:', error)
     }
   }
+
+  return es
 }
