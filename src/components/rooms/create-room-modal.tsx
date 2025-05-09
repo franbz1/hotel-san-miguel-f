@@ -63,16 +63,38 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
     try {
       await createHabitacion(values)
       toast.success("Habitación creada", {
-        description: "La habitación ha sido creada exitosamente.",
+        description: (
+          <div className="mt-2">
+            <p className="text-sm text-black">La habitación ha sido creada exitosamente.</p>
+          </div>
+        ),
       })
       setOpen(false)
       form.reset()
       onRoomCreated?.()
     } catch (error) {
-      console.error(error)
-      toast.error("Error", {
-        description: "Hubo un error al crear la habitación.",
-      })
+      if (error instanceof Error) {
+        toast.error("Error", {
+          description: (
+            <div className="mt-2">
+              <p className="text-sm text-black">Hubo un error al crear la habitación.</p>
+              {error instanceof Error && (
+                <p className="mt-2 text-sm text-red-600">{error.message}</p>
+              )}
+              <p className="mt-2 text-sm text-red-600">¡Intenta nuevamente!</p>
+            </div>
+          ),
+        })
+      } else {
+        toast.error("Error", {
+          description: (
+            <div className="mt-2">
+              <p className="text-sm text-black">Hubo un error al crear la habitación.</p>
+              <p className="mt-2 text-sm text-red-600">¡Intenta nuevamente!</p>
+            </div>
+          ),
+        })
+      }
     }
   }
 

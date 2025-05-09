@@ -89,9 +89,17 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
         new Date(watchFechaFin)
       )
       setHabitaciones(data)
-    } catch {
+    } catch (error) {
       toast.error("Error", {
-        description: "No se pudieron cargar las habitaciones.",
+        description: (
+          <div className="mt-2">
+            <p className="text-sm text-black">No se pudieron cargar las habitaciones.</p>
+            {error instanceof Error && (
+              <p className="mt-2 text-sm text-red-600">{error.message}</p>
+            )}
+            <p className="mt-2 text-sm text-red-600">¡Intenta nuevamente!</p>
+          </div>
+        ),
       })
     }
   }
@@ -161,9 +169,16 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
       })
       onBookingCreated?.()
     } catch (error) {
-      console.error(error)
       toast.error("Error", {
-        description: "Hubo un error al generar el link del formulario.",
+        description: (
+          <div className="mt-2">
+            <p className="text-sm text-black">Hubo un error al generar el link del formulario.</p>
+            {error instanceof Error && (
+              <p className="mt-2 text-sm text-red-600">{error.message}</p>
+            )}
+            <p className="mt-2 text-sm text-red-600">¡Intenta nuevamente!</p>
+          </div>
+        ),
       })
     }
   }

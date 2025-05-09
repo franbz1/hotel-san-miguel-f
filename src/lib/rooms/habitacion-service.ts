@@ -60,7 +60,8 @@ export async function createHabitacion(data: CreateHabitacionDto): Promise<Habit
   })
 
   if (!response.ok) {
-    throw new Error('Error al crear la habitación')
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Error al crear la habitación')
   }
 
   return response.json()
