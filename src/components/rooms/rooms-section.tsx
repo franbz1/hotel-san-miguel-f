@@ -92,7 +92,6 @@ export function RoomsSection() {
     const handleHabitacionesCambios = (cambios: HabitacionesCambio[]) => {
       // Guardar IDs de habitaciones cambiadas para animación
       const changedRoomIds = cambios.map(c => c.habitacionId);
-      
       if (cambios.length > 0) {
         // Mostrar notificación toast
         toast.info(`Actualización de habitaciones`, {
