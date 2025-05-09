@@ -66,10 +66,10 @@ export default function BookingCardUI({ booking: initialBooking, onDeleted }: Bo
       await deleteBookingCard(booking.link_formulario_id)
       toast.success("Reserva eliminada exitosamente")
       onDeleted?.() // Notify parent component to refresh the list
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al eliminar la reserva:', error)
       toast.error(
-        error?.message || "Error al eliminar la reserva. Por favor, inténtalo de nuevo."
+        error instanceof Error ? error.message : "Error al eliminar la reserva. Por favor, inténtalo de nuevo."
       )
     } finally {
       setIsDeleting(false)
@@ -107,8 +107,10 @@ export default function BookingCardUI({ booking: initialBooking, onDeleted }: Bo
       } else {
         toast.error(`Error al subir el formulario a TRA: ${response.message || 'Error desconocido'}`);
       }
-    } catch (error) {
-      toast.error("Error al subir el formulario a TRA. Por favor, inténtalo de nuevo.");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "Error al subir el formulario a TRA. Por favor, inténtalo de nuevo."
+      );
     } finally {
       // Asegurarse de que el toast de carga se cierre
       toast.dismiss(loadingToastId);
@@ -218,7 +220,7 @@ export default function BookingCardUI({ booking: initialBooking, onDeleted }: Bo
                           variant="outline" 
                           className={cn(
                             "h-7 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100",
-                            "transition-all duration-200"
+                            "transition-all duration-200 cursor-pointer"
                           )}
                           onClick={handleUploadTra}
                           disabled={booking.estado !== EstadosFormulario.COMPLETADO || !booking.formulario_id}

@@ -112,7 +112,7 @@ export function BookingsSection() {
             className={cn(
               "h-9 w-9 rounded-full transition-all duration-200 shrink-0",
               "hover:bg-slate-100 hover:text-slate-900",
-              "active:scale-95",
+              "active:scale-95 cursor-pointer",
               loading && "animate-spin bg-slate-100"
             )}
             onClick={handleRefresh}
