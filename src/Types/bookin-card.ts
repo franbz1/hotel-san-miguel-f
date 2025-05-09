@@ -11,4 +11,5 @@ export interface BookingCard {
   numero_habitacion: number
   subido_sire: boolean
   subido_tra: boolean
+  formulario_id: number | null
 }

@@ -20,6 +20,11 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
     numero_habitacion: linkFormulario.numeroHabitacion,
     numero_acompaniantes: 0,
   })
+  const [submissionStatus, setSubmissionStatus] = useState({
+    isSubmitting: false,
+    hasAttemptedSubmit: false,
+    submitError: null as string | null
+  })
 
   const token = useMemo(() => {
     const token = linkFormulario.url.split('/').pop()
@@ -58,6 +63,7 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
         formData={formData}
         token={token}
         isLastStep={isLastStep}
+        onSubmitStatusChange={setSubmissionStatus}
       >
         <WelcomeStep key="welcome" formData={formData} onNext={handleNext} />
         <PersonalInfoStep 
@@ -76,9 +82,9 @@ export default function RegistroFormulario({ linkFormulario }: { linkFormulario:
         <SuccessStep 
           key="success" 
           formData={formData}
-          isSubmitting={false}
-          hasAttemptedSubmit={true}
-          submitError={null}
+          isSubmitting={submissionStatus.isSubmitting}
+          hasAttemptedSubmit={submissionStatus.hasAttemptedSubmit}
+          submitError={submissionStatus.submitError}
         />
       </FormStepsWrapper>
     </FormLayout>

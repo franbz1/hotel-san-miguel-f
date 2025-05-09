@@ -57,4 +57,15 @@ export const LINK_FORMULARIO_ENDPOINTS = {
 
 export const REGISTRO_FORMULARIO_ENDPOINTS = {
   CREATE: (token: string) => `${API_BASE_URL}/registro-formulario/${token}`,
+  UPLOAD_TRA: (token: string) => `${API_BASE_URL}/registro-formulario/tra/${token}`,
+  TRY_UPLOAD_TRA: (id: number) => `${API_BASE_URL}/registro-formulario/tra/formulario/${id}`,
 } as const
+
+export const BOOKING_ENDPOINTS = {
+  DELETE: (id: number) => `${API_BASE_URL}/eliminar-booking/${id}`,
+} as const
+
+export const SSE_ENDPOINTS = {
+  HABITACIONES_CAMBIOS: `${API_BASE_URL}/sse/habitaciones-cambios`,
+} as const
+

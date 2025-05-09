@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, ChevronUp, Eye, Trash2, X, RefreshCw } from "lucide-react"
+import { ChevronDown, ChevronUp, Eye, Trash2, X, RefreshCw, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -9,17 +9,19 @@ import { cn } from "@/lib/common/utils"
 import { BookingCard } from "@/Types/bookin-card"
 import { EstadosFormulario } from "@/Types/enums/estadosFormulario"
 import { regenerateLinkFormulario } from "@/lib/formulario/link-formulario-service"
-import { getBookingCardByLinkId } from "@/lib/bookings/bookin-card-service"
+import { deleteBookingCard, getBookingCardByLinkId, tryUploadTra } from "@/lib/bookings/bookin-card-service"
 import { toast } from "sonner"
 
 interface BookingCardUIProps {
   booking: BookingCard
+  onDeleted?: () => void
 }
 
-export default function BookingCardUI({ booking: initialBooking }: BookingCardUIProps) {
+export default function BookingCardUI({ booking: initialBooking, onDeleted }: BookingCardUIProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [booking, setBooking] = useState<BookingCard>(initialBooking)
   const [isRegenerating, setIsRegenerating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
 
   const statusConfig: Record<EstadosFormulario, { color: string; text: string }> = {
@@ -52,9 +54,71 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
     }
   }
 
+  const handleDeleteBookingCard = async () => {
+    try {
+      const confirmed = window.confirm(
+        `¿Estás seguro que deseas eliminar la reserva de ${booking.nombre}? Esta acción no se puede deshacer.`
+      )
+
+      if (!confirmed) return
+
+      setIsDeleting(true)
+      await deleteBookingCard(booking.link_formulario_id)
+      toast.success("Reserva eliminada exitosamente")
+      onDeleted?.() // Notify parent component to refresh the list
+    } catch (error: any) {
+      console.error('Error al eliminar la reserva:', error)
+      toast.error(
+        error?.message || "Error al eliminar la reserva. Por favor, inténtalo de nuevo."
+      )
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleViewBookingCard = () => {
+    window.open(booking.url, '_blank')
+  }
+
+  const handleUploadTra = async () => {
+    // Crear una ID para el toast de carga para poder dismissearlo más tarde
+    const loadingToastId = "upload-tra-loading";
+
+    try {
+      // Verificar que el estado sea COMPLETADO y no esté ya subido a TRA
+      if (booking.estado !== EstadosFormulario.COMPLETADO || booking.subido_tra) {
+        toast.error("El formulario debe estar completado y no subido a TRA previamente");
+        return;
+      }
+      
+      if (!booking.formulario_id) {
+        toast.error("Error al subir el formulario a TRA: el formulario no existe o no ha sido completado");
+        return;
+      }
+
+      // Mostrar toast de carga con ID específico
+      toast.loading("Subiendo formulario a TRA...", { id: loadingToastId });
+      
+      const response = await tryUploadTra(booking.formulario_id);
+      
+      if (response.statusCode === 200) {
+        toast.success("Formulario subido exitosamente a TRA");
+        setBooking({ ...booking, subido_tra: true });
+      } else {
+        toast.error(`Error al subir el formulario a TRA: ${response.message || 'Error desconocido'}`);
+      }
+    } catch (error) {
+      toast.error("Error al subir el formulario a TRA. Por favor, inténtalo de nuevo.");
+    } finally {
+      // Asegurarse de que el toast de carga se cierre
+      toast.dismiss(loadingToastId);
+    }
+  }
+
+
+
   return (
     <div className="border rounded-lg overflow-hidden mb-3 transition-all duration-200 hover:shadow-md">
-      {/* Cabecera de la tarjeta (siempre visible) */}
       <div
         className={cn(
           "flex items-center p-4 cursor-pointer bg-white hover:bg-slate-50 transition-colors",
@@ -140,14 +204,34 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
 
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  <span className="font-medium text-gray-700">TRA</span>
-                  <Badge variant="outline" className={cn(
-                    "rounded-full p-1",
-                    booking.subido_tra ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-red-100 text-red-700 border-red-200"
-                  )}>
-                    {booking.subido_tra ? "✓" : <X size={12} />}
-                  </Badge>
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium text-gray-700">TRA</span>
+                    {booking.subido_tra ? (
+                      <Badge variant="outline" className="rounded-full p-1 bg-emerald-100 text-emerald-700 border-emerald-200">
+                        ✓
+                      </Badge>
+                    ) : (
+                      booking.estado === EstadosFormulario.COMPLETADO ? (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className={cn(
+                            "h-7 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100",
+                            "transition-all duration-200"
+                          )}
+                          onClick={handleUploadTra}
+                          disabled={booking.estado !== EstadosFormulario.COMPLETADO || !booking.formulario_id}
+                        >
+                          <Upload size={10} />
+                        </Button>
+                      ) : (
+                        <Badge variant="outline" className="rounded-full p-1 bg-red-100 text-red-700 border-red-200">
+                          <X size={12} />
+                        </Badge>
+                      )
+                    )}
+                  </div>
                   <span className="font-medium text-gray-700">SIRE</span>
                   <Badge variant="outline" className={cn(
                     "rounded-full p-1",
@@ -165,13 +249,21 @@ export default function BookingCardUI({ booking: initialBooking }: BookingCardUI
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="cursor-pointer h-8 w-8 rounded-full">
+                  <Button onClick={handleViewBookingCard} variant="ghost" size="icon" className="cursor-pointer h-8 w-8 rounded-full">
                     <Eye className="h-6 w-6" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="cursor-pointer h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className={cn(
+                      "cursor-pointer h-8 w-8 rounded-full transition-all duration-200",
+                      "text-red-500 hover:text-red-600 hover:bg-red-50",
+                      "active:scale-95 disabled:opacity-50 disabled:pointer-events-none",
+                      isDeleting && "animate-pulse bg-red-50"
+                    )}
+                    onClick={handleDeleteBookingCard}
+                    disabled={isDeleting}
+                    title={"Eliminar reserva"}
                   >
                     <Trash2 className="h-6 w-6" />
                   </Button>
