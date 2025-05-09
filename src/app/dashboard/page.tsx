@@ -1,11 +1,9 @@
 "use client"
 
-import { Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { UserNav } from "@/components/user-nav"
 import { RoomsSection } from "@/components/rooms/rooms-section"
 import { BookingsSection } from "@/components/bookings/bookings-section"
+import { Header } from "@/components/layout/header"
 
 const StatCard = ({ title, value, color }: { title: string; value: string; color: string }) => {
   return (
@@ -23,19 +21,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold">Hotel San Miguel</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <UserNav />
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Stats */}
       <div className="container mx-auto px-4 py-6">

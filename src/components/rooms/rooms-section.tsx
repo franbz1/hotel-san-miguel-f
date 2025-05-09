@@ -10,7 +10,7 @@ import { Habitacion } from "@/Types/habitacion"
 import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { CreateRoomModal } from "./create-room-modal"
 import { toast } from "sonner"
-
+import { useRouter } from "next/navigation"
 const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?: boolean }) => {
   const statusColors: Record<EstadoHabitacion, string> = {
     [EstadoHabitacion.LIBRE]: "border-emerald-500 text-emerald-600",
@@ -20,6 +20,8 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
     [EstadoHabitacion.EN_MANTENIMIENTO]: "border-purple-500 text-purple-600",
     [EstadoHabitacion.EN_LIMPIEZA]: "border-yellow-500 text-yellow-600"
   }
+
+  const router = useRouter()
 
   return (
     <TooltipProvider>
@@ -34,6 +36,7 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
             style={{
               background: isAnimated ? 'rgba(249, 250, 251, 0.95)' : '',
             }}
+            onClick={() => router.push(`/dashboard/room/${room.numero_habitacion}`)}
           >
             <svg
               viewBox="0 0 24 24"

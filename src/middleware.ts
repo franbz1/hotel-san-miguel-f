@@ -47,7 +47,8 @@ export async function middleware(request: NextRequest) {
     
     // Si la ruta actual no coincide con la ruta por defecto del rol, redirigir
     if (!path.startsWith(defaultRoute)) {
-      return NextResponse.redirect(new URL(defaultRoute, request.url))
+      const url = new URL(defaultRoute, request.url)
+      return NextResponse.redirect(url)
     }
     
     return NextResponse.next()
