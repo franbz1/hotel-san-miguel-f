@@ -186,7 +186,7 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="cursor-pointer">
           <span className="mr-2">Crear reserva</span>
           <Calendar className="h-4 w-4" />
         </Button>
