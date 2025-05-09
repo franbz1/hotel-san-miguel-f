@@ -1,101 +1,107 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Image from "next/image"
+"use client"
+
+import { useEffect, useState } from "react"
 import { Header } from "@/components/layout/header"
+import { getHabitacionByNumero } from "@/lib/rooms/habitacion-service"
+import { Habitacion } from "@/Types/habitacion"
+import { useParams } from "next/navigation"
+import { Card, CardContent } from "@/components/ui/card"
+
+// Importación de los componentes modulares
+import { RoomBookings } from "@/components/rooms/room-bookings"
+import { RoomAnalytics } from "@/components/rooms/room-analytics"
+import { RoomInfoEditor } from "@/components/rooms/room-info-editor"
+import { RoomCleaningHistory } from "@/components/rooms/room-cleaning-history"
 
 export default function RoomDetails() {
+  const params = useParams()
+  const [habitacion, setHabitacion] = useState<Habitacion | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchHabitacion() {
+      try {
+        const numero = parseInt(params.numero as string)
+        if (isNaN(numero)) {
+          throw new Error("Número de habitación inválido")
+        }
+        
+        const data = await getHabitacionByNumero(numero)
+        setHabitacion(data)
+        setLoading(false)
+      } catch (err) {
+        console.error("Error al cargar los datos de la habitación:", err)
+        setError("No se pudo cargar la información de la habitación")
+        setLoading(false)
+      }
+    }
+
+    fetchHabitacion()
+  }, [params.numero])
+
+  const handleRoomUpdated = async () => {
+    if (!params.numero) return;
+    
+    try {
+      setLoading(true)
+      const numero = parseInt(params.numero as string)
+      const data = await getHabitacionByNumero(numero)
+      setHabitacion(data)
+    } catch (err) {
+      console.error("Error al recargar los datos de la habitación:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="container mx-auto p-6 flex justify-center items-center">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6">
+              <div className="text-center text-red-500">
+                <p className="text-lg">{error}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <Header />
+      <Header title={loading ? "Cargando..." : `Habitación ${habitacion?.numero_habitacion}`} />
 
-      {/* Main Content */}
       <main className="container mx-auto p-4 md:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Bed Illustration or Room Image */}
-          <div className="md:col-span-1">
-            {(() => {
-              // Example room data - this would come from your API or props
-              const roomData = {
-                status: "available", // Possible values: available, occupied, cleaning, maintenance
-              }
-
-              // Determine border color based on room status
-              const getBorderColorClass = (status) => {
-                switch (status) {
-                  case "available":
-                    return "border-emerald-500"
-                  case "occupied":
-                    return "border-blue-500"
-                  case "cleaning":
-                    return "border-yellow-500"
-                  case "maintenance":
-                    return "border-red-500"
-                  default:
-                    return "border-gray-300"
-                }
-              }
-
-              return (
-                <div
-                  className={`border ${getBorderColorClass(roomData.status)} rounded-md p-4 flex justify-center overflow-hidden`}
-                >
-                  <svg
-                    viewBox="0 0 100 100"
-                    className="w-full max-w-[200px] text-emerald-500"
-                    stroke="currentColor"
-                    fill="none"
-                    strokeWidth="1.5"
-                  >
-                    <rect x="10" y="50" width="80" height="30" rx="2" />
-                    <rect x="15" y="40" width="70" height="10" rx="2" />
-                    <rect x="15" y="30" width="70" height="10" rx="2" />
-                    <line x1="15" y1="40" x2="15" y2="80" />
-                    <line x1="85" y1="40" x2="85" y2="80" />
-                  </svg>
-
-                </div>
-              )
-            })()}
+        {/* Top Row - Room Info and Illustration */}
+        <div className="mb-6">
+          <RoomInfoEditor 
+            habitacion={habitacion} 
+            loading={loading} 
+            onRoomUpdated={handleRoomUpdated}
+          />
+        </div>
+        
+        {/* Middle Row - Reservation and Analytics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {/* Bookings */}
+          <div className="md:col-span-2">
+            <RoomBookings habitacion={habitacion} loading={loading} />
           </div>
 
-          {/* Middle Column - Search and Reservation */}
-          <div className="md:col-span-1 space-y-4">
-            <p>aqui va la seccion de bookings unicamente de esta habitacion</p>
-          </div>
-
-          {/* Right Column - Chart */}
+          {/* Analytics */}
           <div className="md:col-span-1">
-            <Card className="border shadow-sm h-full">
-              <CardContent className="p-4 flex items-center justify-center">
-                <p>aqui va la analitica de la habitacion</p>
-              </CardContent>
-            </Card>
+            <RoomAnalytics habitacion={habitacion} loading={loading} />
           </div>
         </div>
 
-        {/* Bottom Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {/* Room Info Card */}
-          <div className="md:col-span-1">
-            <Card className="border shadow-sm">
-              <CardContent className="p-4">
-                <p>aqui va la info de la habitacion</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Cleaning History */}
-          <div className="md:col-span-2">
-            <Card className="border shadow-sm h-full">
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-lg">HISTORIAL DE ASEO...</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                {/* Aquí se podría agregar una tabla o lista con el historial de aseo */}
-                <div className="text-sm text-gray-500">No hay registros de aseo para mostrar.</div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Bottom Row - Cleaning History */}
+        <div className="grid grid-cols-1 gap-6">
+          <RoomCleaningHistory habitacion={habitacion} loading={loading} />
         </div>
       </main>
     </div>

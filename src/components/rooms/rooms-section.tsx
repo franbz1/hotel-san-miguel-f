@@ -7,20 +7,16 @@ import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { getHabitaciones, getHabitacionesCambios, HabitacionesCambio } from "@/lib/rooms/habitacion-service"
 import { Habitacion } from "@/Types/habitacion"
-import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { CreateRoomModal } from "./create-room-modal"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?: boolean }) => {
-  const statusColors: Record<EstadoHabitacion, string> = {
-    [EstadoHabitacion.LIBRE]: "border-emerald-500 text-emerald-600",
-    [EstadoHabitacion.OCUPADO]: "border-red-500 text-red-600",
-    [EstadoHabitacion.RESERVADO]: "border-amber-500 text-amber-600",
-    [EstadoHabitacion.EN_DESINFECCION]: "border-blue-500 text-blue-600",
-    [EstadoHabitacion.EN_MANTENIMIENTO]: "border-purple-500 text-purple-600",
-    [EstadoHabitacion.EN_LIMPIEZA]: "border-yellow-500 text-yellow-600"
-  }
+import { 
+  getRoomBorderClass, 
+  getRoomTextClass, 
+  getRoomStatusText 
+} from "@/lib/common/constants/room-constants"
 
+const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?: boolean }) => {
   const router = useRouter()
 
   return (
@@ -29,8 +25,7 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
         <TooltipTrigger asChild>
           <div
             className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg ${
-              statusColors[room.estado]
-            } cursor-pointer ${
+              getRoomBorderClass(room.estado)} ${getRoomTextClass(room.estado)} cursor-pointer ${
               isAnimated ? 'shadow-md' : ''
             }`}
             style={{
@@ -40,7 +35,7 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
           >
             <svg
               viewBox="0 0 24 24"
-              className={`w-12 h-12 mb-2 ${statusColors[room.estado]} transition-all duration-500`}
+              className={`w-12 h-12 mb-2 ${getRoomTextClass(room.estado)} transition-all duration-500`}
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -54,7 +49,7 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            Habitación {room.numero_habitacion}: {room.estado}
+            Habitación {room.numero_habitacion}: {getRoomStatusText(room.estado)}
           </p>
         </TooltipContent>
       </Tooltip>
