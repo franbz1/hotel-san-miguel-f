@@ -6,14 +6,14 @@ import { Reserva } from "./Reserva"
 
 export interface Huesped {
   id: number
-  tipoDocumento: TipoDoc
-  numeroDocumento: string
-  primerApellido: string
-  segundoApellido: string
+  tipo_documento: TipoDoc
+  numero_documento: string
+  primer_apellido: string
+  segundo_apellido: string
   nombres: string
-  paisResidencia: string
-  departamentoResidencia: string
-  ciudadResidencia: string
+  pais_residencia: string
+  departamento_residencia: string
+  ciudad_residencia: string
   lugarNacimiento: string
   fechaNacimiento: Date
   nacionalidad: string

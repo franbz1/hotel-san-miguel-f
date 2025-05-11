@@ -74,7 +74,7 @@ export default function RoomDetails() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header title={loading ? "Cargando..." : `Habitación ${habitacion?.numero_habitacion}`} />
+      <Header />
 
       <main className="container mx-auto p-4 md:p-6">
         {/* Top Row - Room Info and Illustration */}

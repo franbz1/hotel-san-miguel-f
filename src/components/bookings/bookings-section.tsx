@@ -38,12 +38,10 @@ export function BookingsSection({
   const fetchBookings = useCallback(async (pageNumber: number) => {
     try {
       setLoading(true)
-      
       // Usar la función adecuada según si se especifica una habitación o no
       const data = roomNumber !== undefined 
         ? await getBookingCardsByHabitacion(roomNumber, 10, pageNumber)
         : await getBookingCards(10, pageNumber);
-        
       if (data.length === 0) {
         setHasMore(false)
         return

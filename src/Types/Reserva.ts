@@ -1,6 +1,8 @@
 import { EstadosReserva } from './enums/estadosReserva'
 import { MotivosViajes } from './enums/motivosViajes'
+import { Factura } from './factura'
 import { Huesped } from './huesped'
+import { HuespedSecundario } from './huespedSecundario'
 
 export interface Reserva {
   id: number
@@ -11,15 +13,17 @@ export interface Reserva {
   departamento_procedencia: string
   ciudad_procedencia: string
   pais_destino: string
-  motivoViaje: MotivosViajes
-  checkIn: Date
-  checkOut: Date
+  motivo_viaje: MotivosViajes
+  check_in: Date
+  check_out: Date
   costo: number
-  numeroAcompanantes: number
+  numero_acompaniantes: number
   habitacionId: number
   huespedId: number
-  huespedesSecundarios: Huesped[]
+  huesped: Huesped
+  huespedes_secundarios: HuespedSecundario[]
   facturaId: number
+  factura: Factura
   createdAt: Date
   updatedAt: Date
 }
