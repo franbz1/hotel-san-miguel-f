@@ -22,7 +22,7 @@ export interface Huesped {
   telefono: string | null
   correo: string | null
   reservas: Reserva[]
-  huespedesSecundarios: HuespedSecundario[]
+  huespedes_secundarios: HuespedSecundario[]
   facturas: Factura[]
   formularios: Formulario[]
 
