@@ -24,7 +24,7 @@ export function ReservasHabitacion({ habitacion }: ReservasHabitacionProps) {
           No hay reservas para esta habitación
         </div>
       ) : (
-        <ScrollArea className="h-[600px] rounded-md pr-4">
+        <ScrollArea className="h-[300px] rounded-md pr-4">
           <div className="space-y-6">
             {reservas.map((reserva) => (
               <ReservationCard key={reserva.id} reserva={reserva} />
