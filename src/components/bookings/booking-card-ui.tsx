@@ -99,14 +99,12 @@ export default function BookingCardUI({ booking: initialBooking, onDeleted }: Bo
       // Mostrar toast de carga con ID específico
       toast.loading("Subiendo formulario a TRA...", { id: loadingToastId });
       
-      const response = await tryUploadTra(booking.formulario_id);
+      await tryUploadTra(booking.formulario_id);
       
-      if (response.statusCode === 200) {
-        toast.success("Formulario subido exitosamente a TRA");
-        setBooking({ ...booking, subido_tra: true });
-      } else {
-        toast.error(`Error al subir el formulario a TRA: ${response.message || 'Error desconocido'}`);
-      }
+      // Si llegamos aquí sin error, la subida fue exitosa
+      toast.success("Formulario subido exitosamente a TRA");
+      setBooking({ ...booking, subido_tra: true });
+      
     } catch (error: unknown) {
       toast.error(
         error instanceof Error ? error.message : "Error al subir el formulario a TRA. Por favor, inténtalo de nuevo."
