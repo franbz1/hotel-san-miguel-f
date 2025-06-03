@@ -1,5 +1,5 @@
 import { Habitacion } from "@/Types/habitacion"
-import { ReservasHabitacion } from "./reservas-habitacion"
+import { ReservasList } from "@/components/reservas"
 
 interface RoomBookingsProps {
   habitacion?: Habitacion | null
@@ -20,6 +20,11 @@ export function RoomBookings({ habitacion, loading, onReservaDeleted }: RoomBook
   }
 
   return (
-    <ReservasHabitacion habitacion={habitacion} onReservaDeleted={onReservaDeleted} />
+    <ReservasList 
+      reservas={habitacion.reservas || []}
+      title={`Reservas de la habitación ${habitacion.numero_habitacion}`}
+      emptyMessage="No hay reservas para esta habitación"
+      onReservaDeleted={onReservaDeleted}
+    />
   )
 } 

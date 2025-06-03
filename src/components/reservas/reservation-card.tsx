@@ -1,5 +1,8 @@
 import { useState } from "react"
 import { Reserva } from "@/Types/Reserva"
+import { Huesped } from "@/Types/huesped"
+import { HuespedSecundario } from "@/Types/huespedSecundario"
+import { Factura } from "@/Types/factura"
 import { formatDate } from "@/lib/common/utils"
 import { TipoDoc } from "@/Types/enums/tiposDocumento"
 import { EstadosReserva } from "@/Types/enums/estadosReserva"
@@ -35,16 +38,44 @@ import {
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useRouter } from "next/navigation"
 
 interface ReservationCardProps {
   reserva: Reserva
   onReservaDeleted?: () => void
+  huespedExterno?: Huesped
+  huespedesSecundariosExternos?: HuespedSecundario[]
+  facturasExternas?: Factura[]
 }
 
-export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardProps) {
+export function ReservationCard({ reserva, onReservaDeleted, huespedExterno, huespedesSecundariosExternos, facturasExternas }: ReservationCardProps) {
   const [headerExpanded, setHeaderExpanded] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const router = useRouter()
+
+  // Usar el huésped de la reserva si está disponible, sino usar el externo
+  const huesped = reserva.huesped || huespedExterno
+  
+  // Usar los huéspedes secundarios de la reserva si están disponibles, sino usar los externos
+  const huespedesSecundarios = reserva.huespedes_secundarios?.length > 0 
+    ? reserva.huespedes_secundarios 
+    : huespedesSecundariosExternos || []
+
+  // Buscar la factura correspondiente a esta reserva
+  const factura = reserva.factura || 
+    (facturasExternas?.find(f => f.id === reserva.facturaId)) ||
+    null
+  
+  // Si no hay huésped disponible, mostrar un mensaje de error o valores por defecto
+  if (!huesped) {
+    return (
+      <Card className="p-4 border-red-200 bg-red-50">
+        <p className="text-red-600 text-sm">Error: No se pudo cargar la información del huésped para esta reserva.</p>
+      </Card>
+    )
+  }
 
   const getEstadoBadgeColor = (estado: EstadosReserva) => {
     switch (estado) {
@@ -102,6 +133,10 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
       .toUpperCase()
   }
 
+  const handleViewHuesped = (huespedId: number) => {
+    router.push(`/dashboard/huesped/${huespedId}`)
+  }
+
   const handleDelete = async () => {
     setIsDeleting(true)
 
@@ -126,6 +161,9 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
     (1000 * 60 * 60 * 24)
   )
 
+  // Calcular el número total de huéspedes (principal + acompañantes)
+  const totalHuespedes = 1 + huespedesSecundarios.length
+
   return (
     <Card className="py-0 gap-0 overflow-hidden transition-all duration-300 hover:shadow-lg border-l-4 border-l-indigo-400">
       {/* Header Compacto - Solo información crítica */}
@@ -145,14 +183,14 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
               <AvatarFallback className={`font-semibold transition-all duration-300 ${
                 headerExpanded ? 'bg-indigo-100 text-indigo-700 text-base' : 'bg-slate-100 text-slate-600 text-sm'
               }`}>
-                {getInitials(reserva.huesped.nombres)}
+                {getInitials(huesped.nombres)}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900 truncate">
-                  {reserva.huesped.nombres} {reserva.huesped.primer_apellido}
+                  {huesped.nombres} {huesped.primer_apellido}
                 </h3>
                 <Badge className={`${getEstadoBadgeColor(reserva.estado)} text-xs px-2 py-1`}>
                   {reserva.estado}
@@ -166,7 +204,7 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
                 </span>
                 <span className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
-                  {reserva.numero_acompaniantes + 1}
+                  {totalHuespedes}
                 </span>
                 <span className="hidden sm:flex items-center gap-1">
                   <Globe className="h-3 w-3" />
@@ -221,7 +259,7 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
                   <DialogHeader>
                     <DialogTitle>¿Está seguro de eliminar esta reserva?</DialogTitle>
                     <DialogDescription>
-                      Esta acción no se puede deshacer. Se eliminará permanentemente la reserva de {reserva.huesped.nombres} {reserva.huesped.primer_apellido} y todos sus datos asociados.
+                      Esta acción no se puede deshacer. Se eliminará permanentemente la reserva de {huesped.nombres} {huesped.primer_apellido} y todos sus datos asociados.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
@@ -250,8 +288,8 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1">CONTACTO</p>
-                <p className="text-sm">{reserva.huesped.telefono || "No disponible"}</p>
-                <p className="text-xs text-muted-foreground truncate">{reserva.huesped.correo || "No disponible"}</p>
+                <p className="text-sm">{huesped.telefono || "No disponible"}</p>
+                <p className="text-xs text-muted-foreground truncate">{huesped.correo || "No disponible"}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1">PROCEDENCIA</p>
@@ -262,7 +300,7 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
                 <p className="text-xs font-medium text-muted-foreground mb-1">MOTIVO</p>
                 <p className="text-sm">{formatMotivoViaje(reserva.motivo_viaje)}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatDocumentType(reserva.huesped.tipo_documento)} {reserva.huesped.numero_documento}
+                  {formatDocumentType(huesped.tipo_documento)} {huesped.numero_documento}
                 </p>
               </div>
             </div>
@@ -273,9 +311,9 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
             <TabsList className="w-full justify-start m-4 mb-0">
               <TabsTrigger value="huespedes" className="flex items-center gap-2 cursor-pointer">
                 <UserCheck className="h-4 w-4" />
-                Huéspedes ({reserva.numero_acompaniantes + 1})
+                Huéspedes ({totalHuespedes})
               </TabsTrigger>
-              {reserva.factura && (
+              {factura && (
                 <TabsTrigger value="factura" className="flex items-center gap-2 cursor-pointer">
                   <FileText className="h-4 w-4" />
                   Factura
@@ -290,13 +328,13 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
                   <div className="flex items-start gap-4">
                     <Avatar className="h-12 w-12 border-2 border-indigo-100">
                       <AvatarFallback className="bg-indigo-50 text-indigo-600 font-semibold">
-                        {getInitials(reserva.huesped.nombres)}
+                        {getInitials(huesped.nombres)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold text-lg">
-                          {reserva.huesped.nombres} {reserva.huesped.primer_apellido} {reserva.huesped.segundo_apellido}
+                        <h4 onClick={() => handleViewHuesped(huesped.id)} className="font-semibold text-lg cursor-pointer hover:underline">
+                          {huesped.nombres} {huesped.primer_apellido} {huesped.segundo_apellido}
                         </h4>
                         <Badge variant="outline" className="text-xs">Principal</Badge>
                       </div>
@@ -304,15 +342,15 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                         <div>
                           <p className="text-xs text-muted-foreground">Documento</p>
-                          <p className="font-medium">{formatDocumentType(reserva.huesped.tipo_documento)} {reserva.huesped.numero_documento}</p>
+                          <p className="font-medium">{formatDocumentType(huesped.tipo_documento)} {huesped.numero_documento}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Nacionalidad</p>
-                          <p>{reserva.huesped.nacionalidad}</p>
+                          <p>{huesped.nacionalidad}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Residencia</p>
-                          <p>{reserva.huesped.ciudad_residencia}, {reserva.huesped.pais_residencia}</p>
+                          <p>{huesped.ciudad_residencia}, {huesped.pais_residencia}</p>
                         </div>
                       </div>
                     </div>
@@ -321,27 +359,27 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
               </div>
               
               {/* Huéspedes adicionales - Solo si existen */}
-              {reserva.huespedes_secundarios && reserva.huespedes_secundarios.length > 0 && (
+              {huespedesSecundarios.length > 0 && (
                 <div className="rounded-lg border">
                   <div className="bg-slate-50 px-4 py-2 border-b">
                     <h4 className="font-medium text-sm">
-                      Acompañantes ({reserva.huespedes_secundarios.length})
+                      Acompañantes ({huespedesSecundarios.length})
                     </h4>
                   </div>
                   <Accordion type="multiple" className="w-full">
-                    {reserva.huespedes_secundarios.map((huesped) => (
-                      <AccordionItem key={huesped.id} value={`huesped-${huesped.id}`} className="border-b-0">
+                    {huespedesSecundarios.map((huespedSecundario) => (
+                      <AccordionItem key={huespedSecundario.id} value={`huesped-${huespedSecundario.id}`} className="border-b-0">
                         <AccordionTrigger className="px-4 py-3 hover:bg-slate-25 text-left">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8 border">
                               <AvatarFallback className="bg-slate-100 text-slate-600 text-xs">
-                                {getInitials(huesped.nombres)}
+                                {getInitials(huespedSecundario.nombres)}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium text-sm">{huesped.nombres} {huesped.primer_apellido}</p>
+                              <p className="font-medium text-sm">{huespedSecundario.nombres} {huespedSecundario.primer_apellido}</p>
                               <p className="text-xs text-muted-foreground">
-                                {formatDocumentType(huesped.tipo_documento)} {huesped.numero_documento}
+                                {formatDocumentType(huespedSecundario.tipo_documento)} {huespedSecundario.numero_documento}
                               </p>
                             </div>
                           </div>
@@ -350,16 +388,16 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm ml-11">
                             <div>
                               <p className="text-xs text-muted-foreground">Nacionalidad</p>
-                              <p>{huesped.nacionalidad}</p>
+                              <p>{huespedSecundario.nacionalidad}</p>
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground">Residencia</p>
-                              <p>{huesped.ciudad_residencia}, {huesped.pais_residencia}</p>
+                              <p>{huespedSecundario.ciudad_residencia}, {huespedSecundario.pais_residencia}</p>
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground">Contacto</p>
-                              <p>{huesped.telefono || "No disponible"}</p>
-                              {huesped.correo && <p className="text-xs truncate">{huesped.correo}</p>}
+                              <p>{huespedSecundario.telefono || "No disponible"}</p>
+                              {huespedSecundario.correo && <p className="text-xs truncate">{huespedSecundario.correo}</p>}
                             </div>
                           </div>
                         </AccordionContent>
@@ -371,7 +409,7 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
             </TabsContent>
             
             {/* Información de facturación */}
-            {reserva.factura && (
+            {factura && (
               <TabsContent value="factura" className="m-4 mt-4">
                 <div className="rounded-lg border bg-emerald-50/30">
                   <div className="p-4">
@@ -388,16 +426,16 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="text-center p-3 bg-white rounded-md border">
                         <p className="text-xs text-muted-foreground mb-1">Fecha de emisión</p>
-                        <p className="font-semibold">{formatDate(new Date(reserva.factura.fecha_factura))}</p>
+                        <p className="font-semibold">{formatDate(new Date(factura.fecha_factura))}</p>
                       </div>
                       <div className="text-center p-3 bg-white rounded-md border">
                         <p className="text-xs text-muted-foreground mb-1">Actualizada</p>
-                        <p className="font-semibold">{formatDate(new Date(reserva.factura.updatedAt))}</p>
+                        <p className="font-semibold">{formatDate(new Date(factura.updatedAt))}</p>
                       </div>
                       <div className="text-center p-3 bg-emerald-50 rounded-md border border-emerald-200">
                         <p className="text-xs text-muted-foreground mb-1">Total</p>
                         <p className="font-bold text-lg text-emerald-600">
-                          ${Number(reserva.factura.total).toLocaleString()}
+                          ${Number(factura.total).toLocaleString()}
                         </p>
                       </div>
                     </div>

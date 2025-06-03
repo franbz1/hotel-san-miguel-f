@@ -22,13 +22,22 @@ import {
   MapPin, 
   Calendar, 
   UserCheck,
-  Users
+  Users,
+  BarChart3,
+  TrendingUp,
+  Clock,
+  DollarSign,
+  FileText,
+  MapIcon
 } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { getHuespedById, updateHuesped } from "@/lib/huespedes/huesped-service"
 import { Huesped, UpdateHuespedDto } from "@/Types/huesped"
 import { TipoDoc } from "@/Types/enums/tiposDocumento"
+import { EstadosReserva } from "@/Types/enums/estadosReserva"
+import { MotivosViajes } from "@/Types/enums/motivosViajes"
 import { toast } from "sonner"
+import { ReservasList } from "@/components/reservas"
 
 export default function HuespedDetailsPage() {
   const params = useParams()
@@ -119,6 +128,100 @@ export default function HuespedDetailsPage() {
     })
   }
 
+  // Funciones para calcular analíticas
+  const getAnalytics = () => {
+    if (!huesped) return null
+
+    const reservas = huesped.reservas || []
+    const facturas = huesped.facturas || []
+
+    // Estadísticas de reservas
+    const totalReservas = reservas.length
+    const reservasPorEstado = reservas.reduce((acc, reserva) => {
+      acc[reserva.estado] = (acc[reserva.estado] || 0) + 1
+      return acc
+    }, {} as Record<EstadosReserva, number>)
+
+    // Calcular noches totales
+    const nochesTotales = reservas.reduce((total, reserva) => {
+      const inicio = new Date(reserva.fecha_inicio)
+      const fin = new Date(reserva.fecha_fin)
+      const noches = Math.ceil((fin.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24))
+      return total + noches
+    }, 0)
+
+    // Fechas primera y última reserva
+    const fechasReservas = reservas.map(r => new Date(r.createdAt)).sort((a, b) => a.getTime() - b.getTime())
+    const primeraReserva = fechasReservas[0]
+    const ultimaReserva = fechasReservas[fechasReservas.length - 1]
+
+    // Motivos de viaje más frecuentes
+    const motivosFreq = reservas.reduce((acc, reserva) => {
+      acc[reserva.motivo_viaje] = (acc[reserva.motivo_viaje] || 0) + 1
+      return acc
+    }, {} as Record<MotivosViajes, number>)
+
+    const motivoMasFrecuente = Object.entries(motivosFreq).sort(([,a], [,b]) => b - a)[0]
+
+    // Ciudades de procedencia
+    const ciudadesFreq = reservas.reduce((acc, reserva) => {
+      const ciudad = `${reserva.ciudad_procedencia}, ${reserva.pais_procedencia}`
+      acc[ciudad] = (acc[ciudad] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const ciudadMasFrecuente = Object.entries(ciudadesFreq).sort(([,a], [,b]) => b - a)[0]
+
+    // Estadísticas de facturas
+    const totalFacturado = facturas.reduce((total, factura) => total + factura.total, 0)
+    const promedioFactura = facturas.length > 0 ? totalFacturado / facturas.length : 0
+    const facturaMasAlta = facturas.length > 0 ? Math.max(...facturas.map(f => f.total)) : 0
+    const facturaMasBaja = facturas.length > 0 ? Math.min(...facturas.map(f => f.total)) : 0
+
+    // Tiempo como cliente
+    const tiempoCliente = primeraReserva ? 
+      Math.ceil((Date.now() - primeraReserva.getTime()) / (1000 * 60 * 60 * 24)) : 0
+
+    // Total acompañantes
+    const totalAcompanantes = huesped.huespedes_secundarios?.length || 0
+
+    return {
+      totalReservas,
+      reservasPorEstado,
+      nochesTotales,
+      primeraReserva,
+      ultimaReserva,
+      motivoMasFrecuente,
+      ciudadMasFrecuente,
+      totalFacturado,
+      promedioFactura,
+      facturaMasAlta,
+      facturaMasBaja,
+      tiempoCliente,
+      totalAcompanantes,
+      totalFacturas: facturas.length
+    }
+  }
+
+  const analytics = getAnalytics()
+
+  const formatMotivoViaje = (motivo: MotivosViajes) => {
+    switch(motivo) {
+      case MotivosViajes.NEGOCIOS_Y_MOTIVOS_PROFESIONALES:
+        return "Negocios"
+      case MotivosViajes.VACACIONES_RECREO_Y_OCIO:
+        return "Recreación"
+      case MotivosViajes.SALUD_Y_ATENCION_MEDICA:
+        return "Salud"
+      case MotivosViajes.EDUCACION_Y_FORMACION:
+        return "Educación"
+      case MotivosViajes.OTROS_MOTIVOS:
+        return "Otros"
+      default:
+        return motivo
+    }
+  }
+
   if (loading) {
     return (
       <div>
@@ -162,14 +265,6 @@ export default function HuespedDetailsPage() {
         {/* Header con acciones */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              onClick={() => router.push('/dashboard')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver
-            </Button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 {huesped.nombres} {huesped.primer_apellido} {huesped.segundo_apellido}
@@ -207,7 +302,7 @@ export default function HuespedDetailsPage() {
         </div>
 
         <Tabs defaultValue="personal" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="personal" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Personal</span>
@@ -223,6 +318,10 @@ export default function HuespedDetailsPage() {
             <TabsTrigger value="acompanantes" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Acompañantes</span>
+            </TabsTrigger>
+            <TabsTrigger value="analitica" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analítica</span>
             </TabsTrigger>
           </TabsList>
 
@@ -491,57 +590,15 @@ export default function HuespedDetailsPage() {
 
           {/* Tab de Reservas */}
           <TabsContent value="reservas">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Reservas
-                  <Badge variant="secondary">
-                    {huesped.reservas?.length || 0}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!huesped.reservas || huesped.reservas.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-500">No hay reservas registradas</p>
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-4">
-                      {huesped.reservas.map((reserva) => (
-                        <div key={reserva.id} className="border rounded-lg p-4">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h4 className="font-semibold text-gray-900">Reserva #{reserva.id}</h4>
-                              <p className="text-sm text-gray-600">
-                                Check-in: {formatDate(reserva.check_in)}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Check-out: {formatDate(reserva.check_out)}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Fecha inicio: {formatDate(reserva.fecha_inicio)}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Fecha fin: {formatDate(reserva.fecha_fin)}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Costo: ${reserva.costo.toLocaleString()}
-                              </p>
-                            </div>
-                            <Badge variant={reserva.estado === 'RESERVADO' ? 'default' : 'secondary'}>
-                              {reserva.estado}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
+            <ReservasList 
+              reservas={huesped.reservas || []}
+              title="Reservas del Huésped"
+              emptyMessage="Este huésped no tiene reservas registradas"
+              className="border-0 shadow-none p-0"
+              huesped={huesped}
+              huespedesSecundarios={huesped.huespedes_secundarios}
+              facturas={huesped.facturas}
+            />
           </TabsContent>
 
           {/* Tab de Acompañantes */}
@@ -598,6 +655,203 @@ export default function HuespedDetailsPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Tab de Analítica */}
+          <TabsContent value="analitica">
+            <div className="space-y-6">
+              {/* Resumen general */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Total Reservas</p>
+                        <p className="text-2xl font-bold">{analytics?.totalReservas || 0}</p>
+                      </div>
+                      <Calendar className="h-8 w-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Noches Totales</p>
+                        <p className="text-2xl font-bold">{analytics?.nochesTotales || 0}</p>
+                      </div>
+                      <Clock className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Total Facturado</p>
+                        <p className="text-2xl font-bold">${(analytics?.totalFacturado || 0).toLocaleString()}</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-emerald-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Días como Cliente</p>
+                        <p className="text-2xl font-bold">{analytics?.tiempoCliente || 0}</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-purple-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Estadísticas detalladas */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Estadísticas de Reservas */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      Estadísticas de Reservas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">Primera Reserva</Label>
+                        <p className="text-sm font-medium">
+                          {analytics?.primeraReserva ? formatDate(analytics.primeraReserva) : 'No disponible'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">Última Reserva</Label>
+                        <p className="text-sm font-medium">
+                          {analytics?.ultimaReserva ? formatDate(analytics.ultimaReserva) : 'No disponible'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Reservas por Estado</Label>
+                      {analytics?.reservasPorEstado && Object.entries(analytics.reservasPorEstado).map(([estado, cantidad]) => (
+                        <div key={estado} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={
+                              estado === EstadosReserva.RESERVADO ? 'default' : 
+                              estado === EstadosReserva.FINALIZADO ? 'secondary' :
+                              estado === EstadosReserva.CANCELADO ? 'destructive' : 'outline'
+                            }>
+                              {estado}
+                            </Badge>
+                          </div>
+                          <span className="text-sm font-medium">{cantidad}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Motivo de Viaje Más Frecuente</Label>
+                      <p className="text-sm font-medium">
+                        {analytics?.motivoMasFrecuente ? 
+                          `${formatMotivoViaje(analytics.motivoMasFrecuente[0] as MotivosViajes)} (${analytics.motivoMasFrecuente[1]} veces)` : 
+                          'No disponible'
+                        }
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Ciudad de Procedencia Más Frecuente</Label>
+                      <div className="flex items-center gap-2">
+                        <MapIcon className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm font-medium">
+                          {analytics?.ciudadMasFrecuente ? 
+                            `${analytics.ciudadMasFrecuente[0]} (${analytics.ciudadMasFrecuente[1]} veces)` : 
+                            'No disponible'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Estadísticas de Facturas */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Estadísticas de Facturas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Total de Facturas</Label>
+                          <p className="text-lg font-bold text-emerald-700">{analytics?.totalFacturas || 0}</p>
+                        </div>
+                        <FileText className="h-6 w-6 text-emerald-600" />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Promedio por Factura</Label>
+                          <p className="text-lg font-bold text-blue-700">
+                            ${(analytics?.promedioFactura || 0).toLocaleString()}
+                          </p>
+                        </div>
+                        <TrendingUp className="h-6 w-6 text-blue-600" />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 bg-green-50 rounded-lg border">
+                          <Label className="text-xs text-muted-foreground">Factura Más Alta</Label>
+                          <p className="text-sm font-bold text-green-700">
+                            ${(analytics?.facturaMasAlta || 0).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-orange-50 rounded-lg border">
+                          <Label className="text-xs text-muted-foreground">Factura Más Baja</Label>
+                          <p className="text-sm font-bold text-orange-700">
+                            ${(analytics?.facturaMasBaja || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Información Adicional</Label>
+                      <div className="grid grid-cols-1 gap-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Total Acompañantes</span>
+                          <span className="text-sm font-medium">{analytics?.totalAcompanantes || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Promedio Acompañantes por Reserva</span>
+                          <span className="text-sm font-medium">
+                            {analytics?.totalReservas ? 
+                              ((analytics?.totalAcompanantes || 0) / analytics.totalReservas).toFixed(1) : 
+                              '0'
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
