@@ -259,7 +259,7 @@ export default function HuespedDetailsPage() {
 
   return (
     <div>
-      <Header title="Detalles del Huésped" />
+      <Header title="Hotel San Miguel" />
       
       <div className="container mx-auto px-4 py-6">
         {/* Header con acciones */}

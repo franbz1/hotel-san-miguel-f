@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, Search, Users, Eye, Calendar, Crown } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search, Users, Calendar } from "lucide-react"
 import { getHuespedes } from "@/lib/huespedes/huesped-service"
 import { Huesped } from "@/Types/huesped"
 import { useRouter } from "next/navigation"
@@ -69,20 +69,39 @@ export function HuespedesSection() {
     router.push(`/dashboard/huesped/${huespedId}`)
   }
 
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('es-ES')
+  // Función para generar iniciales del avatar
+  const getInitials = (nombres: string, primerApellido: string) => {
+    const firstInitial = nombres.charAt(0).toUpperCase()
+    const lastInitial = primerApellido.charAt(0).toUpperCase()
+    return `${firstInitial}${lastInitial}`
+  }
+
+  // Función para generar color del avatar basado en las iniciales
+  const getAvatarColor = (nombres: string, primerApellido: string) => {
+    const colors = [
+      'bg-blue-500',
+      'bg-green-500', 
+      'bg-purple-500',
+      'bg-orange-500',
+      'bg-pink-500',
+      'bg-indigo-500',
+      'bg-teal-500',
+      'bg-red-500'
+    ]
+    const charCode = nombres.charCodeAt(0) + primerApellido.charCodeAt(0)
+    return colors[charCode % colors.length]
   }
 
   return (
     <Card className="flex flex-col h-full">
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pb-2">
           <CardTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5" />
-            Huéspedes Principales
+            <Users className="h-5 w-5" />
+            Huéspedes
           </CardTitle>
-          <Badge variant="secondary">
-            {totalHuespedes} registros
+          <Badge variant="secondary" className="font-medium">
+            {totalHuespedes} registrados
           </Badge>
         </div>
         
@@ -90,17 +109,18 @@ export function HuespedesSection() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Buscar por nombre, apellido o documento..."
+            placeholder="Buscar huésped..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
           />
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 overflow-hidden flex flex-col">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2">
+            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
             {error}
           </div>
         )}
@@ -108,94 +128,57 @@ export function HuespedesSection() {
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-sm text-gray-600">Cargando huéspedes...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-200 border-t-blue-600 mx-auto"></div>
+              <p className="mt-3 text-sm text-gray-600 font-medium">Cargando huéspedes...</p>
             </div>
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-1 pr-4 min-h-[300px] max-h-[300px]">
+            <ScrollArea className="flex-1 pr-2">
               <div className="space-y-3">
                 {filteredHuespedes.length === 0 ? (
-                  <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center justify-center py-16">
                     <div className="text-center text-gray-500">
-                      <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No se encontraron huéspedes</p>
+                      <div className="bg-gray-100 rounded-full p-6 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <Users className="h-10 w-10 text-gray-400" />
+                      </div>
+                      <p className="font-medium text-gray-700">No se encontraron huéspedes</p>
                       {searchTerm && (
-                        <p className="text-sm">Intenta con otros términos de búsqueda</p>
+                        <p className="text-sm text-gray-500 mt-1">Intenta con otros términos de búsqueda</p>
                       )}
                     </div>
                   </div>
                 ) : (
                   filteredHuespedes.map((huesped) => (
-                    <div key={huesped.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-gray-900">
-                              {huesped.nombres} {huesped.primer_apellido} {huesped.segundo_apellido || ''}
-                            </h3>
-                            <Badge 
-                              variant="default"
-                              className="text-xs flex items-center gap-1"
-                            >
-                              <Crown className="h-3 w-3" />
-                              Principal
-                            </Badge>
-                          </div>
-                          
-                          <div className="mt-1 space-y-1">
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Documento:</span> {huesped.tipo_documento} {huesped.numero_documento}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Género:</span> {huesped.genero}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Nacionalidad:</span> {huesped.nacionalidad}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Residencia:</span> {huesped.ciudad_residencia}, {huesped.pais_residencia}
-                            </p>
-                            {huesped.telefono && (
-                              <p className="text-sm text-gray-600">
-                                <span className="font-medium">Teléfono:</span> {huesped.telefono}
-                              </p>
-                            )}
-                            {huesped.correo && (
-                              <p className="text-sm text-gray-600">
-                                <span className="font-medium">Email:</span> {huesped.correo}
-                              </p>
-                            )}
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Registro:</span> {formatDate(huesped.createdAt)}
-                            </p>
-                          </div>
+                    <div key={huesped.id} className="group bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer"
+                         onClick={() => handleViewDetails(huesped.id)}>
+                      <div className="flex items-center gap-4">
+                        {/* Avatar con iniciales */}
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm ${getAvatarColor(huesped.nombres, huesped.primer_apellido)} shadow-sm`}>
+                          {getInitials(huesped.nombres, huesped.primer_apellido)}
                         </div>
                         
-                        <div className="ml-4 flex flex-col items-end gap-2">
-                          {/* Badge de reservas */}
-                          <Badge variant={huesped.reservas && huesped.reservas.length > 0 ? 'default' : 'secondary'} className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {huesped.reservas ? huesped.reservas.length : 0} reservas
-                          </Badge>
-                          
-                          {/* Badge de acompañantes */}
-                          {huesped.huespedes_secundarios && huesped.huespedes_secundarios.length > 0 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{huesped.huespedes_secundarios.length} acompañantes
-                            </Badge>
-                          )}
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2 cursor-pointer"
-                            onClick={() => handleViewDetails(huesped.id)}
+                        {/* Información del huésped */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-base group-hover:text-blue-600 transition-colors truncate">
+                            {huesped.nombres} {huesped.primer_apellido}
+                          </h3>
+                          <p className="text-sm text-gray-500 mt-0.5">
+                            {huesped.tipo_documento} {huesped.numero_documento}
+                          </p>
+                        </div>
+                        
+                        {/* Badge de reservas y botón de acción */}
+                        <div className="flex items-center gap-3">
+                          <Badge 
+                            variant={huesped.reservas && huesped.reservas.length > 0 ? 'default' : 'secondary'} 
+                            className="flex items-center gap-1.5 px-2.5 py-1"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Ver detalles
-                          </Button>
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span className="font-medium">
+                              {huesped.reservas ? huesped.reservas.length : 0} reservas
+                            </span>
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -204,31 +187,34 @@ export function HuespedesSection() {
               </div>
             </ScrollArea>
 
-            {/* Paginación */}
+            {/* Paginación mejorada */}
             {!searchTerm && totalPages > 1 && (
-              <div className="border-t pt-4 mt-4">
+              <div className="border-t border-gray-100 pt-4 mt-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">
-                    Página {currentPage} de {totalPages} ({totalHuespedes} huéspedes)
+                    <span className="font-medium">{currentPage}</span> de <span className="font-medium">{totalPages}</span> páginas
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handlePreviousPage}
                       disabled={currentPage === 1 || loading}
+                      className="h-8 px-3 disabled:opacity-50"
                     >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Anterior
+                      <ChevronLeft className="h-4 w-4" />
                     </Button>
+                    <div className="px-3 py-1 text-sm text-gray-600 bg-gray-50 rounded">
+                      {currentPage}
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleNextPage}
                       disabled={currentPage === totalPages || loading}
+                      className="h-8 px-3 disabled:opacity-50"
                     >
-                      Siguiente
-                      <ChevronRight className="h-4 w-4 ml-1" />
+                      <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
