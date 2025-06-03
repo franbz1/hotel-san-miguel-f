@@ -1,4 +1,4 @@
-import { Habitacion } from '@/Types/habitacion'
+import { Habitacion, UpdateHabitacionDto } from '@/Types/habitacion'
 import { HABITACION_ENDPOINTS, SSE_ENDPOINTS } from '@/lib/common/api'
 import { COOKIE_NAMES, getCookie } from '@/lib/common/cookies'
 import { TipoHabitacion } from '@/Types/enums/tiposHabitacion'
@@ -62,6 +62,53 @@ export async function createHabitacion(data: CreateHabitacionDto): Promise<Habit
   if (!response.ok) {
     const errorData = await response.json()
     throw new Error(errorData.message || 'Error al crear la habitación')
+  }
+
+  return response.json()
+}
+
+export async function updateHabitacion(id: number, data: UpdateHabitacionDto): Promise<Habitacion> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(HABITACION_ENDPOINTS.UPDATE(id), {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Error al actualizar la habitación')
+  }
+
+  return response.json()
+}
+
+export async function deleteHabitacion(id: number): Promise<Habitacion> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(HABITACION_ENDPOINTS.DELETE(id), {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Error al eliminar la habitación')
   }
 
   return response.json()

@@ -1,11 +1,10 @@
 "use client"
 
-import { Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { UserNav } from "@/components/user-nav"
 import { RoomsSection } from "@/components/rooms/rooms-section"
 import { BookingsSection } from "@/components/bookings/bookings-section"
+import { HuespedesSection } from "@/components/huespedes/huespedes-section"
+import { Header } from "@/components/layout/header"
 
 const StatCard = ({ title, value, color }: { title: string; value: string; color: string }) => {
   return (
@@ -21,21 +20,9 @@ const StatCard = ({ title, value, color }: { title: string; value: string; color
 export default function DashboardPage() {
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div>
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold">Hotel San Miguel</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <UserNav />
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Stats */}
       <div className="container mx-auto px-4 py-6">
@@ -46,12 +33,21 @@ export default function DashboardPage() {
           <StatCard title="Pendientes" value="0" color="text-gray-600" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Rooms Panel */}
-          <RoomsSection />
+        <div className="space-y-6">
+          {/* Primera fila: Habitaciones y Reservas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Rooms Panel */}
+            <RoomsSection />
 
-          {/* Bookings Panel */}
-          <BookingsSection />
+            {/* Bookings Panel */}
+            <BookingsSection title="Formularios de reservas" />
+          </div>
+
+          {/* Segunda fila: Huéspedes */}
+          <div className="grid grid-cols-1">
+            {/* Huéspedes Panel */}
+            <HuespedesSection />
+          </div>
         </div>
       </div>
     </div>

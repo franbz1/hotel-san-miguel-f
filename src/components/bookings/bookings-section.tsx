@@ -4,7 +4,7 @@ import { RefreshCcw, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { getBookingCards } from "@/lib/bookings/bookin-card-service"
+import { getBookingCards, getBookingCardsByHabitacion } from "@/lib/bookings/bookin-card-service"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { BookingCard } from "@/Types/bookin-card"
 import BookingCardUI from "@/components/bookings/booking-card-ui"
@@ -12,7 +12,21 @@ import { CreateBookingModal } from "@/components/bookings/create-booking-modal"
 import { Button } from "../ui/button"
 import { cn } from "@/lib/common/utils"
 
-export function BookingsSection() {
+interface BookingsSectionProps {
+  roomNumber?: number
+  height?: string
+  title?: string
+  showFilters?: boolean
+  createButton?: boolean
+}
+
+export function BookingsSection({
+  roomNumber,
+  height = "300px",
+  title = "Reservas",
+  showFilters = true,
+  createButton = true
+}: BookingsSectionProps) {
   const [bookings, setBookings] = useState<BookingCard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +38,10 @@ export function BookingsSection() {
   const fetchBookings = useCallback(async (pageNumber: number) => {
     try {
       setLoading(true)
-      const data = await getBookingCards(10, pageNumber)
+      // Usar la función adecuada según si se especifica una habitación o no
+      const data = roomNumber !== undefined 
+        ? await getBookingCardsByHabitacion(roomNumber, 10, pageNumber)
+        : await getBookingCards(10, pageNumber);
       if (data.length === 0) {
         setHasMore(false)
         return
@@ -43,7 +60,7 @@ export function BookingsSection() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [roomNumber])
 
   useEffect(() => {
     fetchBookings(1)
@@ -100,12 +117,14 @@ export function BookingsSection() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Reservas</h2>
+        <h2 className="text-xl font-semibold">{title}</h2>
         <div className="flex items-center gap-3">
-          <div className="relative max-w-[200px] sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Buscar reserva..." className="pl-8 w-full" />
-          </div>
+          {showFilters && (
+            <div className="relative max-w-[200px] sm:w-64">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input type="search" placeholder="Buscar reserva..." className="pl-8 w-full" />
+            </div>
+          )}
           <Button
             variant="outline"
             size="icon"
@@ -121,44 +140,54 @@ export function BookingsSection() {
           >
             <RefreshCcw size={14} className="text-slate-600" />
           </Button>
-          <CreateBookingModal onBookingCreated={handleBookingCreated} />
+          {createButton && <CreateBookingModal onBookingCreated={handleBookingCreated} />}
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-4">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-          <span className="text-xs text-gray-600">Pendiente</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-          <span className="text-xs text-gray-600">Completado</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
-          <span className="text-xs text-gray-600">Expirado</span>
-        </div>
-      </div>
+      {showFilters && (
+        <>
+          <div className="mb-4 flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+              <span className="text-xs text-gray-600">Pendiente</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+              <span className="text-xs text-gray-600">Completado</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span className="text-xs text-gray-600">Expirado</span>
+            </div>
+          </div>
 
-      <Tabs defaultValue="all" className="mb-6">
-        <TabsList>
-          <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="active">Activas</TabsTrigger>
-          <TabsTrigger value="upcoming">Próximas</TabsTrigger>
-          <TabsTrigger value="past">Pasadas</TabsTrigger>
-        </TabsList>
-      </Tabs>
+          <Tabs defaultValue="all" className="mb-6">
+            <TabsList>
+              <TabsTrigger value="all">Todas</TabsTrigger>
+              <TabsTrigger value="active">Activas</TabsTrigger>
+              <TabsTrigger value="upcoming">Próximas</TabsTrigger>
+              <TabsTrigger value="past">Pasadas</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </>
+      )}
 
 
-      <ScrollArea className="h-[300px] rounded-md border">
+      <ScrollArea className={`rounded-md border`} style={{ height }}>
         <div className="space-y-2 p-4">
-          {bookings.map((booking, index) => (
-            <BookingCardUI 
-              key={`${booking.nombre}-${booking.fecha_inicio}-${index}`} 
-              booking={booking}
-              onDeleted={handleRefresh}
-            />
-          ))}
+          {bookings.length === 0 && !loading ? (
+            <div className="text-center text-muted-foreground py-4">
+              No hay reservas para mostrar
+            </div>
+          ) : (
+            bookings.map((booking, index) => (
+              <BookingCardUI 
+                key={`${booking.nombre}-${booking.fecha_inicio}-${index}`} 
+                booking={booking}
+                onDeleted={handleRefresh}
+              />
+            ))
+          )}
           {hasMore && (
             <div ref={loadingRef} className="flex justify-center py-4">
               {loading && <div>Cargando más reservas...</div>}

@@ -53,6 +53,7 @@ export const LINK_FORMULARIO_ENDPOINTS = {
   DELETE: (id: number) => `${API_BASE_URL}/link-formulario/${id}`,
   VALIDATE: (token: string) => `${API_BASE_URL}/link-formulario/validate-token/${token}`,
   REGENERATE: (id: number) => `${API_BASE_URL}/link-formulario/${id}/regenerate`,
+  GET_ALL_BY_HABITACION: (numeroHabitacion: number, limit: number, page: number) => `${API_BASE_URL}/link-formulario/habitacion/${numeroHabitacion}?limit=${limit}&page=${page}`,
 } as const
 
 export const REGISTRO_FORMULARIO_ENDPOINTS = {
@@ -67,5 +68,16 @@ export const BOOKING_ENDPOINTS = {
 
 export const SSE_ENDPOINTS = {
   HABITACIONES_CAMBIOS: `${API_BASE_URL}/sse/habitaciones-cambios`,
+} as const
+
+// Endpoints de huespedes secundarios
+export const HUESPED_SECUNDARIO_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number) => `${API_BASE_URL}/huespedes-secundarios?limit=${limit}&page=${page}`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
+  GET_BY_HUESPED_ID: (huespedId: number, limit: number, page: number) => `${API_BASE_URL}/huespedes-secundarios/huespedId/${huespedId}?limit=${limit}&page=${page}`,
+  GET_BY_DOCUMENT: (numeroDocumento: string) => `${API_BASE_URL}/huespedes-secundarios/numeroDocumento/${numeroDocumento}`,
+  CREATE: `${API_BASE_URL}/huespedes-secundarios`,
+  UPDATE: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
 } as const
 

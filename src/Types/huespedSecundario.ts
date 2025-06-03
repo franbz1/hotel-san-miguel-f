@@ -3,25 +3,63 @@ import { Reserva } from "./Reserva"
 
 export interface HuespedSecundario {
   id: number
-  tipoDocumento: TipoDoc
-  numeroDocumento: string
-  primerApellido: string
-  segundoApellido: string
+  tipo_documento: TipoDoc
+  numero_documento: string
+  primer_apellido: string
+  segundo_apellido: string
   nombres: string
-  paisResidencia: string
-  departamentoResidencia: string
-  ciudadResidencia: string
-  ciudadProcedencia: string
-  lugarNacimiento: string
-  fechaNacimiento: Date
+  pais_residencia: string
+  departamento_residencia: string
+  ciudad_residencia: string
+  ciudad_procedencia: string
+  lugar_nacimiento: string
+  fecha_nacimiento: Date
   nacionalidad: string
   ocupacion: string
   genero: string
   telefono: string | null
   correo: string | null
-  huespedId: number
+  huesped_id: number
   reservas: Reserva[]
 
   createdAt: Date
   updatedAt: Date
+}
+
+export interface CreateHuespedSecundarioDto {
+  tipo_documento: TipoDoc
+  numero_documento: string
+  primer_apellido: string
+  segundo_apellido?: string
+  nombres: string
+  pais_residencia: string
+  ciudad_residencia: string
+  pais_procedencia: string
+  ciudad_procedencia: string
+  fecha_nacimiento: Date
+  nacionalidad: string
+  ocupacion: string
+  genero: string
+  telefono?: string
+  correo?: string
+  huespedId: number
+}
+
+export interface UpdateHuespedSecundarioDto {
+  tipo_documento?: TipoDoc
+  numero_documento?: string
+  primer_apellido?: string
+  segundo_apellido?: string
+  nombres?: string
+  pais_residencia?: string
+  ciudad_residencia?: string
+  pais_procedencia?: string
+  ciudad_procedencia?: string
+  fecha_nacimiento?: Date
+  nacionalidad?: string
+  ocupacion?: string
+  genero?: string
+  telefono?: string
+  correo?: string
+  huespedId?: number
 }

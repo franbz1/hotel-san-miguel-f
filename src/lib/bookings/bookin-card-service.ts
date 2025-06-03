@@ -4,7 +4,7 @@ import { getFormularioById } from "@/lib/formulario/formulario-service";
 import { getReservaById } from "@/lib/bookings/reservas-service";
 import { getHuespedById } from "@/lib/huespedes/huesped-service";
 import { EstadosFormulario } from '@/Types/enums/estadosFormulario';
-import { getLinkFormularioById, getLinksFormulario } from "@/lib/formulario/link-formulario-service";
+import { getLinkFormularioById, getLinksFormulario, getLinksFormularioByHabitacion } from "@/lib/formulario/link-formulario-service";
 import { LinkFormulario } from '@/Types/link-formulario';
 import { BOOKING_ENDPOINTS, REGISTRO_FORMULARIO_ENDPOINTS } from '../common/api';
 import { RemoveBookingResponse } from '@/Types/response-delete-booking';
@@ -18,6 +18,54 @@ export async function getBookingCards(limit: number, page: number): Promise<Book
   }
 
   const { data: linksFormularios } = await getLinksFormulario(limit, page)
+
+  const bookingCards = linksFormularios.map(async (linkFormulario) => {
+    if (linkFormulario.formularioId === null) {
+      return {
+        link_formulario_id: linkFormulario.id,
+        nombre: 'Sin nombre',
+        fecha_inicio: linkFormulario.fechaInicio,
+        fecha_fin: linkFormulario.fechaFin,
+        estado: determinarLinkFormulario(linkFormulario),
+        valor: linkFormulario.costo,
+        url: linkFormulario.url,
+        numero_habitacion: linkFormulario.numeroHabitacion,
+        subido_sire: false,
+        subido_tra: false,
+        formulario_id: null
+      }
+    }
+
+    const formulario = await getFormularioById(linkFormulario.formularioId)
+    const reserva = await getReservaById(formulario.reservaId)
+    const huesped = await getHuespedById(formulario.huespedId)
+
+    return {
+      link_formulario_id: linkFormulario.id,
+      nombre: huesped.nombres,
+      fecha_inicio: reserva.fecha_inicio,
+      fecha_fin: reserva.fecha_fin,
+      estado: determinarLinkFormulario(linkFormulario),
+      valor: reserva.costo,
+      url: linkFormulario.url,
+      numero_habitacion: linkFormulario.numeroHabitacion,
+      subido_sire: formulario?.SubidoASire,
+      subido_tra: formulario?.SubidoATra,
+      formulario_id: formulario?.id ?? null
+    }
+  })
+
+  return Promise.all(bookingCards)
+}
+
+export async function getBookingCardsByHabitacion(numeroHabitacion: number, limit: number, page: number): Promise<BookingCard[]> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const { data: linksFormularios } = await getLinksFormularioByHabitacion(numeroHabitacion, limit, page)
 
   const bookingCards = linksFormularios.map(async (linkFormulario) => {
     if (linkFormulario.formularioId === null) {
