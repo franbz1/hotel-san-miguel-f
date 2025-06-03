@@ -46,8 +46,6 @@ export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardPr
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  console.log(reserva)
-
   const getEstadoBadgeColor = (estado: EstadosReserva) => {
     switch (estado) {
       case EstadosReserva.PENDIENTE:

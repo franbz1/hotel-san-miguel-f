@@ -11,7 +11,6 @@ import { RemoveBookingResponse } from '@/Types/response-delete-booking';
 import { RegisterFormularioInTraResponse } from '@/Types/tra-upload-response';
 
 export async function getBookingCards(limit: number, page: number): Promise<BookingCard[]> {
-  console.log("getBookingCards", limit, page)
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
