@@ -60,7 +60,6 @@ export function DateTimePicker({ onChange, initialDate }: DateTimePickerProps) {
             mode="single"
             selected={date}
             onSelect={handleSelect}
-            initialFocus
           />
         </PopoverContent>
       </Popover>
