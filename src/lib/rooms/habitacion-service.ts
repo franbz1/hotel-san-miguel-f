@@ -91,6 +91,29 @@ export async function updateHabitacion(id: number, data: UpdateHabitacionDto): P
   return response.json()
 }
 
+export async function deleteHabitacion(id: number): Promise<Habitacion> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(HABITACION_ENDPOINTS.DELETE(id), {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Error al eliminar la habitación')
+  }
+
+  return response.json()
+}
+
 export async function getHabitacionesDisponibles(fechaInicio: Date, fechaFin: Date): Promise<Habitacion[]> {
   const token = getCookie(COOKIE_NAMES.TOKEN)
   
