@@ -4,6 +4,8 @@ import { formatDate } from "@/lib/common/utils"
 import { TipoDoc } from "@/Types/enums/tiposDocumento"
 import { EstadosReserva } from "@/Types/enums/estadosReserva"
 import { MotivosViajes } from "@/Types/enums/motivosViajes"
+import { deleteReserva } from "@/lib/bookings/reservas-service"
+import { toast } from "sonner"
 import {
   Calendar,
   ChevronDown,
@@ -11,9 +13,20 @@ import {
   Globe,
   UserCheck,
   Users,
+  Trash2,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   Accordion,
   AccordionContent,
@@ -25,10 +38,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 interface ReservationCardProps {
   reserva: Reserva
+  onReservaDeleted?: () => void
 }
 
-export function ReservationCard({ reserva }: ReservationCardProps) {
+export function ReservationCard({ reserva, onReservaDeleted }: ReservationCardProps) {
   const [headerExpanded, setHeaderExpanded] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   console.log(reserva)
 
@@ -86,6 +102,25 @@ export function ReservationCard({ reserva }: ReservationCardProps) {
       .slice(0, 2)
       .join('')
       .toUpperCase()
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+
+    try {
+      await deleteReserva(reserva.id)
+      toast.success("Reserva eliminada", {
+        description: "La reserva ha sido eliminada correctamente",
+      })
+      onReservaDeleted?.()
+    } catch (error) {
+      toast.error("Error al eliminar", {
+        description: error instanceof Error ? error.message : "No se pudo eliminar la reserva",
+      })
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+    }
   }
 
   const durationDays = Math.ceil(
@@ -152,6 +187,7 @@ export function ReservationCard({ reserva }: ReservationCardProps) {
                 {durationDays} {durationDays === 1 ? 'día' : 'días'}
               </p>
             </div>
+            
             <div className={`transition-transform duration-300 ${headerExpanded ? 'rotate-180' : ''}`}>
               <ChevronDown className="h-5 w-5 text-muted-foreground" />
             </div>
@@ -164,6 +200,53 @@ export function ReservationCard({ reserva }: ReservationCardProps) {
         headerExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
       }`}>
         <CardContent className="p-0">
+          {/* Botón de eliminar en la sección expandida */}
+          <div className="p-4 border-b bg-gradient-to-r from-red-50/30 to-orange-50/30">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-gray-800">Acciones de reserva</p>
+                <p className="text-xs text-muted-foreground">Gestionar esta reserva</p>
+              </div>
+              <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="destructive"
+                    size="sm" 
+                    className="cursor-pointer gap-2"
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Eliminar reserva</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>¿Está seguro de eliminar esta reserva?</DialogTitle>
+                    <DialogDescription>
+                      Esta acción no se puede deshacer. Se eliminará permanentemente la reserva de {reserva.huesped.nombres} {reserva.huesped.primer_apellido} y todos sus datos asociados.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setDeleteDialogOpen(false)}
+                      disabled={isDeleting}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? "Eliminando..." : "Eliminar"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+
           {/* Información de contacto y detalles importantes */}
           <div className="p-4 bg-gradient-to-r from-slate-25 to-gray-25 border-b">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

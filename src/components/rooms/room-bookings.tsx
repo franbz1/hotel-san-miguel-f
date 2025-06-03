@@ -4,9 +4,10 @@ import { ReservasHabitacion } from "./reservas-habitacion"
 interface RoomBookingsProps {
   habitacion?: Habitacion | null
   loading: boolean
+  onReservaDeleted?: () => void
 }
 
-export function RoomBookings({ habitacion, loading }: RoomBookingsProps) {
+export function RoomBookings({ habitacion, loading, onReservaDeleted }: RoomBookingsProps) {
   if (loading || !habitacion) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -19,6 +20,6 @@ export function RoomBookings({ habitacion, loading }: RoomBookingsProps) {
   }
 
   return (
-    <ReservasHabitacion habitacion={habitacion} />
+    <ReservasHabitacion habitacion={habitacion} onReservaDeleted={onReservaDeleted} />
   )
 } 

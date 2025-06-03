@@ -69,14 +69,44 @@ export function RoomsSection() {
     try {
       setIsLoading(true)
       const response = await getHabitaciones(currentPage)
+      
       setHabitaciones(response.data)
-      setTotalPages(response.meta.lastPage)
+      
+      // Manejar el caso cuando no hay habitaciones
+      const calculatedTotalPages = response.meta.lastPage > 0 ? response.meta.lastPage : 1
+      setTotalPages(calculatedTotalPages)
+      
+      // Si la página actual es mayor que el total de páginas disponibles, 
+      // redirigir a la primera página
+      if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
+        setCurrentPage(1)
+        return // Salir temprano, useEffect se activará de nuevo
+      }
+      
       setError(null)
     } catch (err) {
-      setError('Error al cargar las habitaciones')
-      console.error(err)
+      // Si hay error y la página actual es mayor que 1, intentar ir a la página 1
+      if (currentPage > 1) {
+        setCurrentPage(1)
+        setError(null) // Limpiar error temporalmente para permitir retry
+      } else {
+        setError('Error al cargar las habitaciones')
+        console.error(err)
+      }
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1 && !isLoading) {
+      setCurrentPage(prev => prev - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages && !isLoading) {
+      setCurrentPage(prev => prev + 1)
     }
   }
 
@@ -148,6 +178,10 @@ export function RoomsSection() {
     };
   }, []);
 
+  // Calcular si hay habitaciones para mostrar mensaje apropiado
+  const hasHabitaciones = habitaciones.length > 0
+  const showEmptyState = !isLoading && !error && !hasHabitaciones
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
       <div className="flex justify-between items-center mb-6">
@@ -199,6 +233,11 @@ export function RoomsSection() {
           <div className="col-span-full text-center text-red-500">
             {error}
           </div>
+        ) : showEmptyState ? (
+          <div className="col-span-full text-center text-gray-500 py-12">
+            <p className="text-lg mb-2">No hay habitaciones registradas</p>
+            <p className="text-sm text-muted-foreground">Comienza creando tu primera habitación</p>
+          </div>
         ) : (
           habitaciones.map((room) => (
             <RoomCard 
@@ -210,30 +249,32 @@ export function RoomsSection() {
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center space-x-2">
-        <Button
-          className="cursor-pointer"
-          variant="outline"
-          size="icon"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1 || isLoading}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <span className="text-sm">
-          Página {currentPage} de {totalPages}
-        </span>
-        <Button
-          className="cursor-pointer"
-          variant="outline"
-          size="icon"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages || isLoading}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+      {/* Pagination - Solo mostrar si hay habitaciones */}
+      {hasHabitaciones && (
+        <div className="flex justify-center items-center space-x-2">
+          <Button
+            className="cursor-pointer"
+            variant="outline"
+            size="icon"
+            onClick={handlePreviousPage}
+            disabled={currentPage <= 1 || isLoading}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm">
+            Página {currentPage} de {totalPages}
+          </span>
+          <Button
+            className="cursor-pointer"
+            variant="outline"
+            size="icon"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages || isLoading}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 } 

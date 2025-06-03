@@ -5,9 +5,10 @@ import { ReservationCard } from "./reservation-card"
 
 interface ReservasHabitacionProps {
   habitacion: Habitacion
+  onReservaDeleted?: () => void
 }
 
-export function ReservasHabitacion({ habitacion }: ReservasHabitacionProps) {
+export function ReservasHabitacion({ habitacion, onReservaDeleted }: ReservasHabitacionProps) {
   const reservas = useMemo(() => 
     // Ordenar las reservas desde la más reciente a la más antigua
     habitacion.reservas?.sort(
@@ -27,7 +28,11 @@ export function ReservasHabitacion({ habitacion }: ReservasHabitacionProps) {
         <ScrollArea className="h-[300px] rounded-md pr-4">
           <div className="space-y-6">
             {reservas.map((reserva) => (
-              <ReservationCard key={reserva.id} reserva={reserva} />
+              <ReservationCard 
+                key={reserva.id} 
+                reserva={reserva} 
+                onReservaDeleted={onReservaDeleted}
+              />
             ))}
           </div>
         </ScrollArea>

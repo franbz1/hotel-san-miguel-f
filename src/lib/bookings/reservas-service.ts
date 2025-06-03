@@ -48,7 +48,32 @@ export async function getReservaById(id: number): Promise<Reserva> {
   })
 
   if (!response.ok) {
+    const errorData = await response.json()
+    console.log(errorData)
     throw new Error('Error al obtener la reserva')
+  }
+
+  return response.json()
+}
+
+export async function deleteReserva(id: number): Promise<Reserva> {
+  const token = getCookie(COOKIE_NAMES.TOKEN)
+
+  if (!token) {
+    throw new Error('No hay token de autenticación')
+  }
+
+  const response = await fetch(RESERVA_ENDPOINTS.DELETE(id), {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Error al eliminar la reserva')
   }
 
   return response.json()

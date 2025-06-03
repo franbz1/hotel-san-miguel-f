@@ -90,7 +90,11 @@ export default function RoomDetails() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {/* Bookings */}
           <div className="md:col-span-2">
-            <RoomBookings habitacion={habitacion} loading={loading} />
+            <RoomBookings 
+              habitacion={habitacion} 
+              loading={loading} 
+              onReservaDeleted={handleRoomUpdated}
+            />
           </div>
 
           {/* Analytics */}
