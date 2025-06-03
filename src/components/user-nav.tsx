@@ -54,8 +54,8 @@ export function UserNav() {
               <span>Habitaciones</span>
             </DropdownMenuItem>
           </Link>
-          <Link href="/dashboard/bookings">
-            <DropdownMenuItem className={isActive("/dashboard/bookings") ? "bg-muted cursor-default" : "cursor-pointer"}>
+          <Link href="/dashboard/reservas">
+            <DropdownMenuItem className={isActive("/dashboard/reservas") ? "bg-muted cursor-default" : "cursor-pointer"}>
               <CalendarDays className="mr-2 h-4 w-4" />
               <span>Reservas</span>
             </DropdownMenuItem>

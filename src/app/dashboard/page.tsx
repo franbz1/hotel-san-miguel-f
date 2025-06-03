@@ -40,7 +40,7 @@ export default function DashboardPage() {
             <RoomsSection />
 
             {/* Bookings Panel */}
-            <BookingsSection />
+            <BookingsSection title="Formularios de reservas" />
           </div>
 
           {/* Segunda fila: Huéspedes */}
