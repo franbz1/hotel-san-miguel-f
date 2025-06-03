@@ -70,3 +70,14 @@ export const SSE_ENDPOINTS = {
   HABITACIONES_CAMBIOS: `${API_BASE_URL}/sse/habitaciones-cambios`,
 } as const
 
+// Endpoints de huespedes secundarios
+export const HUESPED_SECUNDARIO_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number) => `${API_BASE_URL}/huespedes-secundarios?limit=${limit}&page=${page}`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
+  GET_BY_HUESPED_ID: (huespedId: number, limit: number, page: number) => `${API_BASE_URL}/huespedes-secundarios/huespedId/${huespedId}?limit=${limit}&page=${page}`,
+  GET_BY_DOCUMENT: (numeroDocumento: string) => `${API_BASE_URL}/huespedes-secundarios/numeroDocumento/${numeroDocumento}`,
+  CREATE: `${API_BASE_URL}/huespedes-secundarios`,
+  UPDATE: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
+} as const
+

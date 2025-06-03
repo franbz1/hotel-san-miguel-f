@@ -25,3 +25,41 @@ export interface HuespedSecundario {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface CreateHuespedSecundarioDto {
+  tipo_documento: TipoDoc
+  numero_documento: string
+  primer_apellido: string
+  segundo_apellido?: string
+  nombres: string
+  pais_residencia: string
+  ciudad_residencia: string
+  pais_procedencia: string
+  ciudad_procedencia: string
+  fecha_nacimiento: Date
+  nacionalidad: string
+  ocupacion: string
+  genero: string
+  telefono?: string
+  correo?: string
+  huespedId: number
+}
+
+export interface UpdateHuespedSecundarioDto {
+  tipo_documento?: TipoDoc
+  numero_documento?: string
+  primer_apellido?: string
+  segundo_apellido?: string
+  nombres?: string
+  pais_residencia?: string
+  ciudad_residencia?: string
+  pais_procedencia?: string
+  ciudad_procedencia?: string
+  fecha_nacimiento?: Date
+  nacionalidad?: string
+  ocupacion?: string
+  genero?: string
+  telefono?: string
+  correo?: string
+  huespedId?: number
+}

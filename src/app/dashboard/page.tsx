@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { RoomsSection } from "@/components/rooms/rooms-section"
 import { BookingsSection } from "@/components/bookings/bookings-section"
+import { HuespedesSection } from "@/components/huespedes/huespedes-section"
 import { Header } from "@/components/layout/header"
 
 const StatCard = ({ title, value, color }: { title: string; value: string; color: string }) => {
@@ -32,12 +33,21 @@ export default function DashboardPage() {
           <StatCard title="Pendientes" value="0" color="text-gray-600" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Rooms Panel */}
-          <RoomsSection />
+        <div className="space-y-6">
+          {/* Primera fila: Habitaciones y Reservas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Rooms Panel */}
+            <RoomsSection />
 
-          {/* Bookings Panel */}
-          <BookingsSection />
+            {/* Bookings Panel */}
+            <BookingsSection />
+          </div>
+
+          {/* Segunda fila: Huéspedes */}
+          <div className="grid grid-cols-1">
+            {/* Huéspedes Panel */}
+            <HuespedesSection />
+          </div>
         </div>
       </div>
     </div>

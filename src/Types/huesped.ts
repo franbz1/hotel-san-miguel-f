@@ -29,3 +29,41 @@ export interface Huesped {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface CreateHuespedDto {
+  tipo_documento: TipoDoc
+  numero_documento: string
+  primer_apellido: string
+  segundo_apellido?: string
+  nombres: string
+  pais_residencia: string
+  ciudad_residencia: string
+  pais_procedencia: string
+  ciudad_procedencia: string
+  lugar_nacimiento: string
+  fecha_nacimiento: Date
+  nacionalidad: string
+  ocupacion: string
+  genero: string
+  telefono?: string
+  correo?: string
+}
+
+export interface UpdateHuespedDto {
+  tipo_documento?: TipoDoc
+  numero_documento?: string
+  primer_apellido?: string
+  segundo_apellido?: string
+  nombres?: string
+  pais_residencia?: string
+  ciudad_residencia?: string
+  pais_procedencia?: string
+  ciudad_procedencia?: string
+  lugar_nacimiento?: string
+  fecha_nacimiento?: Date
+  nacionalidad?: string
+  ocupacion?: string
+  genero?: string
+  telefono?: string
+  correo?: string
+}
