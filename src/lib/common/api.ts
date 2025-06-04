@@ -81,3 +81,27 @@ export const HUESPED_SECUNDARIO_ENDPOINTS = {
   DELETE: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
 } as const
 
+// Endpoints de analíticas
+export const ANALYTICS_ENDPOINTS = {
+  // Analíticas de ocupación
+  OCUPACION: (params?: URLSearchParams) => `${API_BASE_URL}/analytics/ocupacion${params ? `?${params.toString()}` : ''}`,
+  
+  // Demografia de huéspedes
+  HUESPEDES_DEMOGRAFIA: (params?: URLSearchParams) => `${API_BASE_URL}/analytics/huespedes/demografia${params ? `?${params.toString()}` : ''}`,
+  
+  // Procedencia de huéspedes
+  HUESPEDES_PROCEDENCIA: (params?: URLSearchParams) => `${API_BASE_URL}/analytics/huespedes/procedencia${params ? `?${params.toString()}` : ''}`,
+  
+  // Rendimiento de habitaciones
+  HABITACIONES_RENDIMIENTO: (params?: URLSearchParams) => `${API_BASE_URL}/analytics/habitaciones/rendimiento${params ? `?${params.toString()}` : ''}`,
+  
+  // Motivos de viaje
+  MOTIVOS_VIAJE: (params?: URLSearchParams) => `${API_BASE_URL}/analytics/motivos-viaje${params ? `?${params.toString()}` : ''}`,
+  
+  // Predicción de ocupación
+  FORECAST_OCUPACION: (params?: URLSearchParams) => `${API_BASE_URL}/analytics/forecast/ocupacion${params ? `?${params.toString()}` : ''}`,
+  
+  // Dashboard ejecutivo
+  DASHBOARD: (params?: URLSearchParams) => `${API_BASE_URL}/analytics/dashboard${params ? `?${params.toString()}` : ''}`,
+} as const
+
