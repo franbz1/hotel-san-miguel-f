@@ -4,14 +4,14 @@ import {
   FiltrosAnalyticsDto,
   FiltrosOcupacionDto,
   FiltrosDashboardDto,
-  FiltrosForecastDto,
-  AnalyticsOcupacionResponse,
-  AnalyticsDemografiaResponse,
-  AnalyticsProcedenciaResponse,
-  AnalyticsRendimientoResponse,
-  AnalyticsMotivosViajeResponse,
-  AnalyticsForecastResponse,
+  ForecastParamsDto,
   DashboardEjecutivoDto,
+  AnalisisOcupacionResponseDto,
+  DemografiaHuespedesDto,
+  ProcedenciaHuespedesDto,
+  RendimientoHabitacionDto,
+  MotivosViajeDto,
+  PrediccionOcupacionDto,
 } from "@/Types/analytics"
 
 // Función auxiliar para crear URLSearchParams
@@ -57,7 +57,7 @@ const fetchWithAuth = async (url: string): Promise<Response> => {
 // Servicio para analíticas de ocupación
 export async function getAnalyticsOcupacion(
   filtros?: FiltrosOcupacionDto
-): Promise<AnalyticsOcupacionResponse> {
+): Promise<AnalisisOcupacionResponseDto> {
   try {
     const params = filtros ? createURLParams(filtros) : undefined
     const response = await fetchWithAuth(ANALYTICS_ENDPOINTS.OCUPACION(params))
@@ -71,7 +71,7 @@ export async function getAnalyticsOcupacion(
 // Servicio para demografía de huéspedes
 export async function getAnalyticsDemografia(
   filtros?: FiltrosAnalyticsDto
-): Promise<AnalyticsDemografiaResponse> {
+): Promise<DemografiaHuespedesDto[]> {
   try {
     const params = filtros ? createURLParams(filtros) : undefined
     const response = await fetchWithAuth(ANALYTICS_ENDPOINTS.HUESPEDES_DEMOGRAFIA(params))
@@ -85,7 +85,7 @@ export async function getAnalyticsDemografia(
 // Servicio para procedencia de huéspedes
 export async function getAnalyticsProcedencia(
   filtros?: FiltrosAnalyticsDto
-): Promise<AnalyticsProcedenciaResponse> {
+): Promise<ProcedenciaHuespedesDto[]> {
   try {
     const params = filtros ? createURLParams(filtros) : undefined
     const response = await fetchWithAuth(ANALYTICS_ENDPOINTS.HUESPEDES_PROCEDENCIA(params))
@@ -99,7 +99,7 @@ export async function getAnalyticsProcedencia(
 // Servicio para rendimiento de habitaciones
 export async function getAnalyticsRendimiento(
   filtros?: FiltrosAnalyticsDto
-): Promise<AnalyticsRendimientoResponse> {
+): Promise<RendimientoHabitacionDto[]> {
   try {
     const params = filtros ? createURLParams(filtros) : undefined
     const response = await fetchWithAuth(ANALYTICS_ENDPOINTS.HABITACIONES_RENDIMIENTO(params))
@@ -113,7 +113,7 @@ export async function getAnalyticsRendimiento(
 // Servicio para motivos de viaje
 export async function getAnalyticsMotivosViaje(
   filtros?: FiltrosAnalyticsDto
-): Promise<AnalyticsMotivosViajeResponse> {
+): Promise<MotivosViajeDto[]> {
   try {
     const params = filtros ? createURLParams(filtros) : undefined
     const response = await fetchWithAuth(ANALYTICS_ENDPOINTS.MOTIVOS_VIAJE(params))
@@ -126,8 +126,8 @@ export async function getAnalyticsMotivosViaje(
 
 // Servicio para forecast de ocupación
 export async function getAnalyticsForecast(
-  filtros?: FiltrosForecastDto
-): Promise<AnalyticsForecastResponse> {
+  filtros?: ForecastParamsDto
+): Promise<PrediccionOcupacionDto[]> {
   try {
     const params = filtros ? createURLParams(filtros) : undefined
     const response = await fetchWithAuth(ANALYTICS_ENDPOINTS.FORECAST_OCUPACION(params))

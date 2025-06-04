@@ -22,20 +22,24 @@ export interface FiltrosDashboardDto extends FiltrosAnalyticsDto {
   topMercados?: number;
 }
 
-export interface FiltrosForecastDto {
-  periodosAdelante?: number;
-  tipoPeriodo?: 'día' | 'semana' | 'mes' | 'año';
+// Corregido según documentación - campos requeridos
+export interface ForecastParamsDto {
+  fechaInicio?: string;
+  fechaFin?: string;
+  periodosAdelante: number; // Requerido (1-12)
+  tipoPeriodo: 'mes' | 'semana'; // Requerido
 }
 
 // DTOs de Respuesta
 
+// Corregido según documentación
 export interface OcupacionPorPeriodoDto {
-  periodo: string;
-  ocupacion: number;
-  revpar: number;
-  adr: number;
-  habitacionesOcupadas: number;
-  habitacionesDisponibles: number;
+  periodo: string;         // Fecha ISO del período
+  tasaOcupacion: number;   // Porcentaje de ocupación
+  revpar: number;          // Revenue Per Available Room
+  adr: number;             // Average Daily Rate
+  totalReservas: number;   // Número total de reservas
+  ingresosTotales: number; // Ingresos totales del período
 }
 
 export interface AnalisisOcupacionResponseDto {
@@ -52,61 +56,49 @@ export interface DemografiaHuespedesDto {
   ingresos: number;
 }
 
+// Corregido según documentación
 export interface ProcedenciaHuespedesDto {
   paisProcedencia: string;
-  cantidadReservas: number;
-  porcentajeTotal: number;
-  duracionPromedioEstancia: number;
+  ciudadProcedencia: string;
+  cantidad: number;
+  porcentaje: number;
 }
 
+// Corregido según documentación - orden y tipo
 export interface RendimientoHabitacionDto {
-  tipo: string;
+  tipo: TipoHabitacion;
   totalHabitaciones: number;
   tasaOcupacionPromedio: number;
-  revpar: number;
-  precioPromedioNoche: number;
   ingresosTotales: number;
+  precioPromedioNoche: number;
+  revpar: number;
 }
 
 export interface MotivosViajeDto {
-  motivo: string;
+  motivo: MotivosViajes;
   cantidad: number;
   porcentaje: number;
   duracionPromedioEstancia: number;
 }
 
-export interface ForecastOcupacionDto {
+// Corregido según documentación - renombrado y campos corregidos
+export interface PrediccionOcupacionDto {
   periodo: string;
-  ocupacionPredicta: number;
-  confianza: number;
-  factoresInfluyentes: string[];
+  ocupacionPredicida: number;
+  nivelConfianza: number;
+  ingresosPredichos: number;
 }
 
+// Corregido según documentación - estructura simplificada
 export interface ComparacionPeriodoAnterior {
-  ocupacion: {
-    actual: number;
-    anterior: number;
-    cambio: number;
-    porcentajeCambio: number;
-  };
-  revpar: {
-    actual: number;
-    anterior: number;
-    cambio: number;
-    porcentajeCambio: number;
-  };
-  adr: {
-    actual: number;
-    anterior: number;
-    cambio: number;
-    porcentajeCambio: number;
-  };
-  ingresos: {
-    actual: number;
-    anterior: number;
-    cambio: number;
-    porcentajeCambio: number;
-  };
+  ocupacionAnterior: number;
+  revparAnterior: number;
+  adrAnterior: number;
+  ingresosAnteriores: number;
+  cambioOcupacion: number;
+  cambioRevpar: number;
+  cambioAdr: number;
+  cambioIngresos: number;
 }
 
 export interface DashboardEjecutivoDto {
@@ -152,8 +144,9 @@ export interface AnalyticsMotivosViajeResponse {
   message?: string;
 }
 
+// Corregido - usando PrediccionOcupacionDto
 export interface AnalyticsForecastResponse {
-  data: ForecastOcupacionDto[];
+  data: PrediccionOcupacionDto[];
   success: boolean;
   message?: string;
 }
