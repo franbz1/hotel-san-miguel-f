@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -27,8 +26,9 @@ import {
   Info,
 } from "lucide-react"
 import Link from "next/link"
-import { getAnalyticsDashboard, formatCurrency, formatPercentage, getChangeColor, getChangeIcon } from "@/lib/analytics/analytics-service"
-import { DashboardEjecutivoDto, FiltrosDashboardDto } from "@/Types/analytics"
+import { formatCurrency, formatPercentage, getChangeColor, getChangeIcon } from "@/lib/analytics/analytics-service"
+import { FiltrosDashboardDto } from "@/Types/analytics"
+import { useAnalyticsDashboard } from "@/hooks/useAnalytics"
 import { toast } from "sonner"
 
 interface KpisDashboardProps {
@@ -37,41 +37,20 @@ interface KpisDashboardProps {
 }
 
 export function KpisDashboard({ filtros, className = "" }: KpisDashboardProps) {
-  const [data, setData] = useState<DashboardEjecutivoDto | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data, loading, error, refetch } = useAnalyticsDashboard(filtros)
 
-  const fetchDashboardData = async (showToast = false) => {
+  const handleRefresh = async () => {
     try {
-      setLoading(true)
-      setError(null)
-
-      const response = await getAnalyticsDashboard(filtros)
-      
-      setData(response)
-      if (showToast) {
-        toast.success("KPIs actualizados", {
-          description: "Los datos del dashboard se han actualizado correctamente"
-        })
-      }
-    } catch (error) {
-      console.error('Error al cargar KPIs:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      setError(errorMessage)
-      toast.error("Error al cargar KPIs", {
-        description: errorMessage
+      await refetch()
+      toast.success("KPIs actualizados", {
+        description: "Los datos del dashboard se han actualizado correctamente"
       })
-    } finally {
-      setLoading(false)
+    } catch (error) {
+      console.error('Error al actualizar KPIs:', error)
+      toast.error("Error al actualizar KPIs", {
+        description: "No se pudieron actualizar los datos del dashboard"
+      })
     }
-  }
-
-  useEffect(() => {
-    fetchDashboardData()
-  }, [filtros])
-
-  const handleRefresh = () => {
-    fetchDashboardData(true)
   }
 
   if (error) {
@@ -304,9 +283,9 @@ export function KpisDashboard({ filtros, className = "" }: KpisDashboardProps) {
                   <p className="text-2xl font-bold">{formatPercentage(data?.ocupacionActual || 0)}</p>
                 )}
                 {!loading && data?.comparacionPeriodoAnterior && (
-                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.ocupacion.porcentajeCambio)}`}>
-                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.ocupacion.porcentajeCambio)}</span>
-                    {Math.abs(data.comparacionPeriodoAnterior.ocupacion.porcentajeCambio).toFixed(1)}%
+                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.cambioOcupacion)}`}>
+                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.cambioOcupacion)}</span>
+                    {Math.abs(data.comparacionPeriodoAnterior.cambioOcupacion).toFixed(1)}%
                   </p>
                 )}
               </div>
@@ -329,9 +308,9 @@ export function KpisDashboard({ filtros, className = "" }: KpisDashboardProps) {
                   <p className="text-2xl font-bold">{formatCurrency(data?.revparActual || 0)}</p>
                 )}
                 {!loading && data?.comparacionPeriodoAnterior && (
-                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.revpar.porcentajeCambio)}`}>
-                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.revpar.porcentajeCambio)}</span>
-                    {Math.abs(data.comparacionPeriodoAnterior.revpar.porcentajeCambio).toFixed(1)}%
+                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.cambioRevpar)}`}>
+                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.cambioRevpar)}</span>
+                    {Math.abs(data.comparacionPeriodoAnterior.cambioRevpar).toFixed(1)}%
                   </p>
                 )}
               </div>
@@ -354,9 +333,9 @@ export function KpisDashboard({ filtros, className = "" }: KpisDashboardProps) {
                   <p className="text-2xl font-bold">{formatCurrency(data?.adrActual || 0)}</p>
                 )}
                 {!loading && data?.comparacionPeriodoAnterior && (
-                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.adr.porcentajeCambio)}`}>
-                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.adr.porcentajeCambio)}</span>
-                    {Math.abs(data.comparacionPeriodoAnterior.adr.porcentajeCambio).toFixed(1)}%
+                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.cambioAdr)}`}>
+                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.cambioAdr)}</span>
+                    {Math.abs(data.comparacionPeriodoAnterior.cambioAdr).toFixed(1)}%
                   </p>
                 )}
               </div>
@@ -379,9 +358,9 @@ export function KpisDashboard({ filtros, className = "" }: KpisDashboardProps) {
                   <p className="text-2xl font-bold">{formatCurrency(data?.ingresosPeriodo || 0)}</p>
                 )}
                 {!loading && data?.comparacionPeriodoAnterior && (
-                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.ingresos.porcentajeCambio)}`}>
-                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.ingresos.porcentajeCambio)}</span>
-                    {Math.abs(data.comparacionPeriodoAnterior.ingresos.porcentajeCambio).toFixed(1)}%
+                  <p className={`text-xs mt-1 flex items-center gap-1 ${getChangeColor(data.comparacionPeriodoAnterior.cambioIngresos)}`}>
+                    <span>{getChangeIcon(data.comparacionPeriodoAnterior.cambioIngresos)}</span>
+                    {Math.abs(data.comparacionPeriodoAnterior.cambioIngresos).toFixed(1)}%
                   </p>
                 )}
               </div>
