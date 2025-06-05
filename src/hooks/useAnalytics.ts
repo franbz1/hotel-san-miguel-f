@@ -30,11 +30,23 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Extraer propiedades individuales para dependencias estables
+  const fechaInicio = filtros?.fechaInicio
+  const fechaFin = filtros?.fechaFin
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getAnalyticsDashboard(filtros)
+      
+      // Reconstruir objeto filtros con propiedades actuales
+      const filtrosActuales = fechaInicio || fechaFin ? {
+        ...(fechaInicio && { fechaInicio }),
+        ...(fechaFin && { fechaFin })
+      } : undefined
+      
+      const response = await getAnalyticsDashboard(filtrosActuales)
+      console.log("response", response)
       setData(response)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
@@ -43,7 +55,7 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
     } finally {
       setLoading(false)
     }
-  }, [filtros])
+  }, [fechaInicio, fechaFin])
 
   useEffect(() => {
     fetchData()
