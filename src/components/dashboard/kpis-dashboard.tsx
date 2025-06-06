@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  TrendingUp,
+import { 
+  TrendingUp, 
   TrendingDown,
-  DollarSign,
+  DollarSign, 
   Home,
   RefreshCw,
   BarChart3,
@@ -337,16 +337,16 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
 
   return (
     <TooltipProvider>
-      <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 ${className}`}>
         {/* Header con controles */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-blue-600" />
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <BarChart3 className="h-6 w-6 text-blue-600" />
             KPIs Ejecutivos - Comparación de Períodos
-          </h2>
+        </h2>
           <div className="flex items-center gap-3">
             {/* Selector de período */}
-            <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <Select value={tipoPeriodo} onValueChange={handlePeriodoChange}>
                 <SelectTrigger className="w-32">
@@ -358,20 +358,20 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
                   <SelectItem value="mes">Mes</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+                </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={loading}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={loading}
               className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Actualizar
-            </Button>
-          </div>
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
         </div>
+      </div>
 
         {/* Información de períodos */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
@@ -385,10 +385,10 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
           </div>
         </div>
 
-        {/* Métricas principales */}
+      {/* Métricas principales */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Ocupación */}
-          <Card>
+        <Card>
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <Home className="h-5 w-5 text-blue-600" />
@@ -481,12 +481,12 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
                     label={nombrePeriodoAnterior}
                   />
                 )}
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
           {/* Ingresos */}
-          <Card>
+        <Card>
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-green-600" />
@@ -559,8 +559,8 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
                     Período Anterior
                   </span>
                   <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                </div>
-                {loading ? (
+      </div>
+            {loading ? (
                   <Skeleton className="h-8 w-28" />
                 ) : (
                   <p className="text-xl font-semibold text-gray-600">
@@ -571,7 +571,7 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
 
               {/* Indicador de cambio */}
               <div className="pt-4 border-t">
-                {loading ? (
+            {loading ? (
                   <Skeleton className="h-6 w-48" />
                 ) : (
                   <IndicadorCambio
@@ -580,10 +580,10 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
                   />
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+          </CardContent>
+        </Card>
       </div>
+            </div>
     </TooltipProvider>
   )
 }
