@@ -34,6 +34,7 @@ import { createHabitacion } from "@/lib/rooms/habitacion-service"
 import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { TipoHabitacion } from "@/Types/enums/tiposHabitacion"
 import { toast } from "sonner"
+import { BedDouble } from "lucide-react"
 
 const formSchema = z.object({
   numero_habitacion: z.coerce.number().min(1, "El número de habitación debe ser mayor a 0"),
@@ -103,13 +104,7 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
       <DialogTrigger asChild>
         <Button className="cursor-pointer">
           <span className="mr-2">Añadir habitación</span>
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" />
-            <path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-            <path d="M2 11h20" />
-            <path d="M12 7v14" />
-            <path d="M2 14h20" />
-          </svg>
+          <BedDouble className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
