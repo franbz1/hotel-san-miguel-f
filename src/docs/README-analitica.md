@@ -342,7 +342,7 @@ interface PrediccionOcupacionDto {
 
 ### `GET /analytics/dashboard`
 
-Dashboard consolidado con KPIs principales y comparaciones temporales.
+Dashboard consolidado con KPIs principales, comparaciones temporales, análisis demográfico, motivos de viaje y rendimiento detallado por habitación individual.
 
 #### **Parámetros de Query (FiltrosDashboardDto):**
 
@@ -366,23 +366,23 @@ GET /analytics/dashboard?fechaInicio=2024-01-01&fechaFin=2024-06-30&incluirCompa
 
 ```typescript
 interface DashboardEjecutivoDto {
-  ocupacionActual: number;
-  revparActual: number;
-  adrActual: number;
-  ingresosPeriodo: number;
-  topMercadosEmisores: DemografiaHuespedesDto[];
-  distribucionMotivosViaje: MotivosViajeDto[];
-  rendimientoHabitaciones: RendimientoHabitacionDto[];
-  tasaHuespedesRecurrentes: number;
-  comparacionPeriodoAnterior?: {
+  ocupacionActual: number;              // KPI de ocupación actual
+  revparActual: number;                 // RevPAR actual
+  adrActual: number;                    // ADR actual
+  ingresosPeriodo: number;              // Ingresos del período
+  topMercadosEmisores: DemografiaHuespedesDto[];    // Top mercados por nacionalidad
+  distribucionMotivosViaje: MotivosViajeDto[];      // Distribución por motivo de viaje
+  rendimientoHabitaciones: RendimientoHabitacionDto[];  // Rendimiento por habitación individual (ordenado por ingresos)
+  tasaHuespedesRecurrentes: number;     // Tasa de huéspedes recurrentes (%)
+  comparacionPeriodoAnterior?: {        // Comparación opcional con período anterior
     ocupacionAnterior: number;
     revparAnterior: number;
     adrAnterior: number;
     ingresosAnteriores: number;
-    cambioOcupacion: number;
-    cambioRevpar: number;
-    cambioAdr: number;
-    cambioIngresos: number;
+    cambioOcupacion: number;            // Cambio porcentual
+    cambioRevpar: number;               // Cambio porcentual
+    cambioAdr: number;                  // Cambio porcentual
+    cambioIngresos: number;             // Cambio porcentual
   };
 }
 ```
@@ -402,8 +402,36 @@ interface DashboardEjecutivoDto {
       "ingresos": 6525000
     }
   ],
-  "distribucionMotivosViaje": [],
-  "rendimientoHabitaciones": [],
+  "distribucionMotivosViaje": [
+    {
+      "motivo": "VACACIONES_RECREO_Y_OCIO",
+      "cantidad": 85,
+      "porcentaje": 65.4,
+      "duracionPromedioEstancia": 3.2
+    }
+  ],
+  "rendimientoHabitaciones": [
+    {
+      "habitacionId": "clm123456789abcdef",
+      "numeroHabitacion": "101",
+      "tipo": "SENCILLA",
+      "ingresosTotales": 850000,
+      "totalReservas": 15,
+      "nochesVendidas": 42,
+      "ingresoPromedioReserva": 56666.67,
+      "porcentajeOcupacion": 75.23
+    },
+    {
+      "habitacionId": "clm987654321fedcba",
+      "numeroHabitacion": "205",
+      "tipo": "DOBLE",
+      "ingresosTotales": 720000,
+      "totalReservas": 12,
+      "nochesVendidas": 36,
+      "ingresoPromedioReserva": 60000,
+      "porcentajeOcupacion": 64.29
+    }
+  ],
   "tasaHuespedesRecurrentes": 18.5,
   "comparacionPeriodoAnterior": {
     "ocupacionAnterior": 68.2,
@@ -466,6 +494,19 @@ const dashboard = await response.json();
 console.log(`Ocupación: ${dashboard.ocupacionActual}%`);
 console.log(`RevPAR: $${dashboard.revparActual}`);
 console.log(`Cambio vs anterior: ${dashboard.comparacionPeriodoAnterior?.cambioOcupacion}%`);
+
+// Top 3 habitaciones más rentables
+const topHabitaciones = dashboard.rendimientoHabitaciones.slice(0, 3);
+console.log('Top 3 habitaciones más rentables:');
+topHabitaciones.forEach((hab, index) => {
+  console.log(`${index + 1}. Habitación ${hab.numeroHabitacion} (${hab.tipo}): $${hab.ingresosTotales.toLocaleString()}`);
+});
+
+// Distribución de motivos de viaje
+const motivoPrincipal = dashboard.distribucionMotivosViaje[0];
+if (motivoPrincipal) {
+  console.log(`Motivo principal: ${motivoPrincipal.motivo} (${motivoPrincipal.porcentaje}%)`);
+}
 ```
 
 ### 2. Gráfico de Ocupación Mensual
