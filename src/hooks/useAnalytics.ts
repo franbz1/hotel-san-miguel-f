@@ -33,6 +33,13 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
   // Extraer propiedades individuales para dependencias estables
   const fechaInicio = filtros?.fechaInicio
   const fechaFin = filtros?.fechaFin
+  const incluirComparacion = filtros?.incluirComparacion
+  const topMercados = filtros?.topMercados
+  const tipoHabitacion = filtros?.tipoHabitacion
+  const nacionalidades = filtros?.nacionalidades
+  const paisesProcedencia = filtros?.paisesProcedencia
+  const motivoViaje = filtros?.motivoViaje
+  const estadoReserva = filtros?.estadoReserva
 
   const fetchData = useCallback(async () => {
     try {
@@ -40,9 +47,16 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
       setError(null)
       
       // Reconstruir objeto filtros con propiedades actuales
-      const filtrosActuales = fechaInicio || fechaFin ? {
+      const filtrosActuales = (fechaInicio || fechaFin || incluirComparacion !== undefined || topMercados || tipoHabitacion || nacionalidades || paisesProcedencia || motivoViaje || estadoReserva) ? {
         ...(fechaInicio && { fechaInicio }),
-        ...(fechaFin && { fechaFin })
+        ...(fechaFin && { fechaFin }),
+        ...(incluirComparacion !== undefined && { incluirComparacion }),
+        ...(topMercados && { topMercados }),
+        ...(tipoHabitacion && { tipoHabitacion }),
+        ...(nacionalidades && { nacionalidades }),
+        ...(paisesProcedencia && { paisesProcedencia }),
+        ...(motivoViaje && { motivoViaje }),
+        ...(estadoReserva && { estadoReserva })
       } : undefined
       
       const response = await getAnalyticsDashboard(filtrosActuales)
@@ -55,7 +69,7 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
     } finally {
       setLoading(false)
     }
-  }, [fechaInicio, fechaFin])
+  }, [fechaInicio, fechaFin, incluirComparacion, topMercados, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva])
 
   useEffect(() => {
     fetchData()
