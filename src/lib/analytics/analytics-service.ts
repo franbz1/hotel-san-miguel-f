@@ -14,6 +14,35 @@ import {
   PrediccionOcupacionDto,
 } from "@/Types/analytics"
 
+// Función auxiliar para convertir fecha local a UTC
+const convertToUTC = (dateString: string): string => {
+  // Crear fecha en zona horaria local (YYYY-MM-DD se interpreta como local)
+  const localDate = new Date(dateString + 'T00:00:00')
+  
+  // Convertir a UTC y formatear como ISO string
+  const utcDate = new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000))
+  
+  // Retornar en formato ISO UTC
+  return utcDate.toISOString()
+}
+
+/*
+EJEMPLO DE CONVERSIÓN DE FECHAS:
+================================
+Usuario en Colombia (UTC-5) selecciona: "2024-01-15"
+
+1. Input del usuario: "2024-01-15" (interpretado como local)
+2. Conversión a UTC: "2024-01-15T05:00:00.000Z" 
+3. Enviado al backend: "2024-01-15T05:00:00.000Z"
+4. Backend procesa en UTC consistentemente
+5. UI sigue mostrando: "2024-01-15" (fecha local original)
+
+VENTAJAS:
+- Backend siempre recibe UTC para consistencia global
+- Usuario ve fechas en su zona horaria local
+- No hay confusión de zona horaria en cálculos del servidor
+*/
+
 // Función auxiliar para crear URLSearchParams
 const createURLParams = (filters: object): URLSearchParams => {
   const params = new URLSearchParams()
@@ -23,7 +52,13 @@ const createURLParams = (filters: object): URLSearchParams => {
       if (Array.isArray(value)) {
         value.forEach((item) => params.append(key, String(item)))
       } else {
-        params.append(key, String(value))
+        // Convertir fechas a UTC antes de enviar
+        if ((key === 'fechaInicio' || key === 'fechaFin') && typeof value === 'string') {
+          const utcDate = convertToUTC(value)
+          params.append(key, utcDate)
+        } else {
+          params.append(key, String(value))
+        }
       }
     }
   })
@@ -182,4 +217,39 @@ export const getChangeIcon = (changePercent: number): string => {
   if (changePercent > 0) return '↗'
   if (changePercent < 0) return '↘'
   return '→'
+}
+
+// Función auxiliar para convertir fecha UTC a local para mostrar
+export const convertUTCToLocal = (utcDateString: string): string => {
+  try {
+    const utcDate = new Date(utcDateString)
+    
+    // Convertir a fecha local y formatear como YYYY-MM-DD
+    const localDate = new Date(utcDate.getTime() + (utcDate.getTimezoneOffset() * 60000))
+    
+    const year = localDate.getFullYear()
+    const month = String(localDate.getMonth() + 1).padStart(2, '0')
+    const day = String(localDate.getDate()).padStart(2, '0')
+    
+    return `${year}-${month}-${day}`
+  } catch (error) {
+    console.error('Error al convertir fecha UTC a local:', error)
+    return utcDateString
+  }
+}
+
+// Función auxiliar para formatear fecha para mostrar al usuario
+export const formatDateForDisplay = (dateString: string): string => {
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'America/Bogota'
+    }).format(date)
+  } catch (error) {
+    console.error('Error al formatear fecha para mostrar:', error)
+    return dateString
+  }
 } 

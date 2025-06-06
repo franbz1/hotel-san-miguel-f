@@ -40,6 +40,7 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
   const paisesProcedencia = filtros?.paisesProcedencia
   const motivoViaje = filtros?.motivoViaje
   const estadoReserva = filtros?.estadoReserva
+  const agruparPor = filtros?.agruparPor
 
   const fetchData = useCallback(async () => {
     try {
@@ -56,11 +57,11 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
         ...(nacionalidades && { nacionalidades }),
         ...(paisesProcedencia && { paisesProcedencia }),
         ...(motivoViaje && { motivoViaje }),
-        ...(estadoReserva && { estadoReserva })
+        ...(estadoReserva && { estadoReserva }),
+        ...(agruparPor && { agruparPor })
       } : undefined
       
       const response = await getAnalyticsDashboard(filtrosActuales)
-      console.log("response", response)
       setData(response)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
@@ -69,7 +70,7 @@ export function useAnalyticsDashboard(filtros?: FiltrosDashboardDto) {
     } finally {
       setLoading(false)
     }
-  }, [fechaInicio, fechaFin, incluirComparacion, topMercados, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva])
+  }, [fechaInicio, fechaFin, incluirComparacion, topMercados, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva, agruparPor])
 
   useEffect(() => {
     fetchData()

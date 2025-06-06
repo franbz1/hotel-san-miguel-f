@@ -4,8 +4,8 @@ import { EstadosReserva } from './enums/estadosReserva'
 
 // DTOs de Filtros
 export interface FiltrosAnalyticsDto {
-  fechaInicio?: string; // Formato: YYYY-MM-DD
-  fechaFin?: string; // Formato: YYYY-MM-DD
+  fechaInicio?: string; // Formato UI: YYYY-MM-DD (local), Enviado como: ISO UTC string
+  fechaFin?: string; // Formato UI: YYYY-MM-DD (local), Enviado como: ISO UTC string
   tipoHabitacion?: TipoHabitacion;
   nacionalidades?: string[];
   paisesProcedencia?: string[];
@@ -20,6 +20,7 @@ export interface FiltrosOcupacionDto extends FiltrosAnalyticsDto {
 export interface FiltrosDashboardDto extends FiltrosAnalyticsDto {
   incluirComparacion?: boolean;
   topMercados?: number;
+  agruparPor?: 'día' | 'semana' | 'mes' | 'año';
 }
 
 // Corregido según documentación - campos requeridos
