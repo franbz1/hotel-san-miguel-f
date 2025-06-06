@@ -79,11 +79,34 @@ export function useAnalyticsOcupacion(filtros?: FiltrosOcupacionDto) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Extraer propiedades individuales para dependencias estables
+  const fechaInicio = filtros?.fechaInicio
+  const fechaFin = filtros?.fechaFin
+  const agruparPor = filtros?.agruparPor
+  const tipoHabitacion = filtros?.tipoHabitacion
+  const nacionalidades = filtros?.nacionalidades
+  const paisesProcedencia = filtros?.paisesProcedencia
+  const motivoViaje = filtros?.motivoViaje
+  const estadoReserva = filtros?.estadoReserva
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getAnalyticsOcupacion(filtros)
+      
+      // Reconstruir objeto filtros con propiedades actuales
+      const filtrosActuales = (fechaInicio || fechaFin || agruparPor || tipoHabitacion || nacionalidades || paisesProcedencia || motivoViaje || estadoReserva) ? {
+        ...(fechaInicio && { fechaInicio }),
+        ...(fechaFin && { fechaFin }),
+        ...(agruparPor && { agruparPor }),
+        ...(tipoHabitacion && { tipoHabitacion }),
+        ...(nacionalidades && { nacionalidades }),
+        ...(paisesProcedencia && { paisesProcedencia }),
+        ...(motivoViaje && { motivoViaje }),
+        ...(estadoReserva && { estadoReserva })
+      } : undefined
+      
+      const response = await getAnalyticsOcupacion(filtrosActuales)
       // Extraemos solo los datos útiles de la respuesta
       setData(response)
     } catch (err) {
@@ -93,7 +116,7 @@ export function useAnalyticsOcupacion(filtros?: FiltrosOcupacionDto) {
     } finally {
       setLoading(false)
     }
-  }, [filtros])
+  }, [fechaInicio, fechaFin, agruparPor, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva])
 
   useEffect(() => {
     fetchData()
@@ -117,11 +140,32 @@ export function useAnalyticsDemografia(filtros?: FiltrosAnalyticsDto) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Extraer propiedades individuales para dependencias estables
+  const fechaInicio = filtros?.fechaInicio
+  const fechaFin = filtros?.fechaFin
+  const tipoHabitacion = filtros?.tipoHabitacion
+  const nacionalidades = filtros?.nacionalidades
+  const paisesProcedencia = filtros?.paisesProcedencia
+  const motivoViaje = filtros?.motivoViaje
+  const estadoReserva = filtros?.estadoReserva
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getAnalyticsDemografia(filtros)
+      
+      // Reconstruir objeto filtros con propiedades actuales
+      const filtrosActuales = (fechaInicio || fechaFin || tipoHabitacion || nacionalidades || paisesProcedencia || motivoViaje || estadoReserva) ? {
+        ...(fechaInicio && { fechaInicio }),
+        ...(fechaFin && { fechaFin }),
+        ...(tipoHabitacion && { tipoHabitacion }),
+        ...(nacionalidades && { nacionalidades }),
+        ...(paisesProcedencia && { paisesProcedencia }),
+        ...(motivoViaje && { motivoViaje }),
+        ...(estadoReserva && { estadoReserva })
+      } : undefined
+      
+      const response = await getAnalyticsDemografia(filtrosActuales)
       setData(response)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
@@ -130,7 +174,7 @@ export function useAnalyticsDemografia(filtros?: FiltrosAnalyticsDto) {
     } finally {
       setLoading(false)
     }
-  }, [filtros])
+  }, [fechaInicio, fechaFin, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva])
 
   useEffect(() => {
     fetchData()
@@ -154,11 +198,32 @@ export function useAnalyticsProcedencia(filtros?: FiltrosAnalyticsDto) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Extraer propiedades individuales para dependencias estables
+  const fechaInicio = filtros?.fechaInicio
+  const fechaFin = filtros?.fechaFin
+  const tipoHabitacion = filtros?.tipoHabitacion
+  const nacionalidades = filtros?.nacionalidades
+  const paisesProcedencia = filtros?.paisesProcedencia
+  const motivoViaje = filtros?.motivoViaje
+  const estadoReserva = filtros?.estadoReserva
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getAnalyticsProcedencia(filtros)
+      
+      // Reconstruir objeto filtros con propiedades actuales
+      const filtrosActuales = (fechaInicio || fechaFin || tipoHabitacion || nacionalidades || paisesProcedencia || motivoViaje || estadoReserva) ? {
+        ...(fechaInicio && { fechaInicio }),
+        ...(fechaFin && { fechaFin }),
+        ...(tipoHabitacion && { tipoHabitacion }),
+        ...(nacionalidades && { nacionalidades }),
+        ...(paisesProcedencia && { paisesProcedencia }),
+        ...(motivoViaje && { motivoViaje }),
+        ...(estadoReserva && { estadoReserva })
+      } : undefined
+      
+      const response = await getAnalyticsProcedencia(filtrosActuales)
       setData(response)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
@@ -167,7 +232,7 @@ export function useAnalyticsProcedencia(filtros?: FiltrosAnalyticsDto) {
     } finally {
       setLoading(false)
     }
-  }, [filtros])
+  }, [fechaInicio, fechaFin, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva])
 
   useEffect(() => {
     fetchData()
@@ -191,11 +256,32 @@ export function useAnalyticsRendimiento(filtros?: FiltrosAnalyticsDto) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Extraer propiedades individuales para dependencias estables
+  const fechaInicio = filtros?.fechaInicio
+  const fechaFin = filtros?.fechaFin
+  const tipoHabitacion = filtros?.tipoHabitacion
+  const nacionalidades = filtros?.nacionalidades
+  const paisesProcedencia = filtros?.paisesProcedencia
+  const motivoViaje = filtros?.motivoViaje
+  const estadoReserva = filtros?.estadoReserva
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getAnalyticsRendimiento(filtros)
+      
+      // Reconstruir objeto filtros con propiedades actuales
+      const filtrosActuales = (fechaInicio || fechaFin || tipoHabitacion || nacionalidades || paisesProcedencia || motivoViaje || estadoReserva) ? {
+        ...(fechaInicio && { fechaInicio }),
+        ...(fechaFin && { fechaFin }),
+        ...(tipoHabitacion && { tipoHabitacion }),
+        ...(nacionalidades && { nacionalidades }),
+        ...(paisesProcedencia && { paisesProcedencia }),
+        ...(motivoViaje && { motivoViaje }),
+        ...(estadoReserva && { estadoReserva })
+      } : undefined
+      
+      const response = await getAnalyticsRendimiento(filtrosActuales)
       setData(response)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
@@ -204,7 +290,7 @@ export function useAnalyticsRendimiento(filtros?: FiltrosAnalyticsDto) {
     } finally {
       setLoading(false)
     }
-  }, [filtros])
+  }, [fechaInicio, fechaFin, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva])
 
   useEffect(() => {
     fetchData()
@@ -228,11 +314,32 @@ export function useAnalyticsMotivosViaje(filtros?: FiltrosAnalyticsDto) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Extraer propiedades individuales para dependencias estables
+  const fechaInicio = filtros?.fechaInicio
+  const fechaFin = filtros?.fechaFin
+  const tipoHabitacion = filtros?.tipoHabitacion
+  const nacionalidades = filtros?.nacionalidades
+  const paisesProcedencia = filtros?.paisesProcedencia
+  const motivoViaje = filtros?.motivoViaje
+  const estadoReserva = filtros?.estadoReserva
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getAnalyticsMotivosViaje(filtros)
+      
+      // Reconstruir objeto filtros con propiedades actuales
+      const filtrosActuales = (fechaInicio || fechaFin || tipoHabitacion || nacionalidades || paisesProcedencia || motivoViaje || estadoReserva) ? {
+        ...(fechaInicio && { fechaInicio }),
+        ...(fechaFin && { fechaFin }),
+        ...(tipoHabitacion && { tipoHabitacion }),
+        ...(nacionalidades && { nacionalidades }),
+        ...(paisesProcedencia && { paisesProcedencia }),
+        ...(motivoViaje && { motivoViaje }),
+        ...(estadoReserva && { estadoReserva })
+      } : undefined
+      
+      const response = await getAnalyticsMotivosViaje(filtrosActuales)
       setData(response)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
@@ -241,7 +348,7 @@ export function useAnalyticsMotivosViaje(filtros?: FiltrosAnalyticsDto) {
     } finally {
       setLoading(false)
     }
-  }, [filtros])
+  }, [fechaInicio, fechaFin, tipoHabitacion, nacionalidades, paisesProcedencia, motivoViaje, estadoReserva])
 
   useEffect(() => {
     fetchData()
@@ -265,11 +372,26 @@ export function useAnalyticsForecast(filtros?: ForecastParamsDto) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Extraer propiedades individuales para dependencias estables
+  const fechaInicio = filtros?.fechaInicio
+  const fechaFin = filtros?.fechaFin
+  const periodosAdelante = filtros?.periodosAdelante
+  const tipoPeriodo = filtros?.tipoPeriodo
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getAnalyticsForecast(filtros)
+      
+      // Para forecast, periodosAdelante y tipoPeriodo son requeridos
+      const filtrosActuales = (periodosAdelante && tipoPeriodo) ? {
+        periodosAdelante,
+        tipoPeriodo,
+        ...(fechaInicio && { fechaInicio }),
+        ...(fechaFin && { fechaFin })
+      } : undefined
+      
+      const response = await getAnalyticsForecast(filtrosActuales)
       setData(response)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
@@ -278,7 +400,7 @@ export function useAnalyticsForecast(filtros?: ForecastParamsDto) {
     } finally {
       setLoading(false)
     }
-  }, [filtros])
+  }, [fechaInicio, fechaFin, periodosAdelante, tipoPeriodo])
 
   useEffect(() => {
     fetchData()

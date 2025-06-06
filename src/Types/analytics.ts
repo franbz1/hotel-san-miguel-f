@@ -64,14 +64,16 @@ export interface ProcedenciaHuespedesDto {
   porcentaje: number;
 }
 
-// Corregido según documentación - orden y tipo
+// Corregido según documentación - estructura por habitación individual
 export interface RendimientoHabitacionDto {
-  tipo: TipoHabitacion;
-  totalHabitaciones: number;
-  tasaOcupacionPromedio: number;
-  ingresosTotales: number;
-  precioPromedioNoche: number;
-  revpar: number;
+  habitacionId: string;           // ID único de la habitación
+  numeroHabitacion: string;       // Número de la habitación (ej: "101")
+  tipo: string;                   // Tipo de habitación (ej: "SENCILLA")
+  ingresosTotales: number;        // Ingresos totales en el período
+  totalReservas: number;          // Total de reservas realizadas
+  nochesVendidas: number;         // Total de noches vendidas
+  ingresoPromedioReserva: number; // Ingreso promedio por reserva
+  porcentajeOcupacion: number;    // Porcentaje de ocupación
 }
 
 export interface MotivosViajeDto {
