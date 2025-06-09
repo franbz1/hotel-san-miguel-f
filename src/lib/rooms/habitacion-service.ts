@@ -75,7 +75,7 @@ export async function updateHabitacion(id: number, data: UpdateHabitacionDto): P
   }
 
   const response = await fetch(HABITACION_ENDPOINTS.UPDATE(id), {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
