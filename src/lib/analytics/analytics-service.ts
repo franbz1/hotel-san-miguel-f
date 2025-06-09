@@ -19,28 +19,30 @@ const convertToUTC = (dateString: string): string => {
   // Crear fecha en zona horaria local (YYYY-MM-DD se interpreta como local)
   const localDate = new Date(dateString + 'T00:00:00')
   
-  // Convertir a UTC y formatear como ISO string
-  const utcDate = new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000))
-  
-  // Retornar en formato ISO UTC
-  return utcDate.toISOString()
+  // ✅ CONVERSIÓN CORRECTA: toISOString() automáticamente convierte a UTC
+  // No necesitamos manipular manualmente el offset de zona horaria
+  return localDate.toISOString()
 }
 
 /*
-EJEMPLO DE CONVERSIÓN DE FECHAS:
-================================
-Usuario en Colombia (UTC-5) selecciona: "2024-01-15"
+EJEMPLO DE CONVERSIÓN DE FECHAS CORREGIDO:
+==========================================
+Usuario en Colombia (UTC-5) selecciona: "2025-06-05"
 
-1. Input del usuario: "2024-01-15" (interpretado como local)
-2. Conversión a UTC: "2024-01-15T05:00:00.000Z" 
-3. Enviado al backend: "2024-01-15T05:00:00.000Z"
-4. Backend procesa en UTC consistentemente
-5. UI sigue mostrando: "2024-01-15" (fecha local original)
+1. Input del usuario: "2025-06-05" (quiere analizar desde el 5 de junio local)
+2. Se crea: new Date("2025-06-05T00:00:00") → 2025-06-05 00:00:00 hora local Colombia
+3. Se convierte: toISOString() → "2025-06-05T05:00:00.000Z" (UTC)
+4. Backend recibe: "2025-06-05T05:00:00.000Z" 
+5. Backend busca desde: 05:00:00 UTC del 5 de junio
+
+RESULTADO:
+- Reserva: 2025-06-06T00:59:07.339Z (UTC) → 2025-06-05T19:59:07 (Colombia)
+- Esta reserva SÍ aparece en el filtro porque 00:59 UTC > 05:00 UTC ✅
 
 VENTAJAS:
-- Backend siempre recibe UTC para consistencia global
-- Usuario ve fechas en su zona horaria local
-- No hay confusión de zona horaria en cálculos del servidor
+- Las fechas se manejan correctamente respetando la zona horaria local
+- Las reservas que el usuario espera ver aparecen en los filtros
+- Backend recibe UTC consistente sin desplazamientos incorrectos
 */
 
 // Función auxiliar para crear URLSearchParams

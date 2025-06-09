@@ -203,6 +203,12 @@ export function ReservationCard({ reserva, onReservaDeleted, huespedExterno, hue
                   {formatDate(new Date(reserva.fecha_inicio))}
                 </span>
                 <span className="flex items-center gap-1">
+                  -
+                </span>
+                <span className="flex items-center gap-1">
+                  {formatDate(new Date(reserva.fecha_fin))}
+                </span>
+                <span className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
                   {totalHuespedes}
                 </span>

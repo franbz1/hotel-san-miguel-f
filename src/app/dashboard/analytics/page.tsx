@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import Link from "next/link"
 import { Header } from "@/components/layout/header"
 import { useAnalyticsDashboard } from "@/hooks/useAnalytics"
@@ -15,34 +15,171 @@ import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  BarChart3,
-  Users,
+import { 
+  BarChart3, 
+  Users, 
   Home,
   DollarSign,
   TrendingUp,
   RefreshCw,
   Filter,
-  Globe,
-  MapPin,
+  Globe, 
+  MapPin, 
   Calendar,
   Percent,
   Building,
+  Info,
+  Clock,
+  ArrowRightLeft,
 } from "lucide-react"
 import { toast } from "sonner"
+
+type PeriodoAgrupacion = 'día' | 'semana' | 'mes' | 'año'
+
+// Función para calcular y explicar los períodos de agrupación
+function explicarPeriodosAgrupacion(
+  fechaInicio: string, 
+  fechaFin: string, 
+  tipoAgrupacion: PeriodoAgrupacion
+) {
+  const inicio = new Date(fechaInicio + 'T00:00:00')
+  const fin = new Date(fechaFin + 'T00:00:00')
+  
+  switch (tipoAgrupacion) {
+    case 'día': {
+      // Para días: genera cada día individual en el rango
+      const dias = []
+      const fechaTemp = new Date(inicio)
+      while (fechaTemp < fin) {
+        dias.push(new Date(fechaTemp))
+        fechaTemp.setDate(fechaTemp.getDate() + 1)
+      }
+      
+      return {
+        tipo: 'Agrupación por Días',
+        descripcion: `Se analiza cada día individual del ${fechaInicio} al ${fechaFin}`,
+        periodosGenerados: `${dias.length} días`,
+        detalleLogica: 'Cada día se evalúa por separado para mostrar tendencias diarias precisas',
+        ejemploPeriodos: dias.length <= 7 ? 
+          dias.map(d => d.toLocaleDateString('es-ES', { 
+            weekday: 'short', 
+            day: 'numeric', 
+            month: 'short',
+            timeZone: 'America/Bogota' 
+          })).join(', ') :
+          `${dias[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'America/Bogota' })} hasta ${dias[dias.length-1].toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'America/Bogota' })}`,
+        icono: '📅',
+        color: 'bg-blue-50 border-blue-200 text-blue-800'
+      }
+    }
+    
+    case 'semana': {
+      // Para semanas: agrupa por semanas completas (lunes a domingo)
+      const inicioSemana = new Date(inicio)
+      const diasHastaLunes = (inicioSemana.getDay() + 6) % 7 // 0 = lunes
+      inicioSemana.setDate(inicioSemana.getDate() - diasHastaLunes)
+      
+      const finSemana = new Date(fin)
+      const diasDesdeUltimoLunes = (finSemana.getDay() + 6) % 7
+      finSemana.setDate(finSemana.getDate() - diasDesdeUltimoLunes)
+      
+      const semanas = []
+      const fechaTemp = new Date(inicioSemana)
+      while (fechaTemp <= finSemana) {
+        semanas.push(new Date(fechaTemp))
+        fechaTemp.setDate(fechaTemp.getDate() + 7)
+      }
+      
+      return {
+        tipo: 'Agrupación por Semanas',
+        descripcion: `Se agrupan los datos por semanas completas (Lunes a Domingo)`,
+        periodosGenerados: `${semanas.length} semana${semanas.length > 1 ? 's' : ''}`,
+        detalleLogica: 'Las reservas se agrupan en semanas completas para identificar patrones semanales',
+        ejemploPeriodos: semanas.map(s => {
+          const finSem = new Date(s)
+          finSem.setDate(finSem.getDate() + 6)
+          return `${s.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'America/Bogota' })} - ${finSem.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'America/Bogota' })}`
+        }).join(', '),
+        icono: '📊',
+        color: 'bg-green-50 border-green-200 text-green-800'
+      }
+    }
+    
+    case 'mes': {
+      // Para meses: agrupa por meses completos
+      const inicioMes = new Date(inicio.getFullYear(), inicio.getMonth(), 1)
+      const finMes = new Date(fin.getFullYear(), fin.getMonth(), 1)
+      
+      const meses = []
+      const fechaTemp = new Date(inicioMes)
+      while (fechaTemp <= finMes) {
+        meses.push(new Date(fechaTemp))
+        fechaTemp.setMonth(fechaTemp.getMonth() + 1)
+      }
+      
+      return {
+        tipo: 'Agrupación por Meses',
+        descripcion: `Se agrupan los datos por meses completos`,
+        periodosGenerados: `${meses.length} mes${meses.length > 1 ? 'es' : ''}`,
+        detalleLogica: 'Las reservas se agrupan mensualmente para análisis de tendencias estacionales',
+        ejemploPeriodos: meses.map(m => 
+          m.toLocaleDateString('es-ES', { 
+            month: 'long', 
+            year: 'numeric',
+            timeZone: 'America/Bogota' 
+          })
+        ).join(', '),
+        icono: '🗓️',
+        color: 'bg-purple-50 border-purple-200 text-purple-800'
+      }
+    }
+    
+    case 'año': {
+      // Para años: agrupa por años completos
+      const añoInicio = inicio.getFullYear()
+      const añoFin = fin.getFullYear()
+      const años = []
+      for (let año = añoInicio; año <= añoFin; año++) {
+        años.push(año)
+      }
+      
+      return {
+        tipo: 'Agrupación por Años',
+        descripcion: `Se agrupan los datos por años completos`,
+        periodosGenerados: `${años.length} año${años.length > 1 ? 's' : ''}`,
+        detalleLogica: 'Las reservas se agrupan anualmente para análisis de tendencias a largo plazo',
+        ejemploPeriodos: años.join(', '),
+        icono: '📈',
+        color: 'bg-orange-50 border-orange-200 text-orange-800'
+      }
+    }
+    
+    default:
+      return null
+  }
+}
 
 export default function AnalyticsPage() {
   // Estado para filtros
   const [filtros, setFiltros] = useState<FiltrosDashboardDto>({
-    incluirComparacion: true,
+    incluirComparacion: false,
     topMercados: 5
   })
+
+  // Estado local para período de agrupación
+  const [periodoAgrupacion, setPeriodoAgrupacion] = useState<PeriodoAgrupacion>('mes')
 
   // Hook para obtener datos del dashboard
   const { data, loading, error, refetch } = useAnalyticsDashboard(filtros)
 
   // Estado para controlar visibilidad de filtros
   const [mostrarFiltros, setMostrarFiltros] = useState(false)
+
+  // Explicación de períodos de agrupación
+  const explicacionPeriodos = useMemo(() => {
+    if (!filtros.fechaInicio || !filtros.fechaFin) return null
+    return explicarPeriodosAgrupacion(filtros.fechaInicio, filtros.fechaFin, periodoAgrupacion)
+  }, [filtros.fechaInicio, filtros.fechaFin, periodoAgrupacion])
 
   // Función para actualizar filtros
   const actualizarFiltro = useCallback(<K extends keyof FiltrosDashboardDto>(
@@ -58,9 +195,10 @@ export default function AnalyticsPage() {
   // Función para limpiar filtros
   const limpiarFiltros = useCallback(() => {
     setFiltros({
-      incluirComparacion: true,
+      incluirComparacion: false,
       topMercados: 5
     })
+    setPeriodoAgrupacion('mes')
   }, [])
 
   // Función para refresh manual
@@ -90,22 +228,25 @@ export default function AnalyticsPage() {
 
   return (
     <TooltipProvider>
-      <div>
-        {/* Header */}
-        <Header />
+    <div>
+      {/* Header */}
+      <Header />
 
-        {/* Analytics Content */}
-        <div className="container mx-auto px-4 py-6">
+      {/* Analytics Content */}
+      <div className="container mx-auto px-4 py-6">
         <div className="space-y-6">
           {/* Header del Dashboard */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-6 w-6 text-blue-600" />
                     Dashboard Ejecutivo de Analytics
-                  </CardTitle>
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Agrupado por: {periodoAgrupacion}
+                    </Badge>
+              </CardTitle>
                   <p className="text-muted-foreground mt-2">
                     Vista completa del rendimiento hotelero con análisis detallado y comparaciones temporales
                   </p>
@@ -144,7 +285,7 @@ export default function AnalyticsPage() {
               <CardContent className="py-6">
                 <div className={`space-y-4 transition-transform duration-300 ease-in-out ${mostrarFiltros ? 'translate-y-0' : '-translate-y-4'
                   }`}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Rango de fechas */}
                     <div className="space-y-2">
                       <Tooltip>
@@ -181,6 +322,37 @@ export default function AnalyticsPage() {
                         value={filtros.fechaFin || ''}
                         onChange={(e) => actualizarFiltro('fechaFin', e.target.value || undefined)}
                       />
+                    </div>
+
+                    {/* Período de agrupación */}
+                    <div className="space-y-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Label htmlFor="periodoAgrupacion" className="cursor-help">
+                            Agrupar por <span className="text-blue-500">ⓘ</span>
+                          </Label>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Define cómo se agrupan los datos temporalmente. Útil para análisis de tendencias y patrones estacionales.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Select
+                        value={periodoAgrupacion}
+                        onValueChange={(value) => {
+                          setPeriodoAgrupacion(value as PeriodoAgrupacion)
+                          actualizarFiltro('agruparPor', value as PeriodoAgrupacion)
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="día">Día</SelectItem>
+                          <SelectItem value="semana">Semana</SelectItem>
+                          <SelectItem value="mes">Mes</SelectItem>
+                          <SelectItem value="año">Año</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Top mercados */}
@@ -246,6 +418,57 @@ export default function AnalyticsPage() {
               </CardContent>
             </div>
           </Card>
+
+          {/* Información de Períodos - Versión Compacta */}
+          {explicacionPeriodos && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground bg-slate-50 rounded-lg px-4 py-2">
+              <div className="flex items-center gap-3">
+                <span className="text-base">{explicacionPeriodos.icono}</span>
+                <span className="font-medium">{explicacionPeriodos.descripcion}</span>
+                <Badge variant="outline" className="text-xs">
+                  {explicacionPeriodos.periodosGenerados}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {filtros.incluirComparacion && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant="secondary" className="text-xs cursor-help">
+                        <ArrowRightLeft className="h-3 w-3 mr-1" />
+                        Comparación activa
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm">Se calculará automáticamente un período anterior equivalente para comparación</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 cursor-help opacity-60 hover:opacity-100 transition-opacity" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-md">
+                    <div className="space-y-2">
+                      <p className="font-semibold text-sm">{explicacionPeriodos.tipo}</p>
+                      <p className="text-sm">{explicacionPeriodos.detalleLogica}</p>
+                      <div className="pt-2 border-t">
+                        <p className="text-xs font-medium mb-1">Períodos analizados:</p>
+                        <p className="text-xs font-mono bg-gray-100 rounded px-2 py-1 text-black">
+                          {explicacionPeriodos.ejemploPeriodos}
+                        </p>
+                      </div>
+                      <p className="text-xs opacity-75 pt-1 border-t">
+                        <Clock className="h-3 w-3 inline mr-1" />
+                        Zona horaria: America/Bogotá (procesado como UTC en servidor)
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          )}
 
           {/* Estado de error */}
           {error && (
@@ -536,6 +759,16 @@ export default function AnalyticsPage() {
                           <p className="text-sm text-muted-foreground">Huéspedes Recurrentes</p>
                           <p className="text-xs text-purple-600 mt-1">
                             Clientes que han regresado al hotel
+                          </p>
+                        </div>
+
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <div className="text-lg font-bold text-blue-600 capitalize">
+                            {periodoAgrupacion}
+                          </div>
+                          <p className="text-sm text-muted-foreground">Período de Agrupación</p>
+                          <p className="text-xs text-blue-600 mt-1">
+                            Los datos se agrupan por {periodoAgrupacion}
                           </p>
                         </div>
 

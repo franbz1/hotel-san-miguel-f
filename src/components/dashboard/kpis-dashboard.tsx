@@ -17,7 +17,7 @@ import {
   Calendar,
   Minus,
 } from "lucide-react"
-import { formatCurrency, formatPercentage } from "@/lib/analytics/analytics-service"
+import { formatCurrency, formatPercentage, convertUTCToLocal } from "@/lib/analytics/analytics-service"
 import { FiltrosDashboardDto } from "@/Types/analytics"
 import { useAnalyticsDashboard } from "@/hooks/useAnalytics"
 import { toast } from "sonner"
@@ -38,6 +38,8 @@ function formatLocalDate(date: Date): string {
 }
 
 // Función para calcular fechas de período
+// NOTA: Las fechas se calculan localmente y se envían como UTC al servidor
+// El servidor devuelve fechas en UTC que se convierten a local para mostrar
 function calcularPeriodos(tipoPeriodo: TipoPeriodo) {
   const hoy = new Date()
   let inicioActual: Date, finActual: Date
@@ -120,10 +122,14 @@ function calcularPeriodos(tipoPeriodo: TipoPeriodo) {
   }
 }
 
-// Función para obtener el nombre del período
+// Función para obtener el nombre del período (maneja fechas UTC del servidor)
 function getNombrePeriodo(tipoPeriodo: TipoPeriodo, fechaInicio: string, fechaFin: string) {
-  const inicio = new Date(fechaInicio)
-  const fin = new Date(fechaFin)
+  // Las fechas pueden venir en formato UTC del servidor, las convertimos a fecha local para mostrar
+  const inicioLocal = fechaInicio.includes('T') ? convertUTCToLocal(fechaInicio) : fechaInicio
+  const finLocal = fechaFin.includes('T') ? convertUTCToLocal(fechaFin) : fechaFin
+  
+  const inicio = new Date(inicioLocal + 'T00:00:00')
+  const fin = new Date(finLocal + 'T00:00:00')
 
   switch (tipoPeriodo) {
     case 'día':
@@ -132,11 +138,12 @@ function getNombrePeriodo(tipoPeriodo: TipoPeriodo, fechaInicio: string, fechaFi
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        timeZone: 'America/Bogota'
       })
 
     case 'semana': {
-      const mesInicio = inicio.toLocaleDateString('es-ES', { month: 'short' })
-      const mesFin = fin.toLocaleDateString('es-ES', { month: 'short' })
+      const mesInicio = inicio.toLocaleDateString('es-ES', { month: 'short', timeZone: 'America/Bogota' })
+      const mesFin = fin.toLocaleDateString('es-ES', { month: 'short', timeZone: 'America/Bogota' })
       const añoInicio = inicio.getFullYear()
       const añoFin = fin.getFullYear()
 
@@ -148,6 +155,7 @@ function getNombrePeriodo(tipoPeriodo: TipoPeriodo, fechaInicio: string, fechaFi
         return `Semana del ${inicio.getDate()} al ${fin.getDate()} de ${inicio.toLocaleDateString('es-ES', {
           month: 'long',
           year: 'numeric',
+          timeZone: 'America/Bogota'
         })}`
       } else {
         // Si cruza mes o año
@@ -156,7 +164,11 @@ function getNombrePeriodo(tipoPeriodo: TipoPeriodo, fechaInicio: string, fechaFi
     }
 
     case 'mes':
-      return inicio.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+      return inicio.toLocaleDateString('es-ES', { 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Bogota'
+      })
 
     default:
       return 'Período'
@@ -382,8 +394,8 @@ export function KpisDashboard({ className = '' }: KpisDashboardProps) {
           <div className="flex items-center gap-2 md:justify-end">
             <span className="font-medium">Período Actual:</span>
             <span>{nombrePeriodoActual}</span>
-          </div>
         </div>
+      </div>
 
       {/* Métricas principales */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
