@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useDashboardDiario } from '@/hooks/useAnalytics'
-import { Loader2, RefreshCw, DollarSign, Receipt, TrendingUp, AlertCircle, LucideIcon, BarChart3 } from 'lucide-react'
+import { Loader2, RefreshCw, DollarSign, Receipt, TrendingUp, AlertCircle, LucideIcon } from 'lucide-react'
 
 const StatCard = ({ 
   title, 
@@ -158,16 +158,6 @@ export function DashboardAnalytics() {
                    Actualizar
                  </>
                )}
-             </Button>
-             <Button
-               asChild
-               size="sm"
-               className="w-full"
-             >
-               <a href="/dashboard/analytics">
-                 <BarChart3 className="w-4 h-4 mr-2" />
-                 Ver Analytics
-               </a>
              </Button>
            </div>
            {datos.ingresosDiarios && (
