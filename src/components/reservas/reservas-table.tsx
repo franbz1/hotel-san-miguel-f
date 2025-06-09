@@ -420,21 +420,22 @@ export function ReservasTable({
             </div>
             <DialogDescription>
               ¿Estás seguro de que deseas eliminar esta reserva? Esta acción no se puede deshacer.
-              {reservaToDelete && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm">
-                    <span className="font-medium">Reserva:</span> #{reservaToDelete.id}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Huésped:</span> {reservaToDelete.huesped?.nombres} {reservaToDelete.huesped?.primer_apellido}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Fechas:</span> {formatearFecha(reservaToDelete.fecha_inicio)} - {formatearFecha(reservaToDelete.fecha_fin)}
-                  </p>
-                </div>
-              )}
             </DialogDescription>
           </DialogHeader>
+          
+          {reservaToDelete && (
+            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm">
+                <span className="font-medium">Reserva:</span> #{reservaToDelete.id}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Huésped:</span> {reservaToDelete.huesped?.nombres} {reservaToDelete.huesped?.primer_apellido}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Fechas:</span> {formatearFecha(reservaToDelete.fecha_inicio)} - {formatearFecha(reservaToDelete.fecha_fin)}
+              </p>
+            </div>
+          )}
           <DialogFooter>
             <Button
               variant="outline"
