@@ -19,6 +19,7 @@ import { HuespedesTable } from "@/components/huespedes/huespedes-table"
 import { HuespedesExcelExport } from "@/components/huespedes/huespedes-excel-export"
 import { Header } from "@/components/layout/header"
 import { toast } from "sonner"
+import { AdminOnly } from "@/components/auth/permission-guard"
 
 export default function HuespedesPage() {
   const [huespedes, setHuespedes] = useState<Huesped[]>([])
@@ -129,12 +130,14 @@ export default function HuespedesPage() {
           </div>
           
           <div className="flex items-center gap-3">
+            <AdminOnly>
             <HuespedesExcelExport
               huespedes={huespedes}
               filteredHuespedes={filteredHuespedes}
               searchTerm={searchTerm}
               tipoDocFilter={tipoDocFilter}
             />
+            </AdminOnly>
             <Button
               variant="outline"
               size="sm"

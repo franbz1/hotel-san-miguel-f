@@ -12,6 +12,7 @@ import { RoomBookings } from "@/components/rooms/room-bookings"
 import { RoomAnalytics } from "@/components/rooms/room-analytics"
 import { RoomInfoEditor } from "@/components/rooms/room-info-editor"
 import { RoomCleaningHistory } from "@/components/rooms/room-cleaning-history"
+import { AdminOnly } from "@/components/auth/permission-guard"
 
 export default function RoomDetails() {
   const params = useParams()
@@ -98,9 +99,11 @@ export default function RoomDetails() {
           </div>
 
           {/* Analytics */}
-          <div className="md:col-span-1">
-            <RoomAnalytics habitacion={habitacion} loading={loading} />
-          </div>
+          <AdminOnly>
+            <div className="md:col-span-1">
+              <RoomAnalytics habitacion={habitacion} loading={loading} />
+            </div>
+          </AdminOnly>
         </div>
 
         {/* Bottom Row - Cleaning History */}

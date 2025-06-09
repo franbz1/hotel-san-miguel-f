@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, LayoutDashboard, CalendarDays, Settings, Menu, ChartBar, Users } from "lucide-react"
+import { LogOut, LayoutDashboard, CalendarDays, Settings, Menu, ChartBar, Users, UserCog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,11 +12,13 @@ import {
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/contexts/auth-context"
+import { usePermissions } from "@/hooks/usePermissions"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 export function UserNav() {
   const { user, logout } = useAuth()
+  const { canViewAnalytics, isAdmin } = usePermissions()
   const pathname = usePathname()
   
   const isActive = (path: string) => pathname === path
@@ -48,12 +50,14 @@ export function UserNav() {
               <span>Dashboard</span>
             </DropdownMenuItem>
           </Link>
-          <Link href="/dashboard/analytics">
-            <DropdownMenuItem className={isActive("/dashboard/analytics") ? "bg-muted cursor-default" : "cursor-pointer"}>
-              <ChartBar className="mr-2 h-4 w-4" />
-              <span>Analytics</span>
-            </DropdownMenuItem>
-          </Link>
+          {canViewAnalytics && (
+            <Link href="/dashboard/analytics">
+              <DropdownMenuItem className={isActive("/dashboard/analytics") ? "bg-muted cursor-default" : "cursor-pointer"}>
+                <ChartBar className="mr-2 h-4 w-4" />
+                <span>Analytics</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
           <Link href="/dashboard/reservas">
             <DropdownMenuItem className={isActive("/dashboard/reservas") ? "bg-muted cursor-default" : "cursor-pointer"}>
               <CalendarDays className="mr-2 h-4 w-4" />
@@ -66,6 +70,14 @@ export function UserNav() {
               <span>Huéspedes</span>
             </DropdownMenuItem>
           </Link>
+          {isAdmin() && (
+            <Link href="/dashboard/usuarios">
+              <DropdownMenuItem className={isActive("/dashboard/usuarios") ? "bg-muted cursor-default" : "cursor-pointer"}>
+                <UserCog className="mr-2 h-4 w-4" />
+                <span>Usuarios</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
           
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

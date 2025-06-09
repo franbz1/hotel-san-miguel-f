@@ -12,6 +12,7 @@ import { FacturaCompleta, AnalisisPeriodo } from '@/Types/analytics-types'
 import { CalendarIcon, BarChart3, Table, RefreshCw, Loader2, DollarSign, Receipt, TrendingUp, FilterX } from "lucide-react"
 import { AnalyticsCharts } from '@/components/analytics/analytics-charts'
 import { ExcelExport } from '@/components/analytics/excel-export'
+import { AdminOnly } from '@/components/auth/permission-guard'
 
 export default function AnalyticsPage() {
   // Estados para fechas en formato string (zona horaria local para la UI)
@@ -130,7 +131,22 @@ export default function AnalyticsPage() {
     <div>
       <Header />
       
-      <div className="container mx-auto px-4 py-6">
+      <AdminOnly fallback={
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Card className="w-full max-w-md">
+              <CardContent className="p-8 text-center">
+                <BarChart3 className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h2 className="text-xl font-semibold mb-2">Acceso Restringido</h2>
+                <p className="text-gray-600">
+                  Solo los administradores pueden acceder a las analíticas del sistema.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      }>
+        <div className="container mx-auto px-4 py-6">
         {/* Header de la página con controles de período */}
         <div className="flex flex-col gap-4 mb-8">
           <div className="flex items-center justify-between">
@@ -411,7 +427,8 @@ export default function AnalyticsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+        </div>
+      </AdminOnly>
     </div>
   )
 } 
