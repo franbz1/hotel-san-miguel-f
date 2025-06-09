@@ -81,3 +81,10 @@ export const HUESPED_SECUNDARIO_ENDPOINTS = {
   DELETE: (id: number) => `${API_BASE_URL}/huespedes-secundarios/${id}`,
 } as const
 
+// Endpoints de analíticas
+export const ANALYTICS_ENDPOINTS = {
+  DAILY_REVENUE: (date: string) => `${API_BASE_URL}/analitics/daily-revenue/${date}`,
+  MONTHLY_REVENUE: (year: number, month: number) => `${API_BASE_URL}/analitics/monthly-revenue/${year}/${month}`,
+  INVOICES_RANGE: (startDate: string, endDate: string) => `${API_BASE_URL}/analitics/invoices-range?startDate=${startDate}&endDate=${endDate}`,
+} as const
+

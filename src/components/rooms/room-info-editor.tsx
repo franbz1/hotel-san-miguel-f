@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { Check, Pencil, Trash2 } from "lucide-react"
+import { BedDouble, Check, Pencil, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -339,19 +339,7 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
             {/* Ilustración (más pequeña) */}
             <div className="w-full md:w-1/4 flex items-center justify-center">
               <div className={`border ${getRoomBorderClass(habitacion?.estado)} rounded-md p-3 flex flex-col justify-center overflow-hidden h-[120px] w-[120px]`}>
-                <svg
-                  viewBox="0 0 100 100"
-                  className={`w-full max-w-[80px] mx-auto ${getRoomTextClass(habitacion?.estado)}`}
-                  stroke="currentColor"
-                  fill="none"
-                  strokeWidth="1.5"
-                >
-                  <rect x="10" y="50" width="80" height="30" rx="2" />
-                  <rect x="15" y="40" width="70" height="10" rx="2" />
-                  <rect x="15" y="30" width="70" height="10" rx="2" />
-                  <line x1="15" y1="40" x2="15" y2="80" />
-                  <line x1="85" y1="40" x2="85" y2="80" />
-                </svg>
+                <BedDouble className={`w-full max-w-[80px] mx-auto ${getRoomTextClass(habitacion?.estado)}`} />
                 <div className="mt-2 text-center">
                   <Badge className={getRoomBadgeClass(habitacion?.estado)}>
                     {getRoomStatusText(habitacion?.estado)}

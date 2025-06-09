@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, BedDouble } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -33,17 +33,7 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
             }}
             onClick={() => router.push(`/dashboard/room/${room.numero_habitacion}`)}
           >
-            <svg
-              viewBox="0 0 24 24"
-              className={`w-12 h-12 mb-2 ${getRoomTextClass(room.estado)} transition-all duration-500`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <rect x="2" y="7" width="20" height="14" rx="2" />
-              <path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-              <path d="M2 11h20" />
-            </svg>
+            <BedDouble className={`w-12 h-12 mb-2 ${getRoomTextClass(room.estado)} transition-all duration-500`} />
             <span className="text-lg font-semibold">{room.numero_habitacion}</span>
           </div>
         </TooltipTrigger>
