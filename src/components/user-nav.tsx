@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, LayoutDashboard, CalendarDays, Settings, Menu, ChartBar } from "lucide-react"
+import { LogOut, LayoutDashboard, CalendarDays, Settings, Menu, ChartBar, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -60,6 +60,13 @@ export function UserNav() {
               <span>Reservas</span>
             </DropdownMenuItem>
           </Link>
+          <Link href="/dashboard/huespedes">
+            <DropdownMenuItem className={isActive("/dashboard/huespedes") ? "bg-muted cursor-default" : "cursor-pointer"}>
+              <Users className="mr-2 h-4 w-4" />
+              <span>Huéspedes</span>
+            </DropdownMenuItem>
+          </Link>
+          
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <Link href="/settings">
