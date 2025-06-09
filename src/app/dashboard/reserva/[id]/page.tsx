@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { 
-  ArrowLeft,
+import {
   Calendar,
   MapPin,
   User,
@@ -127,17 +126,17 @@ export default function ReservaDetailsPage() {
 
   const handleConfirmDelete = async () => {
     if (!reserva) return
-    
+
     try {
       setIsDeleting(true)
       await deleteReserva(reserva.id)
-      
+
       toast.success("Reserva eliminada", {
         description: `La reserva #${reserva.id} ha sido eliminada correctamente`
       })
-      
+
       router.push('/dashboard/reservas')
-      
+
     } catch (error) {
       console.error('Error al eliminar reserva:', error)
       toast.error("Error al eliminar", {
@@ -158,7 +157,7 @@ export default function ReservaDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div>
         <Header />
         <main className="container mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
@@ -174,7 +173,7 @@ export default function ReservaDetailsPage() {
 
   if (error || !reserva) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div>
         <Header />
         <main className="container mx-auto p-6">
           <Card className="border-red-200 bg-red-50">
@@ -202,36 +201,29 @@ export default function ReservaDetailsPage() {
   const totalHuespedes = 1 + (reserva.numero_acompaniantes || 0)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <Header />
-      
+
       <main className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.back()}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver
-              </Button>
-              <Badge variant={getEstadoBadgeVariant(reserva.estado)} className="text-sm">
-                {reserva.estado.toLowerCase()}
-              </Badge>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                <Calendar className="h-8 w-8 text-blue-600" />
+                Reserva #{reserva.id}
+              </h1>
+              <div className="flex items-center gap-3">
+                <Badge variant={getEstadoBadgeVariant(reserva.estado)} className="text-sm">
+                  {reserva.estado.toLowerCase()}
+                </Badge>
+              </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <Calendar className="h-8 w-8 text-blue-600" />
-              Reserva #{reserva.id}
-            </h1>
             <p className="text-muted-foreground mt-1">
               Detalles completos de la reserva
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
@@ -274,21 +266,21 @@ export default function ReservaDetailsPage() {
                   {reserva.huesped.nombres} {reserva.huesped.primer_apellido} {reserva.huesped.segundo_apellido}
                 </Button>
               </div>
-              
+
               <Separator />
-              
+
               <div>
                 <p className="text-sm text-muted-foreground">Documento</p>
                 <p className="font-medium">{reserva.huesped.numero_documento}</p>
               </div>
-              
+
               {reserva.huesped.telefono && (
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">{reserva.huesped.telefono}</span>
                 </div>
               )}
-              
+
               {reserva.huesped.correo && (
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
@@ -311,21 +303,21 @@ export default function ReservaDetailsPage() {
                 <p className="text-sm text-muted-foreground">Fecha de inicio</p>
                 <p className="font-medium">{formatearFecha(reserva.fecha_inicio)}</p>
               </div>
-              
+
               <div>
                 <p className="text-sm text-muted-foreground">Fecha de fin</p>
                 <p className="font-medium">{formatearFecha(reserva.fecha_fin)}</p>
               </div>
-              
+
               <Separator />
-              
+
               <div>
                 <p className="text-sm text-muted-foreground">Duración total</p>
                 <p className="text-lg font-semibold text-blue-600">
                   {duracion} {duracion === 1 ? 'día' : 'días'}
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Check-in</p>
@@ -352,21 +344,21 @@ export default function ReservaDetailsPage() {
                 <p className="text-sm text-muted-foreground">Costo total</p>
                 <p className="text-2xl font-bold text-green-600">{formatearMoneda(reserva.costo)}</p>
               </div>
-              
+
               <div>
                 <p className="text-sm text-muted-foreground">Costo por noche</p>
                 <p className="font-medium">{formatearMoneda(reserva.costo / duracion)}</p>
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">
                   {totalHuespedes} {totalHuespedes === 1 ? 'huésped' : 'huéspedes'}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Home className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Habitación #{reserva.habitacionId}</span>
@@ -449,7 +441,7 @@ export default function ReservaDetailsPage() {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div>
                         <p className="text-sm text-muted-foreground">Nombre completo</p>
@@ -457,7 +449,7 @@ export default function ReservaDetailsPage() {
                           {huespedSecundario.nombres} {huespedSecundario.primer_apellido} {huespedSecundario.segundo_apellido}
                         </p>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-xs text-muted-foreground">Nacionalidad</p>
@@ -468,24 +460,24 @@ export default function ReservaDetailsPage() {
                           <p className="text-sm font-medium">{huespedSecundario.genero}</p>
                         </div>
                       </div>
-                      
+
                       <div>
                         <p className="text-xs text-muted-foreground">Residencia</p>
                         <p className="text-sm">{huespedSecundario.ciudad_residencia}, {huespedSecundario.pais_residencia}</p>
                       </div>
-                      
+
                       <div>
                         <p className="text-xs text-muted-foreground">Ocupación</p>
                         <p className="text-sm">{huespedSecundario.ocupacion}</p>
                       </div>
-                      
+
                       {huespedSecundario.telefono && (
                         <div className="flex items-center gap-2">
                           <Phone className="h-3 w-3 text-muted-foreground" />
                           <span className="text-xs">{huespedSecundario.telefono}</span>
                         </div>
                       )}
-                      
+
                       {huespedSecundario.correo && (
                         <div className="flex items-center gap-2">
                           <Mail className="h-3 w-3 text-muted-foreground" />
@@ -496,7 +488,7 @@ export default function ReservaDetailsPage() {
                   </div>
                 ))}
               </div>
-              
+
               {/* Resumen de acompañantes */}
               <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">

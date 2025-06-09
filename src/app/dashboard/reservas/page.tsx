@@ -140,7 +140,7 @@ export default function ReservasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <Header />
       
       <main className="container mx-auto p-6 space-y-6">
