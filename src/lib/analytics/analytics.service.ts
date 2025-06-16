@@ -49,7 +49,6 @@ async function realizarPeticionAnalytics<T>(url: string, metodo: string = 'GET')
     }
 
     const datos = await response.json()
-    console.log(datos)
     return datos
   } catch (error) {
     const errorMessage = manejarErrorAnalytics(error)

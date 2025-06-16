@@ -88,3 +88,12 @@ export const ANALYTICS_ENDPOINTS = {
   INVOICES_RANGE: (startDate: string, endDate: string) => `${API_BASE_URL}/analitics/invoices-range?startDate=${startDate}&endDate=${endDate}`,
 } as const
 
+// Endpoints de usuarios
+export const USUARIO_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number) => `${API_BASE_URL}/usuarios?limit=${limit}&page=${page}`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/usuarios/${id}`,
+  CREATE: `${API_BASE_URL}/usuarios`,
+  UPDATE: (id: number) => `${API_BASE_URL}/usuarios/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/usuarios/${id}`,
+} as const
+

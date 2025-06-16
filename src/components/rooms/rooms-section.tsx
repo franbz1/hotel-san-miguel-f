@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { getHabitaciones, getHabitacionesCambios, HabitacionesCambio } from "@/lib/rooms/habitacion-service"
 import { Habitacion } from "@/Types/habitacion"
 import { CreateRoomModal } from "./create-room-modal"
+import { AdminOnly } from "@/components/auth/permission-guard"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { 
@@ -183,7 +184,9 @@ export function RoomsSection() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input type="search" placeholder="Buscar habitación..." className="pl-8 w-full" />
           </div>
-          <CreateRoomModal onRoomCreated={fetchHabitaciones} />
+          <AdminOnly>
+            <CreateRoomModal onRoomCreated={fetchHabitaciones} />
+          </AdminOnly>
         </div>
       </div>
 

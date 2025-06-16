@@ -14,8 +14,8 @@ export interface Huesped {
   pais_residencia: string
   departamento_residencia: string
   ciudad_residencia: string
-  lugarNacimiento: string
-  fechaNacimiento: Date
+  lugar_nacimiento: string
+  fecha_nacimiento: Date
   nacionalidad: string
   ocupacion: string
   genero: string

@@ -46,6 +46,7 @@ import {
   getRoomStatusText,
   getRoomTextClass 
 } from "@/lib/common/constants/room-constants"
+import { AdminOnly } from "../auth/permission-guard"
 
 interface RoomInfoEditorProps {
   habitacion?: Habitacion | null
@@ -172,6 +173,7 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Información de la habitación</CardTitle>
         <div className="flex gap-2">
+          <AdminOnly>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -325,6 +327,7 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </AdminOnly>
         </div>
       </CardHeader>
       <CardContent className="p-4">

@@ -3,8 +3,9 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
+import { usePermissions } from "@/hooks/usePermissions"
 import { Loader2 } from "lucide-react"
-import { Role, ROLE_ROUTES, DEFAULT_ROUTE, RoleType } from "@/lib/common/constants/constants"
+import { ROLE_ROUTES, DEFAULT_ROUTE } from "@/lib/common/constants/constants"
 
 interface DashboardGuardProps {
   children: React.ReactNode
@@ -13,45 +14,41 @@ interface DashboardGuardProps {
 export function DashboardGuard({ children }: DashboardGuardProps) {
   const router = useRouter()
   const { user, isLoading } = useAuth()
-  // Función auxiliar para verificar si el rol tiene acceso al dashboard
-  const hasDashboardAccess = (rol: string | undefined): boolean => {
-    if (!rol) return false
-    return Object.values(Role).includes(rol as RoleType)
-  }
+  const { userRole, canAccessDashboard } = usePermissions()
 
   useEffect(() => {
     if (isLoading) {
-      return;
+      return
     }
 
     const checkAuthStatus = () => {
       if (!user) {
-        router.push('/login');
-        return;
+        router.push('/login')
+        return
       }
 
-      if (!hasDashboardAccess(user.rol)) {
-        const userRole = user.rol as keyof typeof Role;
-        const redirectPath = ROLE_ROUTES[userRole] || DEFAULT_ROUTE;
-        router.push(redirectPath);
+      // Verificar si el usuario tiene acceso al dashboard (solo ADMINISTRADOR y CAJERO)
+      if (!canAccessDashboard) {
+        const redirectPath = ROLE_ROUTES[userRole!] || DEFAULT_ROUTE
+        router.push(redirectPath)
+        return
       }
-    };
+    }
 
-    checkAuthStatus();
-  }, [isLoading, user, router]);
-
+    checkAuthStatus()
+  }, [isLoading, user, canAccessDashboard, userRole, router])
 
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    );
+    )
   }
 
-  if (user && hasDashboardAccess(user.rol)) {
-    return <>{children}</>;
+  if (user && canAccessDashboard) {
+    return <>{children}</>
   }
 
-  return null;
+  return null
 } 

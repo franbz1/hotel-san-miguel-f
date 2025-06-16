@@ -11,13 +11,14 @@ import {
   Search, 
   RefreshCw, 
   Filter,
-  ChevronLeft, 
-  ChevronRight
+  Users,
+  Clock,
+  TrendingUp
 } from "lucide-react"
 import { getReservas, ReservasResponse } from "@/lib/bookings/reservas-service"
 import { Reserva } from "@/Types/Reserva"
 import { EstadosReserva } from "@/Types/enums/estadosReserva"
-import { ReservasList } from "@/components/reservas/reservas-list"
+import { ReservasTable } from "@/components/reservas/reservas-table"
 import { Header } from "@/components/layout/header"
 import { toast } from "sonner"
 
@@ -26,11 +27,9 @@ export default function ReservasPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Paginación
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
+  // Paginación del servidor (solo para la carga inicial)
   const [totalReservas, setTotalReservas] = useState(0)
-  const limit = 12
+  const limit = 50 // Cargar más reservas para que la tabla tenga más datos para paginar
   
   // Filtros y búsqueda
   const [searchTerm, setSearchTerm] = useState("")
@@ -38,17 +37,15 @@ export default function ReservasPage() {
   const [filteredReservas, setFilteredReservas] = useState<Reserva[]>([])
 
   // Función para cargar reservas
-  const fetchReservas = async (page: number = 1, showToast: boolean = false) => {
+  const fetchReservas = async (showToast: boolean = false) => {
     try {
       setLoading(true)
       setError(null)
 
-      const response: ReservasResponse = await getReservas(page, limit)
+      const response: ReservasResponse = await getReservas(1, limit)
       
       setReservas(response.data)
-      setCurrentPage(page)
       setTotalReservas(response.meta.totalReservas)
-      setTotalPages(response.meta.lastPage)
       
       if (showToast) {
         toast.success("Reservas actualizadas", {
@@ -100,25 +97,14 @@ export default function ReservasPage() {
 
   // Cargar datos iniciales
   useEffect(() => {
-    fetchReservas(1)
+    fetchReservas()
   }, [])
 
-  // Navegación de páginas
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      fetchReservas(currentPage - 1)
-    }
-  }
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      fetchReservas(currentPage + 1)
-    }
-  }
 
   // Función para refrescar datos
   const handleRefresh = () => {
-    fetchReservas(currentPage, true)
+    fetchReservas(true)
   }
 
   // Función para reiniciar filtros
@@ -129,8 +115,13 @@ export default function ReservasPage() {
 
   // Función para manejar eliminación de reserva
   const handleReservaDeleted = () => {
-    fetchReservas(currentPage)
+    fetchReservas()
   }
+
+  // Cálculos básicos para indicadores
+  const reservasActivas = reservas.filter(r => r.estado === EstadosReserva.RESERVADO).length
+  const reservasPendientes = reservas.filter(r => r.estado === EstadosReserva.PENDIENTE).length
+  const reservasFinalizadas = reservas.filter(r => r.estado === EstadosReserva.FINALIZADO).length
 
   // Función para obtener color del badge de estado
   const getEstadoBadgeVariant = (estado: EstadosReserva) => {
@@ -148,100 +139,8 @@ export default function ReservasPage() {
     }
   }
 
-  // Calcular métricas avanzadas
-  const getAnalytics = () => {
-    const today = new Date()
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-    
-    // Reservas de este mes
-    const reservasEsteMes = reservas.filter(reserva => {
-      const fechaCreacion = new Date(reserva.createdAt)
-      return fechaCreacion >= startOfMonth && fechaCreacion <= endOfMonth
-    })
-    
-    // Ingresos totales
-    const ingresosTotales = reservas.reduce((total, reserva) => {
-      if (reserva.estado !== EstadosReserva.CANCELADO) {
-        return total + (reserva.costo || 0)
-      }
-      return total
-    }, 0)
-    
-    // Ingresos de este mes
-    const ingresosEsteMes = reservasEsteMes.reduce((total, reserva) => {
-      if (reserva.estado !== EstadosReserva.CANCELADO) {
-        return total + (reserva.costo || 0)
-      }
-      return total
-    }, 0)
-    
-    // Duración promedio de estadía
-    const duracionTotal = reservas.filter(r => r.estado !== EstadosReserva.CANCELADO).reduce((total, reserva) => {
-      const inicio = new Date(reserva.fecha_inicio)
-      const fin = new Date(reserva.fecha_fin)
-      const duracion = Math.ceil((fin.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24))
-      return total + duracion
-    }, 0)
-    
-    const reservasValidas = reservas.filter(r => r.estado !== EstadosReserva.CANCELADO).length
-    const duracionPromedio = reservasValidas > 0 ? Math.round(duracionTotal / reservasValidas) : 0
-    
-    // Huéspedes totales (incluyendo acompañantes)
-    const huespedesTotal = reservas.filter(r => r.estado !== EstadosReserva.CANCELADO).reduce((total, reserva) => {
-      return total + 1 + (reserva.numero_acompaniantes || 0)
-    }, 0)
-    
-    // Países más frecuentes
-    const paisesFrecuentes = reservas.reduce((acc, reserva) => {
-      const pais = reserva.pais_procedencia
-      acc[pais] = (acc[pais] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-    
-    const paisMasFrecuente = Object.entries(paisesFrecuentes)
-      .sort(([,a], [,b]) => b - a)[0]
-    
-    // Tasa de ocupación (simulada - asumiendo 20 habitaciones)
-    const habitacionesDisponibles = 20
-    const reservasActivas = reservas.filter(r => 
-      r.estado === EstadosReserva.RESERVADO || r.estado === EstadosReserva.FINALIZADO
-    ).length
-    const tasaOcupacion = Math.round((reservasActivas / habitacionesDisponibles) * 100)
-    
-    // Porcentajes por estado
-    const totalReservasValidas = reservas.length
-    const porcentajes = Object.values(EstadosReserva).reduce((acc, estado) => {
-      const count = reservas.filter(r => r.estado === estado).length
-      acc[estado] = totalReservasValidas > 0 ? Math.round((count / totalReservasValidas) * 100) : 0
-      return acc
-    }, {} as Record<EstadosReserva, number>)
-
-    return {
-      reservasEsteMes: reservasEsteMes.length,
-      ingresosTotales,
-      ingresosEsteMes,
-      duracionPromedio,
-      huespedesTotal,
-      paisMasFrecuente,
-      tasaOcupacion,
-      porcentajes
-    }
-  }
-
-  const analytics = getAnalytics()
-
-  // Función para formatear moneda
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
-
   return (
-    <div className="min-h-screen bg-white">
+    <div>
       <Header />
       
       <main className="container mx-auto p-6 space-y-6">
@@ -257,13 +156,13 @@ export default function ReservasPage() {
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={handleRefresh}
               disabled={loading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-blue-50 border-blue-200"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Actualizar
@@ -271,241 +170,136 @@ export default function ReservasPage() {
           </div>
         </div>
 
-        {/* Estadísticas */}
+        {/* Indicadores básicos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Reservas totales */}
-          <Card>
-            <CardContent className="p-4">
+          {/* Total de reservas */}
+          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Reservas</p>
-                  <p className="text-2xl font-bold">{totalReservas}</p>
-                  <p className="text-xs text-green-600 mt-1">
-                    +{analytics.reservasEsteMes} este mes
-                  </p>
+                  <p className="text-sm font-medium text-blue-700">Total de Reservas</p>
+                  <p className="text-3xl font-bold text-blue-900">{totalReservas}</p>
+                  <p className="text-xs text-blue-600 mt-1">En el sistema</p>
                 </div>
-                <CalendarDays className="h-8 w-8 text-blue-500" />
+                <CalendarDays className="h-10 w-10 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Ingresos totales */}
-          <Card>
-            <CardContent className="p-4">
+          {/* Reservas activas */}
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Ingresos Totales</p>
-                  <p className="text-2xl font-bold">{formatCurrency(analytics.ingresosTotales)}</p>
-                  <p className="text-xs text-green-600 mt-1">
-                    {formatCurrency(analytics.ingresosEsteMes)} este mes
-                  </p>
+                  <p className="text-sm font-medium text-green-700">Reservas Activas</p>
+                  <p className="text-3xl font-bold text-green-900">{reservasActivas}</p>
+                  <p className="text-xs text-green-600 mt-1">Confirmadas</p>
                 </div>
-                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 font-bold text-sm">$</span>
-                </div>
+                <Users className="h-10 w-10 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Ocupación */}
-          <Card>
-            <CardContent className="p-4">
+          {/* Reservas pendientes */}
+          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Tasa de Ocupación</p>
-                  <p className="text-2xl font-bold">{analytics.tasaOcupacion}%</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {analytics.huespedesTotal} huéspedes totales
-                  </p>
+                  <p className="text-sm font-medium text-yellow-700">Pendientes</p>
+                  <p className="text-3xl font-bold text-yellow-900">{reservasPendientes}</p>
+                  <p className="text-xs text-yellow-600 mt-1">Por confirmar</p>
                 </div>
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                  analytics.tasaOcupacion > 80 ? 'bg-red-100' : 
-                  analytics.tasaOcupacion > 60 ? 'bg-yellow-100' : 'bg-green-100'
-                }`}>
-                  <span className={`font-bold text-sm ${
-                    analytics.tasaOcupacion > 80 ? 'text-red-600' : 
-                    analytics.tasaOcupacion > 60 ? 'text-yellow-600' : 'text-green-600'
-                  }`}>
-                    {analytics.tasaOcupacion}%
-                  </span>
-                </div>
+                <Clock className="h-10 w-10 text-yellow-600" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Estadía promedio */}
-          <Card>
-            <CardContent className="p-4">
+          {/* Reservas finalizadas */}
+          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Estadía Promedio</p>
-                  <p className="text-2xl font-bold">{analytics.duracionPromedio}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {analytics.duracionPromedio === 1 ? 'día' : 'días'} por reserva
-                  </p>
+                  <p className="text-sm font-medium text-purple-700">Finalizadas</p>
+                  <p className="text-3xl font-bold text-purple-900">{reservasFinalizadas}</p>
+                  <p className="text-xs text-purple-600 mt-1">Completadas</p>
                 </div>
-                <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 font-bold text-sm">📅</span>
-                </div>
+                <TrendingUp className="h-10 w-10 text-purple-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Análisis por estados */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="md:col-span-2 lg:col-span-4">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2">
-                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-                  Análisis por Estados
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {Object.values(EstadosReserva).map((estado) => {
-                  const count = reservas.filter(r => r.estado === estado).length
-                  const porcentaje = analytics.porcentajes[estado]
-                  
-                  return (
-                    <div key={estado} className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant={getEstadoBadgeVariant(estado)} className="text-xs">
-                          {estado.toLowerCase()}
-                        </Badge>
-                        <span className="text-sm font-medium">{porcentaje}%</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold">{count}</span>
-                        <div className="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full transition-all duration-300 ${
-                              estado === EstadosReserva.PENDIENTE ? 'bg-yellow-500' :
-                              estado === EstadosReserva.RESERVADO ? 'bg-blue-500' :
-                              estado === EstadosReserva.FINALIZADO ? 'bg-green-500' :
-                              'bg-red-500'
-                            }`}
-                            style={{ width: `${porcentaje}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Información adicional */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* País más frecuente */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">País más frecuente</p>
-                  <p className="text-xl font-bold">
-                    {analytics.paisMasFrecuente ? analytics.paisMasFrecuente[0] : 'N/A'}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {analytics.paisMasFrecuente ? analytics.paisMasFrecuente[1] : 0} reservas
-                  </p>
-                </div>
-                <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
-                  <span className="text-orange-600 font-bold text-sm">🌍</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Resumen del mes */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Resumen del Mes</p>
-                  <p className="text-xl font-bold">{analytics.reservasEsteMes} reservas</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatCurrency(analytics.ingresosEsteMes)} generados
-                  </p>
-                </div>
-                <div className="h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <span className="text-indigo-600 font-bold text-sm">📊</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filtros y búsqueda */}
-        <Card>
+        {/* Filtros y búsqueda mejorados */}
+        <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Filter className="h-5 w-5 text-blue-600" />
               Filtros y Búsqueda
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Búsqueda */}
+              {/* Búsqueda mejorada */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Buscar por huésped, documento, ciudad..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
-              {/* Filtro por estado */}
+              {/* Filtro por estado mejorado */}
               <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                   <SelectValue placeholder="Filtrar por estado" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos los estados</SelectItem>
                   {Object.values(EstadosReserva).map((estado) => (
                     <SelectItem key={estado} value={estado}>
-                      {estado.charAt(0) + estado.slice(1).toLowerCase()}
+                      <div className="flex items-center gap-2">
+                        <Badge variant={getEstadoBadgeVariant(estado)} className="text-xs">
+                          {estado.charAt(0) + estado.slice(1).toLowerCase()}
+                        </Badge>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              {/* Botón limpiar filtros */}
+              {/* Botón limpiar filtros mejorado */}
               <Button
                 variant="outline"
                 onClick={handleClearFilters}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 hover:bg-gray-50 border-gray-300"
               >
                 <RefreshCw className="h-4 w-4" />
                 Limpiar Filtros
               </Button>
             </div>
 
-            {/* Contador de resultados filtrados */}
+            {/* Contador de resultados filtrados mejorado */}
             {(searchTerm || estadoFilter !== "all") && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Badge variant="outline">
+              <div className="flex items-center gap-2 text-sm bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <Badge variant="outline" className="bg-white">
                   {filteredReservas.length} de {reservas.length} reservas
                 </Badge>
                 {searchTerm && (
-                  <span>• Búsqueda: &ldquo;{searchTerm}&rdquo;</span>
+                  <span className="text-blue-700">• Búsqueda: &ldquo;{searchTerm}&rdquo;</span>
                 )}
                 {estadoFilter !== "all" && (
-                  <span>• Estado: {estadoFilter}</span>
+                  <span className="text-blue-700">• Estado: {estadoFilter}</span>
                 )}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Lista de reservas */}
+        {/* Tabla de reservas */}
         {error ? (
-          <Card className="border-red-200">
+          <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6">
               <div className="text-center text-red-600">
                 <CalendarDays className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -513,8 +307,8 @@ export default function ReservasPage() {
                 <p className="text-sm">{error}</p>
                 <Button
                   variant="outline"
-                  onClick={() => fetchReservas(currentPage)}
-                  className="mt-4"
+                  onClick={() => fetchReservas()}
+                  className="mt-4 border-red-300 text-red-700 hover:bg-red-100"
                 >
                   Intentar de nuevo
                 </Button>
@@ -522,7 +316,7 @@ export default function ReservasPage() {
             </CardContent>
           </Card>
         ) : (
-          <ReservasList
+          <ReservasTable
             reservas={filteredReservas}
             title={`Reservas ${searchTerm || estadoFilter !== "all" ? "Filtradas" : ""}`}
             emptyMessage={
@@ -532,67 +326,11 @@ export default function ReservasPage() {
             }
             onReservaDeleted={handleReservaDeleted}
             className="min-h-[600px]"
+            itemsPerPage={10}
           />
         )}
 
-        {/* Paginación */}
-        {!searchTerm && estadoFilter === "all" && totalPages > 1 && (
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Página <span className="font-medium">{currentPage}</span> de{" "}
-                  <span className="font-medium">{totalPages}</span> • {" "}
-                  <span className="font-medium">{totalReservas}</span> reservas totales
-                </p>
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1 || loading}
-                    className="flex items-center gap-1"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
-                      if (pageNum > totalPages) return null
-                      
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={pageNum === currentPage ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => fetchReservas(pageNum)}
-                          disabled={loading}
-                          className="min-w-[40px]"
-                        >
-                          {pageNum}
-                        </Button>
-                      )
-                    })}
-                  </div>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages || loading}
-                    className="flex items-center gap-1"
-                  >
-                    Siguiente
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
       </main>
     </div>
   )

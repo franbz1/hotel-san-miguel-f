@@ -38,6 +38,7 @@ import { EstadosReserva } from "@/Types/enums/estadosReserva"
 import { MotivosViajes } from "@/Types/enums/motivosViajes"
 import { toast } from "sonner"
 import { ReservasList } from "@/components/reservas"
+import { Genero } from "@/Types/enums/generos"
 
 export default function HuespedDetailsPage() {
   const params = useParams()
@@ -387,14 +388,14 @@ export default function HuespedDetailsPage() {
                             <SelectValue placeholder="Seleccionar género" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="M">Masculino</SelectItem>
-                            <SelectItem value="F">Femenino</SelectItem>
-                            <SelectItem value="Otro">Otro</SelectItem>
+                            <SelectItem value={Genero.MASCULINO}>Masculino</SelectItem>
+                            <SelectItem value={Genero.FEMENINO}>Femenino</SelectItem>
+                            <SelectItem value={Genero.OTRO}>Otro</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
                         <p className="text-sm text-gray-900 mt-1">
-                          {huesped.genero === 'M' ? 'Masculino' : huesped.genero === 'F' ? 'Femenino' : huesped.genero}
+                          {huesped.genero === Genero.MASCULINO ? Genero.MASCULINO : huesped.genero === Genero.FEMENINO ? Genero.FEMENINO : Genero.OTRO}
                         </p>
                       )}
                     </div>
@@ -468,10 +469,10 @@ export default function HuespedDetailsPage() {
                     </div>
                   </div>
 
-                  {huesped.fechaNacimiento && (
+                  {huesped.fecha_nacimiento && (
                     <div>
                       <Label>Fecha de Nacimiento</Label>
-                      <p className="text-sm text-gray-900 mt-1">{formatDate(huesped.fechaNacimiento)}</p>
+                      <p className="text-sm text-gray-900 mt-1">{formatDate(huesped.fecha_nacimiento)}</p>
                     </div>
                   )}
                 </CardContent>
@@ -515,10 +516,10 @@ export default function HuespedDetailsPage() {
                       <p className="text-sm text-gray-900 mt-1">{huesped.departamento_residencia}</p>
                     </div>
                   )}
-                  {huesped.lugarNacimiento && (
+                  {huesped.lugar_nacimiento && (
                     <div>
                       <Label>Lugar de Nacimiento</Label>
-                      <p className="text-sm text-gray-900 mt-1">{huesped.lugarNacimiento}</p>
+                      <p className="text-sm text-gray-900 mt-1">{huesped.lugar_nacimiento}</p>
                     </div>
                   )}
                   
