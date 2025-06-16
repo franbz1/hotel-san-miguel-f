@@ -1,10 +1,15 @@
 import { RoleType } from "@/lib/common/constants/constants"
+import { RegistroAseoHabitacion } from "./aseo/RegistroAseoHabitacion"
 
 export interface Usuario {
   id: number
   nombre: string
   rol: RoleType
   password: string
+
+  registros_aseo_habitacion?: RegistroAseoHabitacion[];
+
+  
   createdAt: string
   updatedAt: string
   deleted: boolean
