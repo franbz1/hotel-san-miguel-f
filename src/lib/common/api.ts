@@ -97,3 +97,96 @@ export const USUARIO_ENDPOINTS = {
   DELETE: (id: number) => `${API_BASE_URL}/usuarios/${id}`,
 } as const
 
+// Endpoints de configuración de aseo
+export const CONFIGURACION_ASEO_ENDPOINTS = {
+  GET: `${API_BASE_URL}/configuracion-aseo`,
+  UPDATE: `${API_BASE_URL}/configuracion-aseo`,
+} as const
+
+// Endpoints de zonas comunes
+export const ZONA_COMUN_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number, piso?: number, requerido_aseo_hoy?: boolean, ultimo_aseo_tipo?: string) => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    if (piso !== undefined) params.append('piso', piso.toString());
+    if (requerido_aseo_hoy !== undefined) params.append('requerido_aseo_hoy', requerido_aseo_hoy.toString());
+    if (ultimo_aseo_tipo) params.append('ultimo_aseo_tipo', ultimo_aseo_tipo);
+    return `${API_BASE_URL}/zonas-comunes?${params.toString()}`;
+  },
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/zonas-comunes/${id}`,
+  CREATE: `${API_BASE_URL}/zonas-comunes`,
+  UPDATE: (id: number) => `${API_BASE_URL}/zonas-comunes/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/zonas-comunes/${id}`,
+  GET_REQUIEREN_ASEO: `${API_BASE_URL}/zonas-comunes/requieren-aseo`,
+  GET_BY_PISO: (piso: number) => `${API_BASE_URL}/zonas-comunes/piso/${piso}`,
+} as const
+
+// Endpoints de registro de aseo de habitaciones
+export const REGISTRO_ASEO_HABITACION_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number, usuarioId?: number, habitacionId?: number, fecha?: string, tipo_aseo?: string, objetos_perdidos?: boolean, rastros_de_animales?: boolean) => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    if (usuarioId) params.append('usuarioId', usuarioId.toString());
+    if (habitacionId) params.append('habitacionId', habitacionId.toString());
+    if (fecha) params.append('fecha', fecha);
+    if (tipo_aseo) params.append('tipo_aseo', tipo_aseo);
+    if (objetos_perdidos !== undefined) params.append('objetos_perdidos', objetos_perdidos.toString());
+    if (rastros_de_animales !== undefined) params.append('rastros_de_animales', rastros_de_animales.toString());
+    return `${API_BASE_URL}/registro-aseo-habitaciones?${params.toString()}`;
+  },
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/registro-aseo-habitaciones/${id}`,
+  CREATE: `${API_BASE_URL}/registro-aseo-habitaciones`,
+  UPDATE: (id: number) => `${API_BASE_URL}/registro-aseo-habitaciones/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/registro-aseo-habitaciones/${id}`,
+  GET_BY_HABITACION: (id: number) => `${API_BASE_URL}/registro-aseo-habitaciones/habitacion/${id}`,
+  GET_BY_USUARIO: (id: number) => `${API_BASE_URL}/registro-aseo-habitaciones/usuario/${id}`,
+  GET_BY_FECHA: (fecha: string) => `${API_BASE_URL}/registro-aseo-habitaciones/fecha/${fecha}`,
+} as const
+
+// Endpoints de registro de aseo de zonas comunes
+export const REGISTRO_ASEO_ZONA_COMUN_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number, usuarioId?: number, zonaComunId?: number, fecha?: string, tipo_aseo?: string, objetos_perdidos?: boolean, rastros_de_animales?: boolean) => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    if (usuarioId) params.append('usuarioId', usuarioId.toString());
+    if (zonaComunId) params.append('zonaComunId', zonaComunId.toString());
+    if (fecha) params.append('fecha', fecha);
+    if (tipo_aseo) params.append('tipo_aseo', tipo_aseo);
+    if (objetos_perdidos !== undefined) params.append('objetos_perdidos', objetos_perdidos.toString());
+    if (rastros_de_animales !== undefined) params.append('rastros_de_animales', rastros_de_animales.toString());
+    return `${API_BASE_URL}/registro-aseo-zonas-comunes?${params.toString()}`;
+  },
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/registro-aseo-zonas-comunes/${id}`,
+  CREATE: `${API_BASE_URL}/registro-aseo-zonas-comunes`,
+  UPDATE: (id: number) => `${API_BASE_URL}/registro-aseo-zonas-comunes/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/registro-aseo-zonas-comunes/${id}`,
+  GET_BY_ZONA_COMUN: (id: number) => `${API_BASE_URL}/registro-aseo-zonas-comunes/zona-comun/${id}`,
+  GET_BY_USUARIO: (id: number) => `${API_BASE_URL}/registro-aseo-zonas-comunes/usuario/${id}`,
+  GET_BY_FECHA: (fecha: string) => `${API_BASE_URL}/registro-aseo-zonas-comunes/fecha/${fecha}`,
+} as const
+
+// Endpoints de reportes de aseo
+export const REPORTE_ASEO_ENDPOINTS = {
+  GET_ALL: (limit: number, page: number, fecha?: string, fecha_inicio?: string, fecha_fin?: string, elemento_aseo?: string, producto_quimico?: string, elemento_proteccion?: string) => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    if (fecha) params.append('fecha', fecha);
+    if (fecha_inicio) params.append('fecha_inicio', fecha_inicio);
+    if (fecha_fin) params.append('fecha_fin', fecha_fin);
+    if (elemento_aseo) params.append('elemento_aseo', elemento_aseo);
+    if (producto_quimico) params.append('producto_quimico', producto_quimico);
+    if (elemento_proteccion) params.append('elemento_proteccion', elemento_proteccion);
+    return `${API_BASE_URL}/reportes-aseo?${params.toString()}`;
+  },
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/reportes-aseo/${id}`,
+  CREATE: `${API_BASE_URL}/reportes-aseo`,
+  UPDATE: (id: number) => `${API_BASE_URL}/reportes-aseo/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/reportes-aseo/${id}`,
+  GET_BY_FECHA: (fecha: string) => `${API_BASE_URL}/reportes-aseo/fecha/${fecha}`,
+  GENERAR: `${API_BASE_URL}/reportes-aseo/generar`,
+} as const
+
