@@ -12,7 +12,7 @@ export const useConfiguracionAseo = () => {
     configuracion: query.data,
     isLoading: query.isPending,
     isError: query.isError,
-    error: query.error?.message || 'Error al cargar la configuración',
+    error: query.error?.message,
     refetch: query.refetch,
     isSuccess: query.isSuccess,
   };
@@ -30,7 +30,7 @@ export const useUpdateConfiguracionAseo = () => {
     updateConfiguracion,
     isUpdating: mutation.isPending,
     isError: mutation.isError,
-    error: mutation.error?.message || 'Error al actualizar la configuración',
+    error: mutation.error?.message,
     isSuccess: mutation.isSuccess,
     reset: mutation.reset,
     updatedData: mutation.data,
