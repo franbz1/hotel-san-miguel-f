@@ -56,12 +56,57 @@ export function ConfiguracionAseoComponent() {
   const [newAreaHabitacion, setNewAreaHabitacion] = useState("");
   const [newAreaBanio, setNewAreaBanio] = useState("");
 
+  // Funciones para conversión de zona horaria
+  const convertUTCToLocal = (utcTimeString: string): string => {
+    if (!utcTimeString) return "";
+    
+    try {
+      // Crear una fecha con la hora UTC
+      const today = new Date();
+      const [hours, minutes] = utcTimeString.split(':').map(num => parseInt(num));
+      
+      // Crear fecha UTC
+      const utcDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes));
+      
+      // Obtener la hora local
+      const localHours = utcDate.getHours().toString().padStart(2, '0');
+      const localMinutes = utcDate.getMinutes().toString().padStart(2, '0');
+      
+      return `${localHours}:${localMinutes}`;
+    } catch (error) {
+      console.error('Error converting UTC to local time:', error);
+      return utcTimeString;
+    }
+  };
+
+  const convertLocalToUTC = (localTimeString: string): string => {
+    if (!localTimeString) return "";
+    
+    try {
+      // Crear una fecha con la hora local
+      const today = new Date();
+      const [hours, minutes] = localTimeString.split(':').map(num => parseInt(num));
+      
+      // Crear fecha local
+      const localDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
+      
+      // Obtener la hora UTC
+      const utcHours = localDate.getUTCHours().toString().padStart(2, '0');
+      const utcMinutes = localDate.getUTCMinutes().toString().padStart(2, '0');
+      
+      return `${utcHours}:${utcMinutes}`;
+    } catch (error) {
+      console.error('Error converting local to UTC time:', error);
+      return localTimeString;
+    }
+  };
+
   // Cargar datos iniciales cuando se obtiene la configuración
   useEffect(() => {
     if (configuracion) {
       const newFormData: UpdateConfiguracionAseoDto = {
-        hora_limite_aseo: configuracion.hora_limite_aseo || "",
-        hora_proceso_nocturno_utc: configuracion.hora_proceso_nocturno_utc || "",
+        hora_limite_aseo: convertUTCToLocal(configuracion.hora_limite_aseo || ""),
+        hora_proceso_nocturno_utc: convertUTCToLocal(configuracion.hora_proceso_nocturno_utc || ""),
         frecuencia_rotacion_colchones: configuracion.frecuencia_rotacion_colchones || 180,
         dias_aviso_rotacion_colchones: configuracion.dias_aviso_rotacion_colchones || 5,
         habilitar_notificaciones: configuracion.habilitar_notificaciones || false,
@@ -127,15 +172,22 @@ export function ConfiguracionAseoComponent() {
       return;
     }
 
-    updateConfiguracion(formData);
+    // Convertir las horas a UTC antes de enviar
+    const dataToSend: UpdateConfiguracionAseoDto = {
+      ...formData,
+      hora_limite_aseo: convertLocalToUTC(formData.hora_limite_aseo || ""),
+      hora_proceso_nocturno_utc: convertLocalToUTC(formData.hora_proceso_nocturno_utc || ""),
+    };
+
+    updateConfiguracion(dataToSend);
   };
 
   // Reiniciar formulario
   const handleReset = () => {
     if (configuracion) {
       setFormData({
-        hora_limite_aseo: configuracion.hora_limite_aseo || "",
-        hora_proceso_nocturno_utc: configuracion.hora_proceso_nocturno_utc || "",
+        hora_limite_aseo: convertUTCToLocal(configuracion.hora_limite_aseo || ""),
+        hora_proceso_nocturno_utc: convertUTCToLocal(configuracion.hora_proceso_nocturno_utc || ""),
         frecuencia_rotacion_colchones: configuracion.frecuencia_rotacion_colchones || 180,
         dias_aviso_rotacion_colchones: configuracion.dias_aviso_rotacion_colchones || 5,
         habilitar_notificaciones: configuracion.habilitar_notificaciones || false,
@@ -428,16 +480,16 @@ export function ConfiguracionAseoComponent() {
           </CardContent>
         </Card>
 
-                 {/* Elementos de Aseo */}
-         <ArrayFieldComponent
-           title="Elementos de Aseo"
-           field="elementos_aseo_default"
-           items={formData.elementos_aseo_default || []}
-           newValue={newElementoAseo}
-           setNewValue={setNewElementoAseo}
-           placeholder="Ej: Escoba, Trapeador, Aspiradora..."
-           icon={Brush}
-         />
+        {/* Elementos de Aseo */}
+        <ArrayFieldComponent
+          title="Elementos de Aseo"
+          field="elementos_aseo_default"
+          items={formData.elementos_aseo_default || []}
+          newValue={newElementoAseo}
+          setNewValue={setNewElementoAseo}
+          placeholder="Ej: Escoba, Trapeador, Aspiradora..."
+          icon={Brush}
+        />
 
         {/* Elementos de Protección */}
         <ArrayFieldComponent
