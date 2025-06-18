@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ZONA_COMUN_ENDPOINTS } from '../common/api';
 import { getCookie } from '../common/cookies';
+import { COOKIE_NAMES } from '../common/cookies';
 import { 
   ZonaComun, 
   CreateZonaComunDto, 
@@ -27,7 +28,7 @@ const fetchZonasComunes = async (
   page: number, 
   filters?: FiltrosZonaComunDto
 ): Promise<PaginatedResponse<ZonaComun>> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -57,7 +58,7 @@ const fetchZonasComunes = async (
 
 // Función para obtener zona común por ID
 const fetchZonaComunById = async (id: number): Promise<ZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -79,7 +80,7 @@ const fetchZonaComunById = async (id: number): Promise<ZonaComun> => {
 
 // Función para crear zona común
 const createZonaComun = async (data: CreateZonaComunDto): Promise<ZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -102,7 +103,7 @@ const createZonaComun = async (data: CreateZonaComunDto): Promise<ZonaComun> => 
 
 // Función para actualizar zona común
 const updateZonaComun = async ({ id, data }: { id: number; data: UpdateZonaComunDto }): Promise<ZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -125,7 +126,7 @@ const updateZonaComun = async ({ id, data }: { id: number; data: UpdateZonaComun
 
 // Función para eliminar zona común
 const deleteZonaComun = async (id: number): Promise<ZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -147,7 +148,7 @@ const deleteZonaComun = async (id: number): Promise<ZonaComun> => {
 
 // Función para obtener zonas que requieren aseo
 const fetchZonasRequierenAseo = async (): Promise<ZonaComun[]> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -169,7 +170,7 @@ const fetchZonasRequierenAseo = async (): Promise<ZonaComun[]> => {
 
 // Función para obtener zonas por piso
 const fetchZonasPorPiso = async (piso: number): Promise<ZonaComun[]> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }

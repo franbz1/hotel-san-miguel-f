@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { REGISTRO_ASEO_ZONA_COMUN_ENDPOINTS } from '../common/api';
 import { getCookie } from '../common/cookies';
+import { COOKIE_NAMES } from '../common/cookies';
 import { 
   RegistroAseoZonaComun, 
   CreateRegistroAseoZonaComunDto, 
@@ -28,7 +29,7 @@ const fetchRegistrosAseoZonaComun = async (
   page: number, 
   filters?: FiltrosRegistroAseoZonaComunDto
 ): Promise<PaginatedResponse<RegistroAseoZonaComun>> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -61,7 +62,7 @@ const fetchRegistrosAseoZonaComun = async (
 
 // Función para obtener registro por ID
 const fetchRegistroAseoZonaComunById = async (id: number): Promise<RegistroAseoZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -83,7 +84,7 @@ const fetchRegistroAseoZonaComunById = async (id: number): Promise<RegistroAseoZ
 
 // Función para obtener registros por zona común
 const fetchRegistrosPorZonaComun = async (id: number): Promise<RegistroAseoZonaComun[]> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -105,7 +106,7 @@ const fetchRegistrosPorZonaComun = async (id: number): Promise<RegistroAseoZonaC
 
 // Función para obtener registros por usuario
 const fetchRegistrosPorUsuario = async (id: number): Promise<RegistroAseoZonaComun[]> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -127,7 +128,7 @@ const fetchRegistrosPorUsuario = async (id: number): Promise<RegistroAseoZonaCom
 
 // Función para obtener registros por fecha
 const fetchRegistrosPorFecha = async (fecha: string): Promise<RegistroAseoZonaComun[]> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -149,7 +150,7 @@ const fetchRegistrosPorFecha = async (fecha: string): Promise<RegistroAseoZonaCo
 
 // Función para crear registro
 const createRegistroAseoZonaComun = async (data: CreateRegistroAseoZonaComunDto): Promise<RegistroAseoZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -172,7 +173,7 @@ const createRegistroAseoZonaComun = async (data: CreateRegistroAseoZonaComunDto)
 
 // Función para actualizar registro
 const updateRegistroAseoZonaComun = async ({ id, data }: { id: number; data: UpdateRegistroAseoZonaComunDto }): Promise<RegistroAseoZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -195,7 +196,7 @@ const updateRegistroAseoZonaComun = async ({ id, data }: { id: number; data: Upd
 
 // Función para eliminar registro
 const deleteRegistroAseoZonaComun = async (id: number): Promise<RegistroAseoZonaComun> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }

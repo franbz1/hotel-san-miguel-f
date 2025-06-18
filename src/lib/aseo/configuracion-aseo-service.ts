@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CONFIGURACION_ASEO_ENDPOINTS } from '../common/api';
 import { getCookie } from '../common/cookies';
 import { ConfiguracionAseo, UpdateConfiguracionAseoDto } from '../../Types/aseo/ConfiguracionAseo';
+import { COOKIE_NAMES } from '../common/cookies';
 
 // Keys para React Query
 export const CONFIGURACION_ASEO_KEYS = {
@@ -11,7 +12,7 @@ export const CONFIGURACION_ASEO_KEYS = {
 
 // Función para obtener configuración
 const fetchConfiguracionAseo = async (): Promise<ConfiguracionAseo> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -33,7 +34,7 @@ const fetchConfiguracionAseo = async (): Promise<ConfiguracionAseo> => {
 
 // Función para actualizar configuración
 const updateConfiguracionAseo = async (data: UpdateConfiguracionAseoDto): Promise<ConfiguracionAseo> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }

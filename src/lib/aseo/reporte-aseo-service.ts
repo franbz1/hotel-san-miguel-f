@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { REPORTE_ASEO_ENDPOINTS } from '../common/api';
 import { getCookie } from '../common/cookies';
+import { COOKIE_NAMES } from '../common/cookies';
 import { 
   ReporteAseoDiario, 
   CreateReporteAseoDiarioDto, 
@@ -26,7 +27,7 @@ const fetchReportesAseo = async (
   page: number, 
   filters?: FiltrosReportesAseoDto
 ): Promise<PaginatedResponse<ReporteAseoDiario>> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -59,7 +60,7 @@ const fetchReportesAseo = async (
 
 // Función para obtener reporte por ID
 const fetchReporteAseoById = async (id: number): Promise<ReporteAseoDiario> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -81,7 +82,7 @@ const fetchReporteAseoById = async (id: number): Promise<ReporteAseoDiario> => {
 
 // Función para obtener reporte por fecha
 const fetchReportePorFecha = async (fecha: string): Promise<ReporteAseoDiario | null> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -103,7 +104,7 @@ const fetchReportePorFecha = async (fecha: string): Promise<ReporteAseoDiario | 
 
 // Función para crear reporte
 const createReporteAseo = async (data: CreateReporteAseoDiarioDto): Promise<ReporteAseoDiario> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -126,7 +127,7 @@ const createReporteAseo = async (data: CreateReporteAseoDiarioDto): Promise<Repo
 
 // Función para actualizar reporte
 const updateReporteAseo = async ({ id, data }: { id: number; data: UpdateReporteAseoDiarioDto }): Promise<ReporteAseoDiario> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -149,7 +150,7 @@ const updateReporteAseo = async ({ id, data }: { id: number; data: UpdateReporte
 
 // Función para eliminar reporte
 const deleteReporteAseo = async (id: number): Promise<ReporteAseoDiario> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
@@ -171,7 +172,7 @@ const deleteReporteAseo = async (id: number): Promise<ReporteAseoDiario> => {
 
 // Función para generar reporte automático
 const generarReporteAseo = async (fecha: string): Promise<ReporteAseoDiario> => {
-  const token = getCookie('auth-token');
+  const token = getCookie(COOKIE_NAMES.TOKEN);
   if (!token) {
     throw new Error('Token de autenticación no encontrado');
   }
