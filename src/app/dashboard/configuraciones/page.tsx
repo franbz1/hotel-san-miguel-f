@@ -1,12 +1,49 @@
+"use client";
+
 import { Header } from "@/components/layout/header";
 import { ConfiguracionAseoComponent } from "@/components/aseo/configuracion-aseo";
+import { ConfiguracionUsuariosComponent } from "@/components/usuarios/configuracion-usuarios";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Settings, Brush, Cog, Users, BellRing } from "lucide-react";
+import { Brush, Users, Shield, Settings } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function ConfiguracionesPage() {
+  const { canAccessConfiguration, isAdmin } = usePermissions();
+
+  // Verificar permisos de acceso
+  if (!canAccessConfiguration && !isAdmin()) {
+    return (
+      <div>
+        <Header />
+        
+        <main className="container mx-auto px-4 py-6">
+          <div className="flex flex-col items-center justify-center min-h-[500px] space-y-6">
+            <div className="p-6 rounded-full bg-red-100">
+              <Shield className="w-12 h-12 text-red-600" />
+            </div>
+            <div className="text-center space-y-2">
+              <h1 className="text-2xl font-bold text-gray-900">Acceso Restringido</h1>
+              <p className="text-gray-600 max-w-md">
+                No tienes permisos para acceder a las configuraciones del sistema.
+                Solo los administradores pueden gestionar estas configuraciones.
+              </p>
+              <p className="text-sm text-gray-500 mt-4">
+                Contacta con un administrador si necesitas acceso a esta sección.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-lg border border-amber-200">
+              <Settings className="w-4 h-4" />
+              <span className="text-sm font-medium">Configuraciones del Sistema</span>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      <Header title="Configuraciones - Hotel San Miguel" />
+    <div>
+      <Header />
       
       <main className="container mx-auto px-4 py-6">
         <div className="mb-6">
@@ -40,7 +77,7 @@ export default function ConfiguracionesPage() {
             </AccordionItem>
 
             {/* Configuración de Usuarios */}
-            <AccordionItem value="usuarios" className="border-b">
+            <AccordionItem value="usuarios" className="border-b-0">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 rounded-lg">
@@ -49,68 +86,13 @@ export default function ConfiguracionesPage() {
                   <div className="text-left">
                     <h3 className="text-lg font-semibold text-gray-900">Configuración de Usuarios</h3>
                     <p className="text-sm text-gray-600 mt-1">
-                      Roles, permisos y configuraciones de usuarios del sistema
+                      Roles, permisos y gestión completa de usuarios del sistema
                     </p>
                   </div>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-6">
-                <div className="text-center py-8 text-gray-500">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <p>Configuración de usuarios estará disponible próximamente</p>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Configuración de Notificaciones */}
-            <AccordionItem value="notificaciones" className="border-b">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <BellRing className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-lg font-semibold text-gray-900">Configuración de Notificaciones</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Configuraciones generales de notificaciones del sistema
-                    </p>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
-                <div className="text-center py-8 text-gray-500">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <BellRing className="w-6 h-6" />
-                  </div>
-                  <p>Configuración de notificaciones estará disponible próximamente</p>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Configuración del Sistema */}
-            <AccordionItem value="sistema" className="border-b-0">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Cog className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-lg font-semibold text-gray-900">Configuración del Sistema</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Configuraciones generales, respaldos y mantenimiento del sistema
-                    </p>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
-                <div className="text-center py-8 text-gray-500">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Settings className="w-6 h-6" />
-                  </div>
-                  <p>Configuración del sistema estará disponible próximamente</p>
-                </div>
+                <ConfiguracionUsuariosComponent />
               </AccordionContent>
             </AccordionItem>
 
