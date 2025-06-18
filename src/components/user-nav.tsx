@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, LayoutDashboard, CalendarDays, Settings, Menu, ChartBar, Users, UserCog } from "lucide-react"
+import { LogOut, LayoutDashboard, CalendarDays, Settings, Menu, ChartBar, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -70,23 +70,16 @@ export function UserNav() {
               <span>Huéspedes</span>
             </DropdownMenuItem>
           </Link>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
           {isAdmin() && (
-            <Link href="/dashboard/usuarios">
-              <DropdownMenuItem className={isActive("/dashboard/usuarios") ? "bg-muted cursor-default" : "cursor-pointer"}>
-                <UserCog className="mr-2 h-4 w-4" />
-                <span>Usuarios</span>
+            <Link href="/dashboard/configuraciones">
+              <DropdownMenuItem className={isActive("/dashboard/configuraciones") ? "bg-muted cursor-default" : "cursor-pointer"}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Configuraciones</span>
               </DropdownMenuItem>
             </Link>
           )}
-          
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <Link href="/settings">
-          <DropdownMenuItem className={isActive("/settings") ? "bg-muted cursor-default" : "cursor-pointer"}>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Ajustes</span>
-          </DropdownMenuItem>
-        </Link>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
