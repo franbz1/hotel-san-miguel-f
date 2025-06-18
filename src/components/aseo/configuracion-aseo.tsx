@@ -10,7 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, AlertCircle, Clock, Bell, RotateCcw } from "lucide-react";
+import { AlertCircle, Clock, Bell, RotateCcw, Brush, Shield, Beaker, Bed, Bath, FileText, X } from "lucide-react";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 export function ConfiguracionAseoComponent() {
   const {
@@ -33,9 +35,26 @@ export function ConfiguracionAseoComponent() {
     dias_aviso_rotacion_colchones: 5,
     habilitar_notificaciones: false,
     email_notificaciones: "",
+    elementos_aseo_default: [],
+    elementos_proteccion_default: [],
+    productos_quimicos_default: [],
+    areas_intervenir_habitacion_default: [],
+    areas_intervenir_banio_default: [],
+    procedimiento_aseo_habitacion_default: "",
+    procedimiento_desinfeccion_habitacion_default: "",
+    procedimiento_rotacion_colchones_default: "",
+    procedimiento_limieza_zona_comun_default: "",
+    procedimiento_desinfeccion_zona_comun_default: "",
   });
 
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Estados para nuevos elementos de arrays
+  const [newElementoAseo, setNewElementoAseo] = useState("");
+  const [newElementoProteccion, setNewElementoProteccion] = useState("");
+  const [newProductoQuimico, setNewProductoQuimico] = useState("");
+  const [newAreaHabitacion, setNewAreaHabitacion] = useState("");
+  const [newAreaBanio, setNewAreaBanio] = useState("");
 
   // Cargar datos iniciales cuando se obtiene la configuración
   useEffect(() => {
@@ -47,6 +66,16 @@ export function ConfiguracionAseoComponent() {
         dias_aviso_rotacion_colchones: configuracion.dias_aviso_rotacion_colchones || 5,
         habilitar_notificaciones: configuracion.habilitar_notificaciones || false,
         email_notificaciones: configuracion.email_notificaciones || "",
+        elementos_aseo_default: configuracion.elementos_aseo_default || [],
+        elementos_proteccion_default: configuracion.elementos_proteccion_default || [],
+        productos_quimicos_default: configuracion.productos_quimicos_default || [],
+        areas_intervenir_habitacion_default: configuracion.areas_intervenir_habitacion_default || [],
+        areas_intervenir_banio_default: configuracion.areas_intervenir_banio_default || [],
+        procedimiento_aseo_habitacion_default: configuracion.procedimiento_aseo_habitacion_default || "",
+        procedimiento_desinfeccion_habitacion_default: configuracion.procedimiento_desinfeccion_habitacion_default || "",
+        procedimiento_rotacion_colchones_default: configuracion.procedimiento_rotacion_colchones_default || "",
+        procedimiento_limieza_zona_comun_default: configuracion.procedimiento_limieza_zona_comun_default || "",
+        procedimiento_desinfeccion_zona_comun_default: configuracion.procedimiento_desinfeccion_zona_comun_default || "",
       };
       setFormData(newFormData);
       setHasChanges(false);
@@ -54,7 +83,7 @@ export function ConfiguracionAseoComponent() {
   }, [configuracion]);
 
   // Manejar cambios en el formulario
-  const handleInputChange = (field: keyof UpdateConfiguracionAseoDto, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof UpdateConfiguracionAseoDto, value: string | number | boolean | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -62,11 +91,41 @@ export function ConfiguracionAseoComponent() {
     setHasChanges(true);
   };
 
+  // Agregar elemento a array
+  const addElementToArray = (field: keyof UpdateConfiguracionAseoDto, newElement: string, setter: (value: string) => void) => {
+    if (!newElement.trim()) return;
+    
+    const currentArray = (formData[field] as string[]) || [];
+    if (currentArray.includes(newElement.trim())) {
+      toast.error("Este elemento ya existe en la lista");
+      return;
+    }
+    
+    if (currentArray.length >= 50) {
+      toast.error("No se pueden agregar más de 50 elementos");
+      return;
+    }
+
+    const updatedArray = [...currentArray, newElement.trim()];
+    handleInputChange(field, updatedArray);
+    setter("");
+  };
+
+  // Remover elemento del array
+  const removeElementFromArray = (field: keyof UpdateConfiguracionAseoDto, index: number) => {
+    const currentArray = (formData[field] as string[]) || [];
+    const updatedArray = currentArray.filter((_, i) => i !== index);
+    handleInputChange(field, updatedArray);
+  };
+
   // Manejar envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!hasChanges) return;
+    if (!hasChanges) {
+      toast.info("No hay cambios para guardar");
+      return;
+    }
 
     updateConfiguracion(formData);
   };
@@ -81,15 +140,26 @@ export function ConfiguracionAseoComponent() {
         dias_aviso_rotacion_colchones: configuracion.dias_aviso_rotacion_colchones || 5,
         habilitar_notificaciones: configuracion.habilitar_notificaciones || false,
         email_notificaciones: configuracion.email_notificaciones || "",
+        elementos_aseo_default: configuracion.elementos_aseo_default || [],
+        elementos_proteccion_default: configuracion.elementos_proteccion_default || [],
+        productos_quimicos_default: configuracion.productos_quimicos_default || [],
+        areas_intervenir_habitacion_default: configuracion.areas_intervenir_habitacion_default || [],
+        areas_intervenir_banio_default: configuracion.areas_intervenir_banio_default || [],
+        procedimiento_aseo_habitacion_default: configuracion.procedimiento_aseo_habitacion_default || "",
+        procedimiento_desinfeccion_habitacion_default: configuracion.procedimiento_desinfeccion_habitacion_default || "",
+        procedimiento_rotacion_colchones_default: configuracion.procedimiento_rotacion_colchones_default || "",
+        procedimiento_limieza_zona_comun_default: configuracion.procedimiento_limieza_zona_comun_default || "",
+        procedimiento_desinfeccion_zona_comun_default: configuracion.procedimiento_desinfeccion_zona_comun_default || "",
       });
       setHasChanges(false);
       reset();
     }
   };
 
-  // Reset automático después del éxito
+  // Manejo de notificaciones con Sonner
   useEffect(() => {
     if (isSuccess) {
+      toast.success("Configuración actualizada exitosamente");
       setHasChanges(false);
       // Refrescar datos después de 2 segundos
       setTimeout(() => {
@@ -98,6 +168,12 @@ export function ConfiguracionAseoComponent() {
       }, 2000);
     }
   }, [isSuccess, refetch, reset]);
+
+  useEffect(() => {
+    if (updateError) {
+      toast.error(updateError);
+    }
+  }, [updateError]);
 
   if (isLoading) {
     return (
@@ -127,25 +203,88 @@ export function ConfiguracionAseoComponent() {
     );
   }
 
+  // Componente para manejar arrays de elementos
+  const ArrayFieldComponent = ({ 
+    title, 
+    field, 
+    items, 
+    newValue, 
+    setNewValue, 
+    placeholder,
+    icon: Icon 
+  }: {
+    title: string;
+    field: keyof UpdateConfiguracionAseoDto;
+    items: string[];
+    newValue: string;
+    setNewValue: (value: string) => void;
+    placeholder: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Icon className="w-5 h-5" />
+          {title}
+        </CardTitle>
+        <CardDescription>
+          Configura los elementos por defecto para {title.toLowerCase()}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder={placeholder}
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addElementToArray(field, newValue, setNewValue);
+              }
+            }}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            onClick={() => addElementToArray(field, newValue, setNewValue)}
+            disabled={!newValue.trim()}
+          >
+            Agregar
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          {items.map((item, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+            >
+              <span className="text-sm truncate">{item}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeElementFromArray(field, index)}
+                className="h-6 w-6 p-0 hover:bg-red-100"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+        </div>
+        
+        {items.length === 0 && (
+          <p className="text-sm text-gray-500 italic">
+            No hay elementos configurados
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-6">
-      {/* Alertas de estado */}
-      {isSuccess && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            Configuración actualizada exitosamente
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {updateError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{updateError}</AlertDescription>
-        </Alert>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Configuración de Horarios */}
         <Card>
@@ -286,6 +425,160 @@ export function ConfiguracionAseoComponent() {
                 </p>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+                 {/* Elementos de Aseo */}
+         <ArrayFieldComponent
+           title="Elementos de Aseo"
+           field="elementos_aseo_default"
+           items={formData.elementos_aseo_default || []}
+           newValue={newElementoAseo}
+           setNewValue={setNewElementoAseo}
+           placeholder="Ej: Escoba, Trapeador, Aspiradora..."
+           icon={Brush}
+         />
+
+        {/* Elementos de Protección */}
+        <ArrayFieldComponent
+          title="Elementos de Protección"
+          field="elementos_proteccion_default"
+          items={formData.elementos_proteccion_default || []}
+          newValue={newElementoProteccion}
+          setNewValue={setNewElementoProteccion}
+          placeholder="Ej: Guantes, Mascarilla, Gafas..."
+          icon={Shield}
+        />
+
+        {/* Productos Químicos */}
+        <ArrayFieldComponent
+          title="Productos Químicos"
+          field="productos_quimicos_default"
+          items={formData.productos_quimicos_default || []}
+          newValue={newProductoQuimico}
+          setNewValue={setNewProductoQuimico}
+          placeholder="Ej: Desinfectante, Detergente, Jabón..."
+          icon={Beaker}
+        />
+
+        {/* Áreas Habitación */}
+        <ArrayFieldComponent
+          title="Áreas a Intervenir - Habitación"
+          field="areas_intervenir_habitacion_default"
+          items={formData.areas_intervenir_habitacion_default || []}
+          newValue={newAreaHabitacion}
+          setNewValue={setNewAreaHabitacion}
+          placeholder="Ej: Cama, Escritorio, Armario..."
+          icon={Bed}
+        />
+
+        {/* Áreas Baño */}
+        <ArrayFieldComponent
+          title="Áreas a Intervenir - Baño"
+          field="areas_intervenir_banio_default"
+          items={formData.areas_intervenir_banio_default || []}
+          newValue={newAreaBanio}
+          setNewValue={setNewAreaBanio}
+          placeholder="Ej: Inodoro, Lavamanos, Ducha..."
+          icon={Bath}
+        />
+
+        {/* Procedimientos */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Procedimientos Estándar
+            </CardTitle>
+            <CardDescription>
+              Define los procedimientos por defecto para las diferentes tareas de aseo
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="procedimiento_aseo_habitacion">
+                Procedimiento de Aseo de Habitación
+              </Label>
+              <Textarea
+                id="procedimiento_aseo_habitacion"
+                value={formData.procedimiento_aseo_habitacion_default || ""}
+                onChange={(e) => handleInputChange('procedimiento_aseo_habitacion_default', e.target.value)}
+                placeholder="Describe el procedimiento estándar para el aseo de habitaciones..."
+                className="min-h-[100px]"
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-500">
+                Máximo 1000 caracteres
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="procedimiento_desinfeccion_habitacion">
+                Procedimiento de Desinfección de Habitación
+              </Label>
+              <Textarea
+                id="procedimiento_desinfeccion_habitacion"
+                value={formData.procedimiento_desinfeccion_habitacion_default || ""}
+                onChange={(e) => handleInputChange('procedimiento_desinfeccion_habitacion_default', e.target.value)}
+                placeholder="Describe el procedimiento estándar para la desinfección de habitaciones..."
+                className="min-h-[100px]"
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-500">
+                Máximo 1000 caracteres
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="procedimiento_rotacion_colchones">
+                Procedimiento de Rotación de Colchones
+              </Label>
+              <Textarea
+                id="procedimiento_rotacion_colchones"
+                value={formData.procedimiento_rotacion_colchones_default || ""}
+                onChange={(e) => handleInputChange('procedimiento_rotacion_colchones_default', e.target.value)}
+                placeholder="Describe el procedimiento estándar para la rotación de colchones..."
+                className="min-h-[100px]"
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-500">
+                Máximo 1000 caracteres
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="procedimiento_limpieza_zona_comun">
+                Procedimiento de Limpieza de Zona Común
+              </Label>
+              <Textarea
+                id="procedimiento_limpieza_zona_comun"
+                value={formData.procedimiento_limieza_zona_comun_default || ""}
+                onChange={(e) => handleInputChange('procedimiento_limieza_zona_comun_default', e.target.value)}
+                placeholder="Describe el procedimiento estándar para la limpieza de zonas comunes..."
+                className="min-h-[100px]"
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-500">
+                Máximo 1000 caracteres
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="procedimiento_desinfeccion_zona_comun">
+                Procedimiento de Desinfección de Zona Común
+              </Label>
+              <Textarea
+                id="procedimiento_desinfeccion_zona_comun"
+                value={formData.procedimiento_desinfeccion_zona_comun_default || ""}
+                onChange={(e) => handleInputChange('procedimiento_desinfeccion_zona_comun_default', e.target.value)}
+                placeholder="Describe el procedimiento estándar para la desinfección de zonas comunes..."
+                className="min-h-[100px]"
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-500">
+                Máximo 1000 caracteres
+              </p>
+            </div>
           </CardContent>
         </Card>
 

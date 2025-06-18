@@ -1,5 +1,7 @@
 import { Header } from "@/components/layout/header";
 import { ConfiguracionAseoComponent } from "@/components/aseo/configuracion-aseo";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Settings, Brush, Cog, Users, BellRing } from "lucide-react";
 
 export default function ConfiguracionesPage() {
   return (
@@ -14,39 +16,105 @@ export default function ConfiguracionesPage() {
           </p>
         </div>
 
-        <div className="grid gap-6">
-          {/* Configuración de Aseo */}
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">Configuración de Aseo</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Configura los horarios y parámetros del módulo de aseo
-              </p>
-            </div>
-            <div className="p-6">
-              <ConfiguracionAseoComponent />
-            </div>
-          </div>
-
-          {/* Futuras configuraciones */}
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">Otras Configuraciones</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Próximamente más opciones de configuración
-              </p>
-            </div>
-            <div className="p-6">
-              <div className="text-center py-8 text-gray-500">
-                <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                  </svg>
+        <div className="bg-white rounded-lg shadow-sm border">
+          <Accordion type="single" collapsible className="w-full">
+            
+            {/* Configuración de Aseo */}
+            <AccordionItem value="aseo" className="border-b">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Brush className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-semibold text-gray-900">Configuración de Aseo</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Horarios, procedimientos, elementos y configuraciones del módulo de aseo
+                    </p>
+                  </div>
                 </div>
-                <p>Más configuraciones estarán disponibles próximamente</p>
-              </div>
-            </div>
-          </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <ConfiguracionAseoComponent />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Configuración de Usuarios */}
+            <AccordionItem value="usuarios" className="border-b">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Users className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-semibold text-gray-900">Configuración de Usuarios</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Roles, permisos y configuraciones de usuarios del sistema
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="text-center py-8 text-gray-500">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <p>Configuración de usuarios estará disponible próximamente</p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Configuración de Notificaciones */}
+            <AccordionItem value="notificaciones" className="border-b">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <BellRing className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-semibold text-gray-900">Configuración de Notificaciones</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Configuraciones generales de notificaciones del sistema
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="text-center py-8 text-gray-500">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <BellRing className="w-6 h-6" />
+                  </div>
+                  <p>Configuración de notificaciones estará disponible próximamente</p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Configuración del Sistema */}
+            <AccordionItem value="sistema" className="border-b-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <Cog className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-semibold text-gray-900">Configuración del Sistema</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Configuraciones generales, respaldos y mantenimiento del sistema
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="text-center py-8 text-gray-500">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Settings className="w-6 h-6" />
+                  </div>
+                  <p>Configuración del sistema estará disponible próximamente</p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+          </Accordion>
         </div>
       </main>
     </div>
