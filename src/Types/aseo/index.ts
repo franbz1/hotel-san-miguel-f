@@ -3,4 +3,5 @@ export * from './tiposAseoEnum';
 export * from './ConfiguracionAseo';
 export * from './RegistroAseoHabitacion';
 export * from './RegistroAseoZonaComun';
-export * from './ReporteAseoDiario'; 
+export * from './ReporteAseoDiario';
+export * from './HabitacionAseo'; 

@@ -2,4 +2,5 @@
 export * from './RegistroAseoHabitacion.schema';
 export * from './ConfiguracionAseo.schema';
 export * from './RegistroAseoZonaComun.schema';
-export * from './ReporteAseoDiario.schema'; 
+export * from './ReporteAseoDiario.schema';
+export * from './HabitacionAseo.schema'; 
