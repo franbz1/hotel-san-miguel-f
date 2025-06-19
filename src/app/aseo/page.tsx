@@ -45,14 +45,6 @@ export default function AseoDashboardPage() {
             Monitorea y gestiona las actividades de aseo del hotel
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/aseo/habitaciones">
-            <Button size="sm">
-              <Users className="h-4 w-4 mr-2" />
-              Ver Habitaciones
-            </Button>
-          </Link>
-        </div>
       </div>
 
       {/* Estadísticas principales */}

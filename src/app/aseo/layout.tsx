@@ -7,7 +7,7 @@ import {
   ClipboardList, 
   BarChart3
 } from "lucide-react"
-import { UserNav } from "@/components/user-nav"
+import { Header } from "@/components/layout/header"
 
 interface AseoLayoutProps {
   children: React.ReactNode
@@ -23,9 +23,6 @@ export default function AseoLayout({ children }: AseoLayoutProps) {
             <h2 className="text-xl font-semibold text-gray-800">
               Módulo de Aseo
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Hotel San Miguel
-            </p>
           </div>
           
           <nav className="px-4 pb-4">
@@ -85,19 +82,7 @@ export default function AseoLayout({ children }: AseoLayoutProps) {
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="bg-white shadow-sm border-b">
-            <div className="flex items-center justify-between px-6 py-4">
-              <div className="flex items-center gap-4">
-                <h1 className="text-lg font-medium text-gray-900">
-                  Sistema de Gestión de Aseo
-                </h1>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <UserNav />
-              </div>
-            </div>
-          </header>
+          <Header />
 
           {/* Page Content */}
           <main className="flex-1 overflow-auto">

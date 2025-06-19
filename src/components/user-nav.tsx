@@ -18,9 +18,9 @@ import { usePathname } from "next/navigation"
 
 export function UserNav() {
   const { user, logout } = useAuth()
-  const { canViewAnalytics, isAdmin } = usePermissions()
+  const { canViewAnalytics, isAdmin, canAccessDashboard, canViewReservas, canViewHuespedes } = usePermissions()
   const pathname = usePathname()
-  
+
   const isActive = (path: string) => pathname === path
 
   const handleLogout = async () => {
@@ -44,12 +44,14 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <Link href="/dashboard">
-            <DropdownMenuItem className={isActive("/dashboard") ? "bg-muted cursor-default" : "cursor-pointer"}>
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>Dashboard</span>
-            </DropdownMenuItem>
-          </Link>
+          {canAccessDashboard && (
+            <Link href="/dashboard">
+              <DropdownMenuItem className={isActive("/dashboard") ? "bg-muted cursor-default" : "cursor-pointer"}>
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
           {canViewAnalytics && (
             <Link href="/dashboard/analytics">
               <DropdownMenuItem className={isActive("/dashboard/analytics") ? "bg-muted cursor-default" : "cursor-pointer"}>
@@ -58,29 +60,31 @@ export function UserNav() {
               </DropdownMenuItem>
             </Link>
           )}
-          <Link href="/dashboard/reservas">
-            <DropdownMenuItem className={isActive("/dashboard/reservas") ? "bg-muted cursor-default" : "cursor-pointer"}>
-              <CalendarDays className="mr-2 h-4 w-4" />
-              <span>Reservas</span>
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/dashboard/huespedes">
-            <DropdownMenuItem className={isActive("/dashboard/huespedes") ? "bg-muted cursor-default" : "cursor-pointer"}>
-              <Users className="mr-2 h-4 w-4" />
-              <span>Huéspedes</span>
-            </DropdownMenuItem>
-          </Link>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-          {isAdmin() && (
-            <Link href="/dashboard/configuraciones">
-              <DropdownMenuItem className={isActive("/dashboard/configuraciones") ? "bg-muted cursor-default" : "cursor-pointer"}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Configuraciones</span>
+          {canViewReservas && (
+            <Link href="/dashboard/reservas">
+              <DropdownMenuItem className={isActive("/dashboard/reservas") ? "bg-muted cursor-default" : "cursor-pointer"}>
+                <CalendarDays className="mr-2 h-4 w-4" />
+                <span>Reservas</span>
               </DropdownMenuItem>
             </Link>
           )}
-        <DropdownMenuSeparator />
+          {canViewHuespedes && (
+            <Link href="/dashboard/huespedes">
+              <DropdownMenuItem className={isActive("/dashboard/huespedes") ? "bg-muted cursor-default" : "cursor-pointer"}>
+                <Users className="mr-2 h-4 w-4" />
+                <span>Huéspedes</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
+        </DropdownMenuGroup>
+        {isAdmin() && (
+          <><DropdownMenuSeparator /><Link href="/dashboard/configuraciones">
+            <DropdownMenuItem className={isActive("/dashboard/configuraciones") ? "bg-muted cursor-default" : "cursor-pointer"}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Configuraciones</span>
+            </DropdownMenuItem>
+          </Link><DropdownMenuSeparator /></>
+        )}
         <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Cerrar sesión</span>
