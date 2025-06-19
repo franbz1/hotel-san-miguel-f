@@ -16,7 +16,13 @@ export const createRegistroAseoHabitacionDtoSchema: z.ZodType<CreateRegistroAseo
   tipos_realizados: z.array(z.nativeEnum(TiposAseo)).min(1, "Debe seleccionar al menos un tipo de aseo"),
   objetos_perdidos: z.boolean().default(false),
   rastros_de_animales: z.boolean().default(false),
-  observaciones: z.string().min(5, "Las observaciones deben tener al menos 5 caracteres").max(1000, "Las observaciones no pueden exceder 1000 caracteres").optional(),
+  observaciones: z.string().optional().refine((val) => {
+    if (!val || val.trim() === "") return true; // Permitir vacío
+    return val.length >= 5; // Si no está vacío, debe tener al menos 5 caracteres
+  }, "Las observaciones deben tener al menos 5 caracteres si se especifican").refine((val) => {
+    if (!val) return true;
+    return val.length <= 1000;
+  }, "Las observaciones no pueden exceder 1000 caracteres"),
 });
 
 export const updateRegistroAseoHabitacionDtoSchema: z.ZodType<UpdateRegistroAseoHabitacionDto> = z.object({
@@ -33,7 +39,13 @@ export const updateRegistroAseoHabitacionDtoSchema: z.ZodType<UpdateRegistroAseo
   tipos_realizados: z.array(z.nativeEnum(TiposAseo)).min(1, "Debe seleccionar al menos un tipo de aseo").optional(),
   objetos_perdidos: z.boolean().optional(),
   rastros_de_animales: z.boolean().optional(),
-  observaciones: z.string().min(5, "Las observaciones deben tener al menos 5 caracteres").max(1000, "Las observaciones no pueden exceder 1000 caracteres").optional(),
+  observaciones: z.string().optional().refine((val) => {
+    if (!val || val.trim() === "") return true; // Permitir vacío
+    return val.length >= 5; // Si no está vacío, debe tener al menos 5 caracteres
+  }, "Las observaciones deben tener al menos 5 caracteres si se especifican").refine((val) => {
+    if (!val) return true;
+    return val.length <= 1000;
+  }, "Las observaciones no pueden exceder 1000 caracteres"),
 });
 
 export const filtrosRegistroAseoHabitacionDtoSchema: z.ZodType<FiltrosRegistroAseoHabitacionDto> = z.object({

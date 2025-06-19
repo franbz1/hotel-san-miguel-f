@@ -6,13 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { RefreshCw, Filter, X } from 'lucide-react';
+import { RefreshCw, Filter, X, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useHabitacionesAseoManager } from '@/hooks/aseo/useHabitacionesAseo';
 import { TiposAseo } from '@/Types/aseo/tiposAseoEnum';
 import { EstadoHabitacion } from '@/Types/enums/estadosHabitacion';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function HabitacionesAseoPage() {
+  const { user } = useAuth();
   const {
     habitaciones,
     meta,
@@ -300,6 +303,7 @@ export default function HabitacionesAseoPage() {
                     <TableHead>Rotación</TableHead>
                     <TableHead>Último Aseo</TableHead>
                     <TableHead>Fecha Último Aseo</TableHead>
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -338,6 +342,14 @@ export default function HabitacionesAseoPage() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDate(habitacion.ultimo_aseo_fecha)}
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/aseo/habitaciones/registrar?habitacionId=${habitacion.id}&usuarioId=${user?.id || 1}&usuarioNombre=${user?.nombre || ''}&numeroHabitacion=${habitacion.numero_habitacion}`}>
+                          <Button size="sm" variant="outline">
+                            <Plus className="h-4 w-4 mr-1" />
+                            Registrar
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))}
