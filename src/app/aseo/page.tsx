@@ -201,7 +201,7 @@ export default function AseoDashboardPage() {
       </div>
 
       {/* Lista de habitaciones prioritarias */}
-      {!isLoading && countAseoHoy > 0 && (
+      {!isLoadingHabitaciones && countAseoHoy > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Habitaciones Prioritarias</CardTitle>
