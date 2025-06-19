@@ -54,4 +54,11 @@ export {
   useGenerarReporteAseo,
   useReportesAseoManager,
   useReportesAseoDashboard,
-} from './useReportesAseo'; 
+} from './useReportesAseo';
+
+// Habitaciones para aseo
+export {
+  useHabitacionesAseo,
+  useHabitacionesAseoManager,
+  useHabitacionesAseoDashboard,
+} from './useHabitacionesAseo'; 

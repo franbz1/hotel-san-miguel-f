@@ -33,4 +33,10 @@ export {
 } from './registro-aseo-zona-comun-service';
 
 // Reportes de aseo
-export * from './reporte-aseo-service'; 
+export * from './reporte-aseo-service';
+
+// Habitaciones para aseo
+export {
+  HABITACIONES_ASEO_KEYS,
+  useHabitacionesAseo,
+} from './habitaciones-aseo-service'; 

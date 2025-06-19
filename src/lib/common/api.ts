@@ -17,6 +17,16 @@ export const HABITACION_ENDPOINTS = {
   UPDATE: (id: number) => `${API_BASE_URL}/habitaciones/${id}`,
   DELETE: (id: number) => `${API_BASE_URL}/habitaciones/${id}`,
   POST_ALL_AVAILABLE_BY_DATE_RANGE: `${API_BASE_URL}/habitaciones/disponibles`,
+  GET_ASEO: (limit: number, page: number, requerido_aseo_hoy?: boolean, requerido_desinfeccion_hoy?: boolean, requerido_rotacion_colchones?: boolean, ultimo_aseo_tipo?: string) => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    if (requerido_aseo_hoy !== undefined) params.append('requerido_aseo_hoy', requerido_aseo_hoy.toString());
+    if (requerido_desinfeccion_hoy !== undefined) params.append('requerido_desinfeccion_hoy', requerido_desinfeccion_hoy.toString());
+    if (requerido_rotacion_colchones !== undefined) params.append('requerido_rotacion_colchones', requerido_rotacion_colchones.toString());
+    if (ultimo_aseo_tipo) params.append('ultimo_aseo_tipo', ultimo_aseo_tipo);
+    return `${API_BASE_URL}/habitaciones/aseo?${params.toString()}`;
+  },
 } as const
 
 // Endpoints de reservas
