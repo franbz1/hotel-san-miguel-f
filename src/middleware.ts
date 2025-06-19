@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { COOKIE_NAMES } from './lib/common/cookies'
 import { getValidatedUser } from './lib/auth/auth-service'
-import { Role, ROLE_ROUTES, DEFAULT_ROUTE, PUBLIC_ROUTES } from './lib/common/constants/constants'
+import { Role, ROLE_ROUTES, DEFAULT_ROUTE, PUBLIC_ROUTES, DASHBOARD_ACCESS_ROLES, ASEO_ACCESS_ROLES } from './lib/common/constants/constants'
 
 
 export async function middleware(request: NextRequest) {
@@ -44,6 +44,25 @@ export async function middleware(request: NextRequest) {
     // Verificar acceso a rutas según rol
     const userRole = user.rol as keyof typeof Role
     const defaultRoute = ROLE_ROUTES[userRole] || DEFAULT_ROUTE
+    
+    // Verificar acceso específico a rutas
+    if (path.startsWith('/aseo')) {
+      // Solo usuarios con rol ASEO o ADMINISTRADOR pueden acceder a /aseo
+      if (!ASEO_ACCESS_ROLES.includes(userRole)) {
+        const url = new URL(defaultRoute, request.url)
+        return NextResponse.redirect(url)
+      }
+      return NextResponse.next()
+    }
+    
+    if (path.startsWith('/dashboard')) {
+      // Solo usuarios con rol ADMINISTRADOR o CAJERO pueden acceder al dashboard
+      if (!DASHBOARD_ACCESS_ROLES.includes(userRole)) {
+        const url = new URL(defaultRoute, request.url)
+        return NextResponse.redirect(url)
+      }
+      return NextResponse.next()
+    }
     
     // Si la ruta actual no coincide con la ruta por defecto del rol, redirigir
     if (!path.startsWith(defaultRoute)) {
