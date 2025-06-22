@@ -27,15 +27,21 @@ import {
   Building,
   Calendar,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  ClipboardList
 } from "lucide-react"
 import { useZonasComunesManager } from "@/hooks/aseo/useZonasComunes"
 import { TiposAseo } from "@/Types/aseo/tiposAseoEnum"
 import { CreateZonaComunDto, UpdateZonaComunDto, ZonaComun, FiltrosZonaComunDto } from "@/Types/zonasComunes"
 import { ZonaComunDialog } from "@/components/zonas-comunes/zona-comun-dialog"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function ZonasComunesPage() {
+  const router = useRouter()
+  const { user } = useAuth()
+  
   // Estados para filtros
   const [selectedPiso, setSelectedPiso] = useState<string>("")
   const [selectedRequiereAseo, setSelectedRequiereAseo] = useState<string>("")
@@ -157,6 +163,22 @@ export default function ZonasComunesPage() {
   const confirmDelete = (zona: ZonaComun) => {
     setSelectedZona(zona)
     setShowDeleteDialog(true)
+  }
+
+  // Manejar registro de aseo
+  const handleRegistroAseo = (zona: ZonaComun) => {
+    if (!user) {
+      toast.error("Debes estar autenticado para registrar aseo")
+      return
+    }
+    
+    const params = new URLSearchParams({
+      usuarioId: user.id.toString(),
+      usuarioNombre: user.nombre,
+      nombreZonaComun: zona.nombre
+    })
+    
+    router.push(`/aseo/zonas-comunes/registrar/${zona.id}?${params.toString()}`)
   }
 
   if (isError) {
@@ -376,6 +398,15 @@ export default function ZonasComunesPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleRegistroAseo(zona)}
+                              title="Registrar Aseo"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <ClipboardList className="h-4 w-4" />
+                            </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
