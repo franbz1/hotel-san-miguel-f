@@ -265,9 +265,6 @@ export default function ZonasComunesPage() {
                 <SelectContent>
                   <SelectItem value={TiposAseo.LIMPIEZA}>Limpieza</SelectItem>
                   <SelectItem value={TiposAseo.DESINFECCION}>Desinfección</SelectItem>
-                  <SelectItem value={TiposAseo.ROTACION_COLCHONES}>Rotación Colchones</SelectItem>
-                  <SelectItem value={TiposAseo.LIMPIEZA_BANIO}>Limpieza Baño</SelectItem>
-                  <SelectItem value={TiposAseo.DESINFECCION_BANIO}>Desinfección Baño</SelectItem>
                 </SelectContent>
               </Select>
             </div>
