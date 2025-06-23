@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { useHabitacionesAseoDashboard } from '@/hooks/aseo/useHabitacionesAseo';
 import { useReportesAseoDashboard } from '@/hooks/aseo/useReportesAseo';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function AseoDashboardPage() {
   const {
@@ -34,6 +35,8 @@ export default function AseoDashboardPage() {
     generarReporteHoy,
     isGenerating
   } = useReportesAseoDashboard();
+
+  const { user } = useAuth();
 
   return (
     <div className="p-6 space-y-6">
@@ -212,8 +215,10 @@ export default function AseoDashboardPage() {
                   {habitacionesAseoHoy.slice(0, 6).map((habitacion) => (
                     <div key={habitacion.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">Hab. {habitacion.numero_habitacion}</span>
-                        <Badge variant="secondary">{habitacion.tipo}</Badge>
+                        <Link href={`/aseo/habitaciones/registrar?habitacionId=${habitacion.id}&usuarioId=${user?.id || 1}&usuarioNombre=${user?.nombre || ''}&numeroHabitacion=${habitacion.numero_habitacion}`}>
+                          <span className="font-medium hover:underline">Hab. {habitacion.numero_habitacion}</span>
+                          <Badge variant="secondary">{habitacion.tipo}</Badge>
+                        </Link>
                       </div>
                       <div className="flex gap-1">
                         {habitacion.requerido_aseo_hoy && (
