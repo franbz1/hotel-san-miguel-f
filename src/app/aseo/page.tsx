@@ -31,6 +31,7 @@ export default function AseoDashboardPage() {
 
   const {
     existeReporteHoy,
+    reporteHoy,
     isLoadingReporteHoy,
     generarReporteHoy,
     isGenerating
@@ -128,7 +129,7 @@ export default function AseoDashboardPage() {
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   <span className="text-sm">Reporte generado</span>
                 </div>
-                <Link href="/aseo/reportes">
+                <Link href={`/aseo/reportes/${reporteHoy?.id}`}>
                   <Button variant="outline" size="sm">
                     Ver Reporte
                   </Button>
