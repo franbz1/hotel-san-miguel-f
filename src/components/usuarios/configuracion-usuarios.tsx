@@ -7,13 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { UsuariosTable } from "@/components/usuarios/usuarios-table"
 import { UsuarioModal } from "@/components/usuarios/usuario-modal"
 import { AdminOnly } from "@/components/auth/permission-guard"
-import { Header } from "@/components/layout/header"
 import { usePermissions } from "@/hooks/usePermissions"
 import { Usuario, CreateUsuarioDto, UpdateUsuarioDto } from "@/Types/usuario"
 import { getUsuarios, createUsuario, updateUsuario, deleteUsuario } from "@/lib/usuarios/usuario-service"
 import { toast } from "sonner"
 
-export default function UsuariosPage() {
+export function ConfiguracionUsuariosComponent() {
   const { canAccessUserManagement } = usePermissions()
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -122,31 +121,25 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <Header />
-
-      {/* Contenido Principal */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="space-y-6">
-          {/* Header de la página */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
-              <p className="text-muted-foreground">
-                Administra los usuarios del sistema y sus roles
-              </p>
-            </div>
-            <AdminOnly>
-              <Button onClick={handleCreateUser}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nuevo Usuario
-              </Button>
-            </AdminOnly>
-          </div>
+    <div className="space-y-6">
+      {/* Header de la sección */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Gestión de Usuarios</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Administra los usuarios del sistema y sus roles
+          </p>
+        </div>
+        <AdminOnly>
+          <Button onClick={handleCreateUser}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Usuario
+          </Button>
+        </AdminOnly>
+      </div>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
@@ -214,16 +207,14 @@ export default function UsuariosPage() {
         </CardContent>
       </Card>
 
-          {/* Modal de usuario */}
-          <UsuarioModal
-            open={modalOpen}
-            onOpenChange={setModalOpen}
-            usuario={selectedUsuario}
-            onSubmit={handleSubmitUser}
-            isLoading={isSubmitting}
-          />
-        </div>
-      </div>
+      {/* Modal de usuario */}
+      <UsuarioModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        usuario={selectedUsuario}
+        onSubmit={handleSubmitUser}
+        isLoading={isSubmitting}
+      />
     </div>
   )
 } 

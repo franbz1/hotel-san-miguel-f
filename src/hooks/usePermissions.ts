@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/auth-context'
 import { getRolePermissions, hasSpecificPermission, PERMISSIONS } from '@/lib/permissions/permissions-config'
-import { RoleType } from '@/lib/common/constants/constants'
+import { RoleType, DASHBOARD_ACCESS_ROLES, ASEO_ACCESS_ROLES } from '@/lib/common/constants/constants'
 
 /**
  * Hook personalizado para manejar permisos de usuario
@@ -96,6 +96,8 @@ export function usePermissions() {
     canAccessUserManagement: permissions.canViewUsuarios,
     canAccessFinances: permissions.canViewFinanzas,
     canAccessConfiguration: permissions.canViewConfiguracion,
+    canAccessDashboard: userRole ? DASHBOARD_ACCESS_ROLES.includes(userRole) : false,
+    canAccessAseo: userRole ? ASEO_ACCESS_ROLES.includes(userRole) : false,
   }
 }
 
