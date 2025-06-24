@@ -1,9 +1,9 @@
-import { TipoDoc } from "./enums/tiposDocumento"
+import { TipoDocumentoHuespedSecundario } from "./enums/tipoDocumentoHuespedSecundario"
 import { Reserva } from "./Reserva"
 
 export interface HuespedSecundario {
   id: number
-  tipo_documento: TipoDoc
+  tipo_documento: TipoDocumentoHuespedSecundario
   numero_documento: string
   primer_apellido: string
   segundo_apellido: string
@@ -27,7 +27,7 @@ export interface HuespedSecundario {
 }
 
 export interface CreateHuespedSecundarioDto {
-  tipo_documento: TipoDoc
+  tipo_documento: TipoDocumentoHuespedSecundario
   numero_documento: string
   primer_apellido: string
   segundo_apellido?: string
@@ -46,7 +46,7 @@ export interface CreateHuespedSecundarioDto {
 }
 
 export interface UpdateHuespedSecundarioDto {
-  tipo_documento?: TipoDoc
+  tipo_documento?: TipoDocumentoHuespedSecundario
   numero_documento?: string
   primer_apellido?: string
   segundo_apellido?: string

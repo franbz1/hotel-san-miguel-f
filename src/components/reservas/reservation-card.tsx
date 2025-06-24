@@ -39,6 +39,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useRouter } from "next/navigation"
+import { TipoDocumentoHuespedSecundario } from "@/Types/enums/tipoDocumentoHuespedSecundario"
 
 interface ReservationCardProps {
   reserva: Reserva
@@ -100,8 +101,31 @@ export function ReservationCard({ reserva, onReservaDeleted, huespedExterno, hue
         return "CE"
       case TipoDoc.PASAPORTE:
         return "Pasaporte"
-      case TipoDoc.TI:
-        return "TI"
+      case TipoDoc.PPT:
+        return "PPT"
+      case TipoDoc.PEP:
+        return "PEP"
+      case TipoDoc.DNI:
+        return "DNI"
+      default:
+        return tipo
+    }
+  }
+
+  const formatDocumentTypeHuespedSecundario = (tipo: TipoDocumentoHuespedSecundario) => {
+    switch(tipo) {
+      case TipoDocumentoHuespedSecundario.CC:
+        return "CC"
+      case TipoDocumentoHuespedSecundario.CE:
+        return "CE"
+      case TipoDocumentoHuespedSecundario.PASAPORTE:
+        return "Pasaporte"
+      case TipoDocumentoHuespedSecundario.PEP:
+        return "PEP"
+      case TipoDocumentoHuespedSecundario.DNI:
+        return "DNI"
+      case TipoDocumentoHuespedSecundario.REGISTRO_CIVIL:
+        return "Registro Civil"
       default:
         return tipo
     }
@@ -379,7 +403,7 @@ export function ReservationCard({ reserva, onReservaDeleted, huespedExterno, hue
                             <div>
                               <p className="font-medium text-sm">{huespedSecundario.nombres} {huespedSecundario.primer_apellido}</p>
                               <p className="text-xs text-muted-foreground">
-                                {formatDocumentType(huespedSecundario.tipo_documento)} {huespedSecundario.numero_documento}
+                                {formatDocumentTypeHuespedSecundario(huespedSecundario.tipo_documento)} {huespedSecundario.numero_documento}
                               </p>
                             </div>
                           </div>

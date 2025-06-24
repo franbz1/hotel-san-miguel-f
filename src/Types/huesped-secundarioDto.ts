@@ -1,8 +1,8 @@
 import { Genero } from "./enums/generos";
-import { TipoDoc } from "./enums/tiposDocumento";
+import { TipoDocumentoHuespedSecundario } from "./enums/tipoDocumentoHuespedSecundario";
 
 export interface CreateHuespedSecundario {
-  tipo_documento: TipoDoc
+  tipo_documento: TipoDocumentoHuespedSecundario
   numero_documento: string;
   primer_apellido: string;
   segundo_apellido?: string;
