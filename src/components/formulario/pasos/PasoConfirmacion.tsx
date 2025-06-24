@@ -2,13 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { LinkFormulario } from '@/Types/link-formulario';
+import { useFormularioContext } from '../FormularioWrapper';
 
-interface PasoConfirmacionProps {
-  linkFormulario?: LinkFormulario;
-}
+export const PasoConfirmacion = () => {
+  const { getAllAvailableData } = useFormularioContext();
+  const data = getAllAvailableData();
+  
+  // Extraer datos para mostrar
+  const linkData = data.link;
+  const personalData = data.stepData.informacionPersonal;
+  const companionData = data.stepData.acompaniantes;
 
-export const PasoConfirmacion = ({ linkFormulario }: PasoConfirmacionProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
@@ -24,60 +28,35 @@ export const PasoConfirmacion = ({ linkFormulario }: PasoConfirmacionProps) => {
           <CardTitle className="text-lg">Datos de la Reserva</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {linkFormulario ? (
+          {linkData ? (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-sm font-medium text-muted-foreground">Fecha de Inicio:</span>
-                <p className="font-medium">{new Date(linkFormulario.fechaInicio).toLocaleDateString()}</p>
+                <p className="font-medium">{new Date(linkData.fechaInicio).toLocaleDateString()}</p>
               </div>
               <div>
                 <span className="text-sm font-medium text-muted-foreground">Fecha de Fin:</span>
-                <p className="font-medium">{new Date(linkFormulario.fechaFin).toLocaleDateString()}</p>
+                <p className="font-medium">{new Date(linkData.fechaFin).toLocaleDateString()}</p>
               </div>
               <div>
                 <span className="text-sm font-medium text-muted-foreground">Motivo de Viaje:</span>
-                <p className="font-medium">TODO: Mostrar desde formulario</p>
+                <p className="font-medium">{personalData?.motivo_viaje || 'No especificado'}</p>
               </div>
               <div>
                 <span className="text-sm font-medium text-muted-foreground">Costo:</span>
-                <p className="font-medium">${linkFormulario.costo.toLocaleString()}</p>
+                <p className="font-medium">${linkData.costo.toLocaleString()}</p>
               </div>
               <div>
                 <span className="text-sm font-medium text-muted-foreground">Habitación:</span>
-                <p className="font-medium">{linkFormulario.numeroHabitacion}</p>
+                <p className="font-medium">{linkData.numeroHabitacion}</p>
               </div>
               <div>
                 <span className="text-sm font-medium text-muted-foreground">Acompañantes:</span>
-                <p className="font-medium">TODO: Mostrar desde formulario</p>
+                <p className="font-medium">{companionData?.numero_acompaniantes || 0}</p>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">Fecha de Inicio:</span>
-                <p className="font-medium">--/--/----</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">Fecha de Fin:</span>
-                <p className="font-medium">--/--/----</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">Motivo de Viaje:</span>
-                <p className="font-medium">---------</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">Costo:</span>
-                <p className="font-medium">$ ----</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">Habitación:</span>
-                <p className="font-medium">---</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">Acompañantes:</span>
-                <p className="font-medium">-</p>
-              </div>
-            </div>
+            <p className="text-muted-foreground">No hay datos de reserva disponibles</p>
           )}
         </CardContent>
       </Card>
@@ -88,54 +67,59 @@ export const PasoConfirmacion = ({ linkFormulario }: PasoConfirmacionProps) => {
           <CardTitle className="text-lg">Huésped Principal</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* TODO: Mostrar datos reales del formulario */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Nombre Completo:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Documento:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Fecha de Nacimiento:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Género:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Nacionalidad:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Ocupación:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-          </div>
-          
-          <Separator />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Residencia:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Procedencia:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Teléfono:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Correo:</span>
-              <p className="font-medium">TODO: Mostrar desde formulario</p>
-            </div>
-          </div>
+          {personalData ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Nombre Completo:</span>
+                  <p className="font-medium">{personalData.nombres} {personalData.primer_apellido} {personalData.segundo_apellido || ''}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Documento:</span>
+                  <p className="font-medium">{personalData.tipo_documento} {personalData.numero_documento}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Fecha de Nacimiento:</span>
+                  <p className="font-medium">{personalData.fecha_nacimiento.toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Género:</span>
+                  <p className="font-medium">{personalData.genero}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Nacionalidad:</span>
+                  <p className="font-medium">{personalData.nacionalidad}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Ocupación:</span>
+                  <p className="font-medium">{personalData.ocupacion}</p>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Residencia:</span>
+                  <p className="font-medium">{personalData.ciudad_residencia}, {personalData.pais_residencia}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Procedencia:</span>
+                  <p className="font-medium">{personalData.ciudad_procedencia}, {personalData.pais_procedencia}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Teléfono:</span>
+                  <p className="font-medium">{personalData.telefono || 'No proporcionado'}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Correo:</span>
+                  <p className="font-medium">{personalData.correo || 'No proporcionado'}</p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="text-muted-foreground">Complete el paso de información personal para ver los datos aquí</p>
+          )}
         </CardContent>
       </Card>
 
@@ -144,19 +128,50 @@ export const PasoConfirmacion = ({ linkFormulario }: PasoConfirmacionProps) => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-lg">Acompañantes</CardTitle>
-            <span className="text-sm text-muted-foreground">TODO: Mostrar número real</span>
+            <span className="text-sm text-muted-foreground">
+              {companionData?.numero_acompaniantes || 0} registrados
+            </span>
           </div>
         </CardHeader>
         <CardContent>
-          {/* TODO: Mostrar lista de acompañantes o mensaje vacío */}
-          <div className="text-center py-6">
-            <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-              <span className="text-xl">👤</span>
+          {companionData?.huespedes_secundarios && companionData.huespedes_secundarios.length > 0 ? (
+            <div className="space-y-4">
+              {companionData.huespedes_secundarios.map((huesped, index) => (
+                <div key={index} className="p-4 border rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Nombre:</span>
+                      <p className="font-medium">{huesped.nombres} {huesped.primer_apellido} {huesped.segundo_apellido || ''}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Documento:</span>
+                      <p className="font-medium">{huesped.tipo_documento} {huesped.numero_documento}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Nacionalidad:</span>
+                      <p className="font-medium">{huesped.nacionalidad}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Fecha de Nacimiento:</span>
+                      <p className="font-medium">{huesped.fecha_nacimiento.toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="text-sm text-muted-foreground">
-              TODO: Mostrar acompañantes desde formulario
-            </p>
-          </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                <span className="text-xl">👤</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {companionData?.numero_acompaniantes === 0 
+                  ? 'No hay acompañantes registrados para esta reserva'
+                  : 'Complete el paso de acompañantes para ver los datos aquí'
+                }
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

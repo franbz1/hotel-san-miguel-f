@@ -9,6 +9,7 @@ import {
   AcompaniantesFormData 
 } from '@/lib/formulario/schemas/RegistroFormularioDto.schema';
 import { CreateRegistroFormulario } from '@/Types/registro-formularioDto';
+import { LinkFormulario } from '@/Types/link-formulario';
 
 // Tipos para los datos del formulario por pasos
 type FormStepData = {
@@ -29,6 +30,17 @@ interface FormularioContextType {
   validateAndAdvance: () => Promise<boolean>;
   stepData: FormStepData;
   updateStepData: <T extends keyof FormStepData>(step: T, data: FormStepData[T]) => void;
+  
+  // Nuevos campos para acceso a datos
+  linkFormulario?: LinkFormulario;
+  getCurrentFormData: () => Record<string, unknown>;
+  getCompleteFormData: () => Partial<CreateRegistroFormulario>;
+  getAllAvailableData: () => {
+    link: LinkFormulario | undefined;
+    currentForm: Record<string, unknown>;
+    stepData: FormStepData;
+    complete: Partial<CreateRegistroFormulario>;
+  };
 }
 
 const FormularioContext = createContext<FormularioContextType | null>(null);
@@ -45,11 +57,13 @@ export const useFormularioContext = () => {
 interface FormularioWrapperProps {
   children: ReactNode;
   onSubmit: (data: Partial<CreateRegistroFormulario>) => void;
+  linkFormulario?: LinkFormulario;
 }
 
 export const FormularioWrapper = ({ 
   children, 
-  onSubmit
+  onSubmit,
+  linkFormulario
 }: FormularioWrapperProps) => {
   // Estado de navegación
   const [currentStep, setCurrentStep] = useState(1);
@@ -62,6 +76,45 @@ export const FormularioWrapper = ({
   const form = useForm({
     mode: 'onChange' // Validar en tiempo real
   });
+
+  // ==========================================
+  // FUNCIONES DE ACCESO A DATOS
+  // ==========================================
+
+  /**
+   * Obtiene los datos actuales del formulario (paso actual)
+   */
+  const getCurrentFormData = () => {
+    return form.getValues();
+  };
+
+  /**
+   * Obtiene todos los datos del formulario combinados
+   */
+  const getCompleteFormData = (): Partial<CreateRegistroFormulario> => {
+    return {
+      // Datos de información personal (paso 2)
+      ...stepData.informacionPersonal,
+      
+      // Datos de acompañantes (paso 3)
+      ...stepData.acompaniantes,
+      
+      // Datos del formulario actual
+      ...getCurrentFormData()
+    };
+  };
+
+  /**
+   * Obtiene todos los datos disponibles (link + formulario + pasos)
+   */
+  const getAllAvailableData = () => {
+    return {
+      link: linkFormulario,
+      currentForm: getCurrentFormData(),
+      stepData: stepData,
+      complete: getCompleteFormData()
+    };
+  };
 
   // ==========================================
   // FUNCIONES DE NAVEGACIÓN
@@ -161,13 +214,7 @@ export const FormularioWrapper = ({
     }
 
     // Combinar todos los datos de los pasos
-    const completeFormData: Partial<CreateRegistroFormulario> = {
-      // Datos de información personal (paso 2)
-      ...stepData.informacionPersonal,
-      
-      // Datos de acompañantes (paso 3)
-      ...stepData.acompaniantes
-    };
+    const completeFormData = getCompleteFormData();
 
     // Ejecutar callback de envío
     onSubmit(completeFormData);
@@ -211,7 +258,13 @@ export const FormularioWrapper = ({
     canAdvance,
     validateAndAdvance,
     stepData,
-    updateStepData
+    updateStepData,
+    
+    // Nuevos campos para acceso a datos
+    linkFormulario,
+    getCurrentFormData,
+    getCompleteFormData,
+    getAllAvailableData
   };
 
   return (

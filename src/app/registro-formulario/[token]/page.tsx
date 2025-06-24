@@ -196,7 +196,10 @@ export default function RegistroFormularioPage() {
 
   // Renderizar el formulario
   return (
-    <FormularioWrapper onSubmit={handleFormSubmit}>
+    <FormularioWrapper 
+      onSubmit={handleFormSubmit}
+      linkFormulario={linkFormulario}
+    >
       <RegistroFormulario 
         linkFormulario={linkFormulario}
         isSubmitting={isSubmitting}
