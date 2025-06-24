@@ -12,7 +12,17 @@ export interface FormulariosResponse {
   }
 }
 
-export async function getFormularios(page: number = 1, limit: number = 6): Promise<FormulariosResponse> {
+// Keys para React Query
+export const FORMULARIO_KEYS = {
+  all: ['formularios'] as const,
+  lists: () => [...FORMULARIO_KEYS.all, 'list'] as const,
+  list: (page: number, limit: number) => [...FORMULARIO_KEYS.lists(), { page, limit }] as const,
+  details: () => [...FORMULARIO_KEYS.all, 'detail'] as const,
+  detail: (id: number) => [...FORMULARIO_KEYS.details(), id] as const,
+};
+
+// Función para obtener formularios paginados
+export const fetchFormularios = async (page: number = 1, limit: number = 6): Promise<FormulariosResponse> => {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -33,7 +43,8 @@ export async function getFormularios(page: number = 1, limit: number = 6): Promi
   return response.json()
 }
 
-export async function getFormularioById(id: number): Promise<Formulario> {
+// Función para obtener formulario por ID
+export const fetchFormularioById = async (id: number): Promise<Formulario> => {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -52,4 +63,13 @@ export async function getFormularioById(id: number): Promise<Formulario> {
   }
 
   return response.json()
+}
+
+// Funciones legacy para compatibilidad (opcional, se pueden eliminar después de migrar todos los usos)
+export async function getFormularios(page: number = 1, limit: number = 6): Promise<FormulariosResponse> {
+  return fetchFormularios(page, limit);
+}
+
+export async function getFormularioById(id: number): Promise<Formulario> {
+  return fetchFormularioById(id);
 }
