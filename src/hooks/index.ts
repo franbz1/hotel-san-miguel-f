@@ -7,7 +7,5 @@ export * from './usePermissions';
 // Aseo - Todos los hooks del módulo de aseo
 export * from './aseo';
 
-// Formularios
-export * from './useFormulario';
-export * from './useLinkFormulario';
-export * from './useRegistroFormulario'; 
+// Formularios - Todos los hooks del módulo de formularios
+export * from './formulario'; 
