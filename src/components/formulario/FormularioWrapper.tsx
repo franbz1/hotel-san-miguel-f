@@ -75,6 +75,7 @@ export const FormularioWrapper = ({
   // Configuración del formulario principal (solo para el paso actual)
   const form = useForm({
     mode: 'onChange' // Validar en tiempo real
+    // La validación se maneja en validateCurrentStep usando los schemas específicos
   });
 
   // ==========================================
