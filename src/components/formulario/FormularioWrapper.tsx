@@ -86,6 +86,7 @@ export const FormularioWrapper = ({
       segundo_apellido: '',
       fecha_nacimiento: undefined,
       genero: undefined,
+      ocupacion: '',
       
       // Ubicación
       nacionalidad: '',

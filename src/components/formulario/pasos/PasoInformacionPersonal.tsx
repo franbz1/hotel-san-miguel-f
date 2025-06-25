@@ -206,6 +206,25 @@ export const PasoInformacionPersonal = () => {
               </FormItem>
             )}
           />
+
+          {/* Ocupación */}
+          <FormField
+            control={control}
+            name="ocupacion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ocupación *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Ingrese su ocupación"
+                    maxLength={50}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </div>
 
