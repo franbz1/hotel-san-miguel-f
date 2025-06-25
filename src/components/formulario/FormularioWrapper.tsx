@@ -2,6 +2,8 @@
 
 import { createContext, useContext, ReactNode, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
+import { toast } from 'sonner';
+import { ZodError } from 'zod';
 import { 
   informacionPersonalSchema, 
   acompaniantesSchema,
@@ -30,7 +32,7 @@ interface FormularioContextType {
   validateAndAdvance: () => Promise<boolean>;
   stepData: FormStepData;
   updateStepData: <T extends keyof FormStepData>(step: T, data: FormStepData[T]) => void;
-  
+
   // Nuevos campos para acceso a datos
   linkFormulario?: LinkFormulario;
   getCurrentFormData: () => Record<string, unknown>;
@@ -60,8 +62,8 @@ interface FormularioWrapperProps {
   linkFormulario?: LinkFormulario;
 }
 
-export const FormularioWrapper = ({ 
-  children, 
+export const FormularioWrapper = ({
+  children,
   onSubmit,
   linkFormulario
 }: FormularioWrapperProps) => {
@@ -74,7 +76,37 @@ export const FormularioWrapper = ({
 
   // Configuración del formulario principal (solo para el paso actual)
   const form = useForm({
-    mode: 'onChange' // Validar en tiempo real
+    mode: 'onChange', // Validar en tiempo real
+    defaultValues: {
+      // Información Personal
+      tipo_documento: undefined,
+      numero_documento: '',
+      nombres: '',
+      primer_apellido: '',
+      segundo_apellido: '',
+      fecha_nacimiento: undefined,
+      genero: undefined,
+      
+      // Ubicación
+      nacionalidad: '',
+      pais_procedencia: '',
+      estado_procedencia: '',
+      ciudad_procedencia: '',
+      pais_residencia: '',
+      estado_residencia: '',
+      ciudad_residencia: '',
+      
+      // Contacto
+      telefono: '',
+      codigo_pais_telefono: '',
+      email: '',
+      
+      // Reserva
+      motivo_viaje: undefined,
+      
+      // Acompañantes (para paso 3)
+      huespedes_secundarios: []
+    } as Partial<CreateRegistroFormulario>
     // La validación se maneja en validateCurrentStep usando los schemas específicos
   });
 
@@ -96,10 +128,10 @@ export const FormularioWrapper = ({
     return {
       // Datos de información personal (paso 2)
       ...stepData.informacionPersonal,
-      
+
       // Datos de acompañantes (paso 3)
       ...stepData.acompaniantes,
-      
+
       // Datos del formulario actual
       ...getCurrentFormData()
     };
@@ -144,13 +176,53 @@ export const FormularioWrapper = ({
   // ==========================================
 
   const updateStepData = <T extends keyof FormStepData>(
-    step: T, 
+    step: T,
     data: FormStepData[T]
   ) => {
     setStepData(prev => ({
       ...prev,
       [step]: data
     }));
+  };
+
+  /**
+   * Maneja errores de validación de Zod y los muestra en el formulario y toast
+   */
+  const handleValidationErrors = (error: ZodError, stepName: string) => {
+    // Limpiar errores previos
+    form.clearErrors();
+
+    // Configurar errores en los campos del formulario
+    error.errors.forEach((err) => {
+      const fieldPath = err.path.join('.');
+      // Usar setError con paths conocidos
+      if (fieldPath in form.getValues()) {
+        form.setError(fieldPath as keyof typeof form.getValues, {
+          type: 'validation',
+          message: err.message
+        });
+      }
+    });
+
+    // Mostrar resumen de errores en toast
+    const errorCount = error.errors.length;
+    const firstErrors = error.errors.slice(0, 3).map(err => err.message);
+
+    toast.error(`Errores en ${stepName}`, {
+      description: (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-black">Se encontraron {errorCount} errores.</p>
+          <p className="text-sm text-black">Por favor, corrija los siguientes errores:</p>
+          <p className="text-sm text-black">{firstErrors.join('\n• ')} {errorCount > 3 ? '\n• ...' : ''}</p>
+        </div>
+      ),
+      duration: 5000,
+      style: {
+        color: '#dc2626', // text-red-600
+        borderColor: '#dc2626'
+      },
+      className: 'text-red-600'
+    });
   };
 
   const validateCurrentStep = async (): Promise<boolean> => {
@@ -160,25 +232,50 @@ export const FormularioWrapper = ({
       switch (currentStep) {
         case 1: // Bienvenida - no requiere validación
           return true;
-          
+
         case 2: // Información Personal
           const personalData = await informacionPersonalSchema.parseAsync(formData);
           updateStepData('informacionPersonal', personalData);
+          // Limpiar errores si la validación es exitosa
+          form.clearErrors();
+          toast.success('Información personal validada correctamente');
           return true;
-          
+
         case 3: // Acompañantes
           const companionData = await acompaniantesSchema.parseAsync(formData);
           updateStepData('acompaniantes', companionData);
+          // Limpiar errores si la validación es exitosa
+          form.clearErrors();
+          toast.success('Información de acompañantes validada correctamente');
           return true;
-          
+
         case 4: // Confirmación - validar datos completos
           return validateCompleteForm();
-          
+
         default:
           return false;
       }
     } catch (error) {
-      console.error('Error de validación en paso:', currentStep, error);
+      if (error instanceof ZodError) {
+        const stepNames = {
+          1: 'Bienvenida',
+          2: 'Información Personal',
+          3: 'Acompañantes',
+          4: 'Confirmación'
+        };
+
+        handleValidationErrors(error, stepNames[currentStep as keyof typeof stepNames] || `Paso ${currentStep}`);
+      } else {
+        console.error('Error de validación en paso:', currentStep, error);
+        toast.error('Error inesperado', {
+          description: 'Ocurrió un error durante la validación. Por favor, inténtalo de nuevo.',
+          style: {
+            color: '#dc2626', // text-red-600
+            borderColor: '#dc2626'
+          },
+          className: 'text-red-600'
+        });
+      }
       return false;
     }
   };
@@ -187,17 +284,17 @@ export const FormularioWrapper = ({
     // Verificar que todos los pasos requeridos tengan datos
     const hasPersonalInfo = !!stepData.informacionPersonal;
     const hasCompanionInfo = !!stepData.acompaniantes;
-    
+
     return hasPersonalInfo && hasCompanionInfo;
   };
 
   const validateAndAdvance = async (): Promise<boolean> => {
     const isValid = await validateCurrentStep();
-    
+
     if (isValid && !isLastStep) {
       nextStep();
     }
-    
+
     return isValid;
   };
 
@@ -208,7 +305,7 @@ export const FormularioWrapper = ({
   const handleSubmit = async () => {
     // Validar una última vez
     const isValid = await validateCurrentStep();
-    
+
     if (!isValid) {
       console.error('Formulario inválido en el paso final');
       return;
@@ -227,7 +324,7 @@ export const FormularioWrapper = ({
 
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep >= totalSteps;
-  
+
   // Determinar si se puede avanzar basado en el paso actual
   const canAdvance = (() => {
     switch (currentStep) {
@@ -260,7 +357,7 @@ export const FormularioWrapper = ({
     validateAndAdvance,
     stepData,
     updateStepData,
-    
+
     // Nuevos campos para acceso a datos
     linkFormulario,
     getCurrentFormData,
