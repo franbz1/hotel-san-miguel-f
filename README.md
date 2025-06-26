@@ -22,20 +22,32 @@ Este proyecto es únicamente el **frontend** que consume la API del backend disp
 ### ✨ Vista Unificada de Gestión Hotelera
 Permite administrar todo el hotel desde una sola interfaz: visualizar habitaciones en tiempo real, gestionar reservas activas, controlar el estado del aseo y monitorear analíticas de rendimiento.
 
+![image](https://github.com/user-attachments/assets/bcfacc78-5e9e-4bcc-95c5-e5bf829300ab)
+
 ### 🏨 Gestión de Habitaciones y Reservas
 Control completo del estado de habitaciones con sistemas de reservas que incluyen validaciones automáticas, asignación inteligente y seguimiento de ocupación.
+
+![image](https://github.com/user-attachments/assets/55d8fb35-584a-495f-bd2c-746db38bd9fc)
 
 ### 👥 Administración de Huéspedes
 Registro digital completo con formularios únicos generados por token, validación de documentos internacionales y gestión de acompañantes.
 
+![image](https://github.com/user-attachments/assets/00601880-ba4b-4c51-b908-dd18ab7d2bb8)
+
 ### 🧹 Control de Aseo según Normativas
 Sistema especializado para cumplir con normativas hoteleras de limpieza, incluyendo programación automática, rotación de colchones y reportes de cumplimiento.
+
+![image](https://github.com/user-attachments/assets/6d646c6b-f72e-4940-b78d-d499cf267d3b)
 
 ### 📊 Analíticas de Rendimiento
 Dashboard con métricas clave del hotel, análisis de ingresos, reportes de ocupación y exportación de datos para toma de decisiones.
 
+![image](https://github.com/user-attachments/assets/2c55ebb0-d367-4c2a-ac33-898d0a2fa1fb)
+
 ### 🔐 Sistema de Roles y Seguridad
 Autenticación segura con diferentes niveles de acceso según el rol del usuario, protegiendo la información sensible del hotel.
+
+![image](https://github.com/user-attachments/assets/39d273c0-df01-4c41-a18e-9fc4f7257a53)
 
 ## 🏗️ Arquitectura del Sistema
 
