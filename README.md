@@ -118,18 +118,13 @@ bun install
 ```
 
 3. **Configurar la URL del backend**
-```bash
-# Crear archivo .env.local
-cp .env.example .env.local
+```typescript
+//Ir al archivo src\lib\common\api.ts
+//configurar la constante a la ruta donde se esta ejecutando el backend de nestjs
+export const API_BASE_URL = 'http://localhost:3001' 
 ```
 
-Configurar la URL del backend en el archivo `.env.local`:
-```env
-# URL del backend API (ajustar según tu configuración)
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
-```
-
-**Nota**: Asegúrate de tener el backend ejecutándose desde [hotel-san-miguel](https://github.com/franbz1/hotel-san-miguel)
+**Nota**: Asegúrate de tener el backend ejecutándose del repositorio [hotel-san-miguel](https://github.com/franbz1/hotel-san-miguel)
 
 4. **Ejecutar en modo desarrollo**
 ```bash
@@ -235,6 +230,7 @@ Interfaz especializada para el registro de huéspedes con proceso guiado paso a 
 - **Tailwind CSS 4** - Framework de utilidades CSS
 - **Radix UI** - Componentes accesibles y primitivos
 - **Lucide React** - Iconografía moderna
+- **Shadcn** - Libreria de componentes
 - **Recharts** - Gráficos y visualizaciones
 
 ### Validación y Tipos
