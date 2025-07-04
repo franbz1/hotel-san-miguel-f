@@ -1,0 +1,23 @@
+{
+  "informacion_personal": {
+    "tipo_documento": "Tipo de documento de identidad. C.C: Cédula de Ciudadanía, C.E: Cédula de Extranjería, P.E.P: Permiso Especial de Permanencia, D.N.I: Documento Nacional de Identidad",
+    "numero_documento": "Número único de identificación según el tipo de documento seleccionado",
+    "nombres": "Nombres completos tal como aparecen en el documento de identidad",
+    "primer_apellido": "Primer apellido tal como aparece en el documento de identidad",
+    "segundo_apellido": "Segundo apellido si aplica (opcional)",
+    "fecha_nacimiento": "Fecha de nacimiento del huésped registrado en el documento de identidad",
+    "genero": "Identidad de género del huésped para efectos de registro",
+    "ocupacion": "Profesión u ocupación principal del huésped"
+  },
+  "contacto_ubicacion": {
+    "nacionalidad": "País de nacionalidad o ciudadanía del huésped",
+    "procedencia": "Última ciudad donde se hospedó antes de llegar a este establecimiento",
+    "residencia": "Ciudad donde reside habitualmente el huésped",
+    "destino": "Ciudad del próximo destino después de su estadía",
+    "telefono": "Número de teléfono de contacto incluyendo código de país",
+    "email": "Dirección de correo electrónico para comunicaciones y confirmaciones"
+  },
+  "reserva": {
+    "motivo_viaje": "Razón principal de su viaje o estadía en el establecimiento"
+  }
+} 

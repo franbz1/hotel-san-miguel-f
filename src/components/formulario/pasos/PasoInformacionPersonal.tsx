@@ -19,11 +19,16 @@ import {
 } from '@/components/ui/select';
 import { LocationSelector } from '@/components/ui/location-selector';
 import { CountryCodeSelector, useCountryCodeSelector } from '@/components/ui/country-code-selector';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 
 // Enums
 import { TipoDoc } from '@/Types/enums/tiposDocumento';
 import { Genero } from '@/Types/enums/generos';
 import { MotivosViajes } from '@/Types/enums/motivosViajes';
+
+// Tooltips
+import tooltips from '@/lib/common/tooltips/formulario-tooltips.json';
 
 export const PasoInformacionPersonal = () => {
   const { control, setValue } = useFormContext();
@@ -50,6 +55,36 @@ export const PasoInformacionPersonal = () => {
     return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   };
 
+  // Componente para el label con icono de información
+  const LabelWithTooltip = ({ label, tooltipText }: { label: string; tooltipText: string }) => (
+    <div className="flex items-center gap-2">
+      <FormLabel>{label}</FormLabel>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info className="h-4 w-4 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-xs">{tooltipText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  );
+
+  // Componente para títulos de sección con tooltip
+  const SectionTitleWithTooltip = ({ title, tooltipText }: { title: string; tooltipText: string }) => (
+    <div className="flex items-center gap-2">
+      <h4 className="text-md font-medium">{title}</h4>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info className="h-4 w-4 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-xs">{tooltipText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
 
@@ -64,7 +99,10 @@ export const PasoInformacionPersonal = () => {
             name="tipo_documento"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Documento *</FormLabel>
+                <LabelWithTooltip 
+                  label="Tipo de Documento *" 
+                  tooltipText={tooltips.informacion_personal.tipo_documento} 
+                />
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -90,7 +128,10 @@ export const PasoInformacionPersonal = () => {
             name="numero_documento"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Número de Documento *</FormLabel>
+                <LabelWithTooltip 
+                  label="Número de Documento *" 
+                  tooltipText={tooltips.informacion_personal.numero_documento} 
+                />
                 <FormControl>
                   <Input
                     placeholder="Ingrese el número de documento"
@@ -108,7 +149,10 @@ export const PasoInformacionPersonal = () => {
             name="nombres"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombres *</FormLabel>
+                <LabelWithTooltip 
+                  label="Nombres *" 
+                  tooltipText={tooltips.informacion_personal.nombres} 
+                />
                 <FormControl>
                   <Input
                     placeholder="Ingrese sus nombres"
@@ -127,7 +171,10 @@ export const PasoInformacionPersonal = () => {
               name="primer_apellido"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Primer Apellido *</FormLabel>
+                  <LabelWithTooltip 
+                    label="Primer Apellido *" 
+                    tooltipText={tooltips.informacion_personal.primer_apellido} 
+                  />
                   <FormControl>
                     <Input
                       placeholder="Primer apellido"
@@ -144,7 +191,10 @@ export const PasoInformacionPersonal = () => {
               name="segundo_apellido"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Segundo Apellido</FormLabel>
+                  <LabelWithTooltip 
+                    label="Segundo Apellido" 
+                    tooltipText={tooltips.informacion_personal.segundo_apellido} 
+                  />
                   <FormControl>
                     <Input
                       placeholder="Segundo apellido (opcional)"
@@ -163,7 +213,10 @@ export const PasoInformacionPersonal = () => {
             name="fecha_nacimiento"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fecha de Nacimiento *</FormLabel>
+                <LabelWithTooltip 
+                  label="Fecha de Nacimiento *" 
+                  tooltipText={tooltips.informacion_personal.fecha_nacimiento} 
+                />
                 <FormControl>
                   <Input
                     type="date"
@@ -187,7 +240,10 @@ export const PasoInformacionPersonal = () => {
             name="genero"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Género *</FormLabel>
+                <LabelWithTooltip 
+                  label="Género *" 
+                  tooltipText={tooltips.informacion_personal.genero} 
+                />
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -213,7 +269,10 @@ export const PasoInformacionPersonal = () => {
             name="ocupacion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Ocupación *</FormLabel>
+                <LabelWithTooltip 
+                  label="Ocupación *" 
+                  tooltipText={tooltips.informacion_personal.ocupacion} 
+                />
                 <FormControl>
                   <Input
                     placeholder="Ingrese su ocupación"
@@ -235,7 +294,10 @@ export const PasoInformacionPersonal = () => {
         <div className="space-y-6">
           {/* Nacionalidad */}
           <div className="space-y-2">
-            <h4 className="text-md font-medium">Nacionalidad</h4>
+            <SectionTitleWithTooltip 
+              title="Nacionalidad" 
+              tooltipText={tooltips.contacto_ubicacion.nacionalidad} 
+            />
             <FormField
               control={control}
               name="nacionalidad"
@@ -262,7 +324,10 @@ export const PasoInformacionPersonal = () => {
 
           {/* Procedencia */}
           <div className="space-y-2">
-            <h4 className="text-md font-medium">Procedencia</h4>
+            <SectionTitleWithTooltip 
+              title="Procedencia" 
+              tooltipText={tooltips.contacto_ubicacion.procedencia} 
+            />
             <FormField
               control={control}
               name="pais_procedencia"
@@ -293,7 +358,10 @@ export const PasoInformacionPersonal = () => {
 
           {/* Residencia */}
           <div className="space-y-2">
-            <h4 className="text-md font-medium">Residencia</h4>
+            <SectionTitleWithTooltip 
+              title="Residencia" 
+              tooltipText={tooltips.contacto_ubicacion.residencia} 
+            />
             <FormField
               control={control}
               name="pais_residencia"
@@ -328,7 +396,10 @@ export const PasoInformacionPersonal = () => {
 
           {/* Destino */}
           <div className="space-y-2">
-            <h4 className="text-md font-medium">Destino</h4>
+            <SectionTitleWithTooltip 
+              title="Destino" 
+              tooltipText={tooltips.contacto_ubicacion.destino} 
+            />
             <FormField
               control={control}
               name="pais_destino"
@@ -361,7 +432,17 @@ export const PasoInformacionPersonal = () => {
 
             {/* Teléfono */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Teléfono *</label>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">Teléfono *</label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">{tooltips.contacto_ubicacion.telefono}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <div className="flex gap-2">
                 {/* Código de país */}
                 <div className="w-48">
@@ -406,7 +487,10 @@ export const PasoInformacionPersonal = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email *</FormLabel>
+                  <LabelWithTooltip 
+                    label="Email *" 
+                    tooltipText={tooltips.contacto_ubicacion.email} 
+                  />
                   <FormControl>
                     <Input
                       type="email"
@@ -433,7 +517,10 @@ export const PasoInformacionPersonal = () => {
             name="motivo_viaje"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Motivo de Viaje *</FormLabel>
+                <LabelWithTooltip 
+                  label="Motivo de Viaje *" 
+                  tooltipText={tooltips.reserva.motivo_viaje} 
+                />
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
