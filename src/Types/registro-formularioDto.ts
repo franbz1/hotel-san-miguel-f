@@ -8,6 +8,8 @@ export interface CreateRegistroFormulario {
   fecha_inicio: Date;
   fecha_fin: Date;
   motivo_viaje: MotivosViajes;
+  pais_destino: string;
+  ciudad_destino: string;
   costo: number;
   numero_habitacion: number;
   numero_acompaniantes: number;

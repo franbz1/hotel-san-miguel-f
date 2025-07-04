@@ -326,6 +326,35 @@ export const PasoInformacionPersonal = () => {
             />
           </div>
 
+          {/* Destino */}
+          <div className="space-y-2">
+            <h4 className="text-md font-medium">Destino</h4>
+            <FormField
+              control={control}
+              name="pais_destino"
+              render={({ field: paisField }) => (
+                <FormItem>
+                  <FormControl>
+                    <LocationSelector
+                      level="city"
+                      defaultCountryCode="CO" // Colombia por defecto
+                      placeholder={{
+                        country: "País de destino...",
+                        state: "Estado/Departamento...",
+                        city: "Ciudad de destino..."
+                      }}
+                      onLocationChange={(location) => {
+                        paisField.onChange(location.country?.name || '');
+                        setValue('ciudad_destino', location.city?.name || '');
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           {/* Campos de contacto */}
           <div className="pt-4 border-t space-y-4">
             <h4 className="text-md font-medium">Información de Contacto</h4>
@@ -341,12 +370,12 @@ export const PasoInformacionPersonal = () => {
                     displayMode="code-only"
                     placeholder="+57"
                     value={phoneCountry?.code}
-                                         onCountryCodeChange={(country) => {
-                       handleCountryCodeChange(country);
-                       setValue('codigo_pais_telefono', country?.dial_code || '');
-                       // Marcar que el código fue cambiado manualmente
-                       setIsPhoneCodeManuallySet(true);
-                     }}
+                    onCountryCodeChange={(country) => {
+                      handleCountryCodeChange(country);
+                      setValue('codigo_pais_telefono', country?.dial_code || '');
+                      // Marcar que el código fue cambiado manualmente
+                      setIsPhoneCodeManuallySet(true);
+                    }}
                   />
                 </div>
 

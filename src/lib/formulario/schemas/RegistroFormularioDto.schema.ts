@@ -36,6 +36,12 @@ export const huespedSecundarioSchema = z.object({
   ciudad_procedencia: z.string()
     .min(2, "La ciudad de procedencia es obligatorio y debe tener al menos 2 caracteres")
     .max(50, "La ciudad de procedencia no puede tener más de 50 caracteres"),
+  pais_destino: z.string()
+    .min(2, "El país de destino es obligatorio y debe tener al menos 2 caracteres")
+    .max(50, "El país de destino no puede tener más de 50 caracteres"),
+  ciudad_destino: z.string()
+    .min(2, "La ciudad de destino es obligatoria y debe tener al menos 2 caracteres")
+    .max(50, "La ciudad de destino no puede tener más de 50 caracteres"),
   fecha_nacimiento: z.date({
     required_error: "La fecha de nacimiento es obligatoria y debe ser una fecha",
     invalid_type_error: "La fecha de nacimiento debe ser una fecha válida"
@@ -100,6 +106,12 @@ export const informacionPersonalSchema = z.object({
   ciudad_procedencia: z.string()
     .min(2, "La ciudad de procedencia es obligatoria y debe ser un texto")
     .max(50, "La ciudad de procedencia no puede tener más de 50 caracteres"),
+  pais_destino: z.string()
+    .min(2, "El país de destino es obligatorio y debe ser un texto")
+    .max(50, "El país de destino no puede tener más de 50 caracteres"),
+  ciudad_destino: z.string()
+    .min(2, "La ciudad de destino es obligatoria y debe ser un texto")
+    .max(50, "La ciudad de destino no puede tener más de 50 caracteres"),
   fecha_nacimiento: z.date({
     required_error: "La fecha de nacimiento es obligatoria",
     invalid_type_error: "Debe ser una fecha válida"
@@ -157,6 +169,12 @@ export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormular
     required_error: "La fecha de fin es obligatoria", 
     invalid_type_error: "Debe ser una fecha válida"
   }),
+  pais_destino: z.string()
+    .min(2, "El país de destino es obligatorio y debe ser un texto")
+    .max(50, "El país de destino no puede tener más de 50 caracteres"),
+  ciudad_destino: z.string()
+    .min(2, "La ciudad de destino es obligatoria y debe ser un texto")
+    .max(50, "La ciudad de destino no puede tener más de 50 caracteres"),
   motivo_viaje: z.nativeEnum(MotivosViajes, {
     required_error: "El motivo de viaje es obligatorio",
     invalid_type_error: "Debe ser uno de los motivos de viaje válidos"
@@ -207,8 +225,8 @@ export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormular
     .min(2, "El país de procedencia es obligatorio y debe ser un texto")
     .max(50, "El país de procedencia no puede tener más de 50 caracteres"),
   ciudad_procedencia: z.string()
-    .min(2, "La ciudad de procedencia es obligatoria y debe ser un texto")
-    .max(50, "La ciudad de procedencia no puede tener más de 50 caracteres"),
+    .min(2, "La ciudad de destino es obligatoria y debe ser un texto")
+    .max(50, "La ciudad de destino no puede tener más de 50 caracteres"),
   fecha_nacimiento: z.date({
     required_error: "La fecha de nacimiento es obligatoria",
     invalid_type_error: "Debe ser una fecha válida"

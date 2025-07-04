@@ -11,6 +11,8 @@ export interface CreateHuespedSecundario {
   ciudad_residencia: string;
   pais_procedencia: string;
   ciudad_procedencia: string;
+  pais_destino: string;
+  ciudad_destino: string;
   fecha_nacimiento: Date
   nacionalidad: string;
   ocupacion: string;
