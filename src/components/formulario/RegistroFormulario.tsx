@@ -50,9 +50,9 @@ export const RegistroFormulario = ({ linkFormulario, isSubmitting = false }: Reg
     switch (currentStep) {
       case 1:
         return <PasoBienvenida />;
-      case 2:
-        return <PasoInformacionPersonal />;
       case 3:
+        return <PasoInformacionPersonal />;
+      case 2:
         return <PasoAcompaniantes />;
       case 4:
         return <PasoConfirmacion />;
