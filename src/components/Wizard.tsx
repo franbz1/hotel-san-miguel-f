@@ -1,5 +1,5 @@
 import { useWizard, StepStatus, AnimationDirection } from "@/hooks/useWizard";
-import React, { ReactNode, useState, useEffect } from "react";
+import React, { ReactNode, useState, useEffect, useRef } from "react";
 
 export interface WizardStep<StepKey extends string> {
   key: StepKey;
@@ -28,6 +28,37 @@ export interface WizardProps<StepKey extends string> {
   }) => ReactNode;
 }
 
+// Wrapper para detectar cuando un componente está montado
+interface StepWrapperProps {
+  children: ReactNode;
+  onMounted: () => void;
+  stepKey: string;
+}
+
+function StepWrapper({ children, onMounted, stepKey }: StepWrapperProps) {
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    // Resetear el estado cuando cambia el step
+    mountedRef.current = false;
+    
+    // Usar requestAnimationFrame para asegurar que el componente esté completamente renderizado
+    const frame = requestAnimationFrame(() => {
+      if (!mountedRef.current) {
+        mountedRef.current = true;
+        onMounted();
+      }
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      mountedRef.current = false;
+    };
+  }, [stepKey, onMounted]);
+
+  return <>{children}</>;
+}
+
 // Componente para manejar las animaciones del contenido del paso
 interface AnimatedStepProps {
   children: ReactNode;
@@ -36,50 +67,105 @@ interface AnimatedStepProps {
 }
 
 function AnimatedStep({ children, animationDirection, stepKey }: AnimatedStepProps) {
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [phase, setPhase] = useState<'stable' | 'exiting' | 'entering' | 'mounted'>('stable');
   const [displayContent, setDisplayContent] = useState(children);
+  const [nextContent, setNextContent] = useState<ReactNode>(null);
+  const [isNewComponentReady, setIsNewComponentReady] = useState(false);
+  const currentStepKey = useRef(stepKey);
 
+  // Detectar cuando cambia el step
   useEffect(() => {
-    if (animationDirection === "none") {
-      setDisplayContent(children);
-      return;
+    if (stepKey !== currentStepKey.current) {
+      if (animationDirection === "none") {
+        // Sin animación, cambio directo
+        setDisplayContent(children);
+        setPhase('stable');
+      } else {
+        // Iniciar animación de salida
+        setPhase('exiting');
+        setNextContent(children);
+        setIsNewComponentReady(false);
+      }
+      currentStepKey.current = stepKey;
     }
-
-    setIsAnimating(true);
-    
-    // Pequeño delay para permitir que la animación de salida termine
-    const timer = setTimeout(() => {
-      setDisplayContent(children);
-      setIsAnimating(false);
-    }, 150);
-
-    return () => clearTimeout(timer);
   }, [stepKey, animationDirection, children]);
 
-  const getAnimationClasses = () => {
-    if (animationDirection === "none") {
-      return "opacity-100 translate-x-0";
-    }
+  // Manejar cuando el nuevo componente está listo
+  const handleNewComponentReady = () => {
+    setIsNewComponentReady(true);
+  };
 
-    if (isAnimating) {
-      // Animación de salida
-      return animationDirection === "forward" 
-        ? "animate-out slide-out-to-left duration-150" 
-        : "animate-out slide-out-to-right duration-150";
-    } else {
-      // Animación de entrada
-      return animationDirection === "forward"
-        ? "animate-in slide-in-from-right duration-300 ease-out"
-        : "animate-in slide-in-from-left duration-300 ease-out";
+  // Manejar transición de salida a entrada
+  useEffect(() => {
+    if (phase === 'exiting' && isNewComponentReady) {
+      // El nuevo componente está listo, cambiar a fase de entrada
+      const timer = setTimeout(() => {
+        setDisplayContent(nextContent);
+        setPhase('entering');
+      }, 150); // Duración de la animación de salida
+
+      return () => clearTimeout(timer);
+    }
+  }, [phase, isNewComponentReady, nextContent]);
+
+  // Finalizar animación de entrada
+  useEffect(() => {
+    if (phase === 'entering') {
+      const timer = setTimeout(() => {
+        setPhase('stable');
+        setNextContent(null);
+      }, 300); // Duración de la animación de entrada
+
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
+
+  const getAnimationClasses = () => {
+    switch (phase) {
+      case 'stable':
+        return "opacity-100 translate-x-0";
+      
+      case 'exiting':
+        return animationDirection === "forward" 
+          ? "animate-out slide-out-to-left duration-150" 
+          : "animate-out slide-out-to-right duration-150";
+      
+      case 'entering':
+        return animationDirection === "forward"
+          ? "animate-in slide-in-from-right duration-300 ease-out"
+          : "animate-in slide-in-from-left duration-300 ease-out";
+      
+      default:
+        return "opacity-100 translate-x-0";
     }
   };
 
   return (
-    <div 
-      className={`transition-all ${getAnimationClasses()}`}
-      key={`${stepKey}-${animationDirection}`}
-    >
-      {displayContent}
+    <div className="relative">
+      {/* Contenido visible actual */}
+      <div 
+        className={`transition-all ${getAnimationClasses()}`}
+        style={{ 
+          visibility: phase === 'entering' ? 'visible' : 'visible',
+        }}
+      >
+        {displayContent}
+      </div>
+
+      {/* Precargar el siguiente componente de manera invisible */}
+      {nextContent && phase === 'exiting' && (
+        <div 
+          className="absolute inset-0 opacity-0 pointer-events-none"
+          style={{ zIndex: -1 }}
+        >
+          <StepWrapper 
+            stepKey={stepKey} 
+            onMounted={handleNewComponentReady}
+          >
+            {nextContent}
+          </StepWrapper>
+        </div>
+      )}
     </div>
   );
 }
