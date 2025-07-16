@@ -1,339 +1,313 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Check, ChevronsUpDown, MapPin } from 'lucide-react';
-import { cn } from '@/lib/common/utils';
-import { Button } from '@/components/ui/button';
+import * as React from "react";
+import { ChevronDown, MapPin, Globe, Building, Navigation } from "lucide-react";
+import { cn } from "@/lib/common/utils";
+import { useLocationPicker, Level } from "@/hooks/formulario/locationPicker";
+import type { ICountry, IState, ICity } from "country-state-city";
+
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from '@/components/ui/command';
+  CommandList,
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { useCountryStateCity, SelectedLocation } from '@/hooks/formulario/useCountryStateCity';
-import { ICountry, IState, ICity } from 'country-state-city';
+} from "@/components/ui/popover";
 
-export type LocationLevel = 'country' | 'state' | 'city';
-
-export interface LocationSelectorProps {
-  // Nivel de detalle requerido
-  level: LocationLevel;
-  
-  // País por defecto que aparece primero
-  defaultCountryCode?: string;
-  
-  // Valores iniciales
-  initialCountryCode?: string;
-  initialStateCode?: string;
-  initialCityCode?: string;
-  
-  // Callbacks de cambio
-  onLocationChange?: (location: SelectedLocation) => void;
-  onCountryChange?: (country: ICountry | null) => void;
-  onStateChange?: (state: IState | null) => void;
-  onCityChange?: (city: ICity | null) => void;
-  
-  // Callback específico para código ISO del país (útil para sincronizar con códigos telefónicos)
-  onCountryISOChange?: (isoCode: string | null) => void;
-  
-  // Personalización
-  placeholder?: {
-    country?: string;
-    state?: string;
-    city?: string;
+interface LocationSelectorProps {
+  /** Nivel inicial del selector */
+  initialLevel?: Level;
+  /** Valores iniciales para precargar el componente */
+  initialValues?: {
+    countryCode?: string;    // ISO code del país (ej: "CO", "US")
+    stateCode?: string;      // ISO code del estado (ej: "ANT", "CA")
+    cityName?: string;       // Nombre de la ciudad (ej: "Medellín")
   };
-  
-  // Clases CSS
+  /** Placeholder personalizado */
+  placeholder?: string;
+  /** Clase CSS adicional */
   className?: string;
-  
-  // Deshabilitado
+  /** Si está deshabilitado */
   disabled?: boolean;
+  /** Callback cuando cambia la selección */
+  onSelectionChange?: (selection: {
+    level: Level;
+    country?: ICountry;
+    state?: IState;
+    city?: ICity;
+  }) => void;
+  /** @deprecated Use initialValues.countryCode instead */
+  defaultCountry?: string;
+  /** @deprecated Use initialValues.stateCode instead */
+  defaultState?: string;
+  /** @deprecated Use initialValues.cityName instead */
+  defaultCity?: string;
 }
 
-export const LocationSelector = ({
-  level,
-  defaultCountryCode,
-  initialCountryCode,
-  initialStateCode,
-  initialCityCode,
-  onLocationChange,
-  onCountryChange,
-  onStateChange,
-  onCityChange,
-  onCountryISOChange,
-  placeholder = {},
+export function LocationSelector({
+  initialLevel = "country",
+  initialValues,
+  placeholder = "Seleccionar ubicación...",
   className,
-  disabled = false
-}: LocationSelectorProps) => {
-  // Estados para controlar los popovers
-  const [countryOpen, setCountryOpen] = useState(false);
-  const [stateOpen, setStateOpen] = useState(false);
-  const [cityOpen, setCityOpen] = useState(false);
+  disabled = false,
+  onSelectionChange,
+  // Props deprecated para retrocompatibilidad
+  defaultCountry,
+  defaultState,
+  defaultCity,
+}: LocationSelectorProps) {
+  const [open, setOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
 
-  // Hook de ubicaciones
+  // Consolidar valores iniciales con retrocompatibilidad
+  const consolidatedInitialValues = React.useMemo(() => {
+    return {
+      countryCode: initialValues?.countryCode || defaultCountry || "",
+      stateCode: initialValues?.stateCode || defaultState || "",
+      cityName: initialValues?.cityName || defaultCity || "",
+    };
+  }, [initialValues, defaultCountry, defaultState, defaultCity]);
+
   const {
-    selected,
+    level,
+    setLevel,
     countries,
     states,
     cities,
-    selectCountry,
-    selectState,
-    selectCity,
-    isLoading
-  } = useCountryStateCity({
-    initialCountryCode,
-    initialStateCode,
-    initialCityCode,
-    enableFiltering: true,
-    onLocationChange
+    selectedCountry,
+    setSelectedCountry,
+    selectedState,
+    setSelectedState,
+    selectedCity,
+    setSelectedCity,
+    clearSelection,
+    // clearFromLevel, // No usado actualmente
+  } = useLocationPicker({
+    initialLevel,
+    initialValues: consolidatedInitialValues,
+    onChange: onSelectionChange,
   });
 
-  // Ordenar países con el país por defecto primero
-  const sortedCountries = React.useMemo(() => {
-    if (!defaultCountryCode) return countries;
+  // Obtener los elementos filtrados según la búsqueda
+  const getFilteredItems = () => {
+    const search = searchValue.toLowerCase();
     
-    const defaultCountry = countries.find(c => c.isoCode === defaultCountryCode);
-    const otherCountries = countries.filter(c => c.isoCode !== defaultCountryCode);
+    switch (level) {
+      case "country":
+        return countries.filter((country) =>
+          country.name.toLowerCase().includes(search)
+        );
+      case "state":
+        return states.filter((state) =>
+          state.name.toLowerCase().includes(search)
+        );
+      case "city":
+        return cities.filter((city) =>
+          city.name.toLowerCase().includes(search)
+        );
+      default:
+        return [];
+    }
+  };
+
+  // Obtener el texto que se muestra en el trigger
+  const getDisplayText = () => {
+    const parts = [];
     
-    return defaultCountry ? [defaultCountry, ...otherCountries] : countries;
-  }, [countries, defaultCountryCode]);
-
-  // Efectos para callbacks individuales
-  useEffect(() => {
-    if (onCountryChange) {
-      onCountryChange(selected.country);
+    if (selectedCountry) {
+      const country = countries.find((c) => c.isoCode === selectedCountry);
+      if (country) parts.push(country.name);
     }
-    if (onCountryISOChange) {
-      onCountryISOChange(selected.country?.isoCode || null);
+    
+    if (selectedState && level !== "country") {
+      const state = states.find((s) => s.isoCode === selectedState);
+      if (state) parts.push(state.name);
     }
-  }, [selected.country, onCountryChange, onCountryISOChange]);
-
-  useEffect(() => {
-    if (onStateChange) {
-      onStateChange(selected.state);
+    
+    if (selectedCity && level === "city") {
+      const city = cities.find((c) => c.name === selectedCity);
+      if (city) parts.push(city.name);
     }
-  }, [selected.state, onStateChange]);
+    
+    return parts.length > 0 ? parts.join(", ") : placeholder;
+  };
 
-  useEffect(() => {
-    if (onCityChange) {
-      onCityChange(selected.city);
+  // Manejar selección de elemento
+  const handleSelect = (item: ICountry | IState | ICity) => {
+    switch (level) {
+      case "country":
+        const country = item as ICountry;
+        setSelectedCountry(country.isoCode);
+        if (states.length > 0) {
+          setLevel("state");
+        }
+        break;
+      case "state":
+        const state = item as IState;
+        setSelectedState(state.isoCode);
+        if (cities.length > 0) {
+          setLevel("city");
+        }
+        break;
+      case "city":
+        const city = item as ICity;
+        setSelectedCity(city.name);
+        setOpen(false);
+        break;
     }
-  }, [selected.city, onCityChange]);
+    setSearchValue("");
+  };
 
-  // Manejadores de selección
-  const handleCountrySelect = (country: ICountry) => {
-    selectCountry(country);
-    setCountryOpen(false);
-    // Resetear estados dependientes cuando cambia el país
-    if (level !== 'country') {
-      setStateOpen(false);
-      setCityOpen(false);
+  // Obtener icono según el nivel actual
+  const getLevelIcon = () => {
+    switch (level) {
+      case "country":
+        return <Globe className="h-4 w-4" />;
+      case "state":
+        return <Building className="h-4 w-4" />;
+      case "city":
+        return <Navigation className="h-4 w-4" />;
+      default:
+        return <MapPin className="h-4 w-4" />;
     }
   };
 
-  const handleStateSelect = (state: IState) => {
-    selectState(state);
-    setStateOpen(false);
-    // Resetear ciudad cuando cambia el estado
-    if (level === 'city') {
-      setCityOpen(false);
+  // Obtener título del nivel actual
+  const getLevelTitle = () => {
+    switch (level) {
+      case "country":
+        return "Seleccionar País";
+      case "state":
+        return "Seleccionar Estado/Provincia";
+      case "city":
+        return "Seleccionar Ciudad";
+      default:
+        return "Seleccionar Ubicación";
     }
   };
 
-  const handleCitySelect = (city: ICity) => {
-    selectCity(city);
-    setCityOpen(false);
-  };
+  const filteredItems = getFilteredItems();
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* Selector de País */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">País *</label>
-        <Popover open={countryOpen} onOpenChange={setCountryOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={countryOpen}
-              className="w-full justify-between"
-              disabled={disabled}
-            >
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 opacity-50" />
-                {selected.country ? (
-                  <span>{selected.country.name}</span>
-                ) : (
-                  <span className="text-muted-foreground">
-                    {placeholder.country || "Seleccionar país..."}
-                  </span>
-                )}
-              </div>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-full p-0">
-            <Command>
-              <CommandInput placeholder="Buscar país..." />
-              <CommandEmpty>No se encontró el país.</CommandEmpty>
-              <CommandGroup className="max-h-64 overflow-auto">
-                {sortedCountries.map((country) => (
+    <div className={cn("w-full", className)}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn(
+              "w-full justify-between",
+              !selectedCountry && "text-muted-foreground"
+            )}
+            disabled={disabled}
+          >
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              <span className="truncate">{getDisplayText()}</span>
+            </div>
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            <CommandInput
+              placeholder={`Buscar ${level === "country" ? "país" : level === "state" ? "estado" : "ciudad"}...`}
+              value={searchValue}
+              onValueChange={setSearchValue}
+            />
+            <CommandList>
+              <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+              <CommandGroup heading={getLevelTitle()}>
+                {filteredItems.map((item) => (
                   <CommandItem
-                    key={country.isoCode}
-                    value={country.name}
-                    onSelect={() => handleCountrySelect(country)}
+                    key={level === "country" ? (item as ICountry).isoCode 
+                        : level === "state" ? (item as IState).isoCode 
+                        : (item as ICity).name}
+                    value={item.name}
+                    onSelect={() => handleSelect(item)}
+                    className="flex items-center gap-2"
                   >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selected.country?.isoCode === country.isoCode
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                    {country.name}
-                    {country.isoCode === defaultCountryCode && (
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        Por defecto
+                    {getLevelIcon()}
+                    <span>{item.name}</span>
+                    {level === "state" && (
+                      <span className="text-muted-foreground text-xs ml-auto">
+                        {(item as IState).countryCode}
+                      </span>
+                    )}
+                    {level === "city" && (
+                      <span className="text-muted-foreground text-xs ml-auto">
+                        {(item as ICity).stateCode}
                       </span>
                     )}
                   </CommandItem>
                 ))}
               </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      {/* Selector de Estado/Provincia */}
-      {(level === 'state' || level === 'city') && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Estado/Provincia *</label>
-          <Popover open={stateOpen} onOpenChange={setStateOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={stateOpen}
-                className="w-full justify-between"
-                disabled={disabled || !selected.country}
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 opacity-50" />
-                  {selected.state ? (
-                    <span>{selected.state.name}</span>
-                  ) : (
-                    <span className="text-muted-foreground">
-                      {!selected.country 
-                        ? "Primero selecciona un país"
-                        : placeholder.state || "Seleccionar estado..."
-                      }
-                    </span>
-                  )}
-                </div>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
-              <Command>
-                <CommandInput placeholder="Buscar estado..." />
-                <CommandEmpty>No se encontró el estado.</CommandEmpty>
-                <CommandGroup className="max-h-64 overflow-auto">
-                  {states.map((state) => (
-                    <CommandItem
-                      key={state.isoCode}
-                      value={state.name}
-                      onSelect={() => handleStateSelect(state)}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selected.state?.isoCode === state.isoCode
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {state.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
-      )}
-
-      {/* Selector de Ciudad */}
-      {level === 'city' && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Ciudad *</label>
-          <Popover open={cityOpen} onOpenChange={setCityOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={cityOpen}
-                className="w-full justify-between"
-                disabled={disabled || !selected.state}
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 opacity-50" />
-                  {selected.city ? (
-                    <span>{selected.city.name}</span>
-                  ) : (
-                    <span className="text-muted-foreground">
-                      {!selected.state 
-                        ? "Primero selecciona un estado"
-                        : placeholder.city || "Seleccionar ciudad..."
-                      }
-                    </span>
-                  )}
-                </div>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
-              <Command>
-                <CommandInput placeholder="Buscar ciudad..." />
-                <CommandEmpty>No se encontró la ciudad.</CommandEmpty>
-                <CommandGroup className="max-h-64 overflow-auto">
-                  {cities.map((city) => (
-                    <CommandItem
-                      key={`${city.stateCode}-${city.name}`}
-                      value={city.name}
-                      onSelect={() => handleCitySelect(city)}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selected.city?.name === city.name
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {city.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
-      )}
-
-      {/* Indicador de carga */}
-      {isLoading && (
-        <div className="text-sm text-muted-foreground flex items-center gap-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-          Cargando ubicaciones...
-        </div>
-      )}
+            </CommandList>
+          </Command>
+          
+          {/* Navegación de niveles */}
+          <div className="border-t p-2">
+            <div className="flex gap-1 justify-between">
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLevel("country")}
+                  disabled={level === "country"}
+                  className="flex items-center gap-1 text-xs"
+                >
+                  <Globe className="h-3 w-3" />
+                  País
+                </Button>
+                {selectedCountry && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLevel("state")}
+                    disabled={level === "state" || states.length === 0}
+                    className="flex items-center gap-1 text-xs"
+                  >
+                    <Building className="h-3 w-3" />
+                    Estado
+                  </Button>
+                )}
+                {selectedState && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLevel("city")}
+                    disabled={level === "city" || cities.length === 0}
+                    className="flex items-center gap-1 text-xs"
+                  >
+                    <Navigation className="h-3 w-3" />
+                    Ciudad
+                  </Button>
+                )}
+              </div>
+              
+              {/* Botón para limpiar selección */}
+              {(selectedCountry || selectedState || selectedCity) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearSelection}
+                  className="text-xs text-muted-foreground hover:text-destructive"
+                >
+                  Limpiar
+                </Button>
+              )}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
-}; 
+} 
