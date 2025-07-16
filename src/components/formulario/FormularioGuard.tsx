@@ -220,7 +220,10 @@ export const FormularioGuard = ({ children }: FormularioGuardProps) => {
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-red-600 text-center">
           <h2 className="text-xl font-semibold mb-2">Acceso Denegado</h2>
-          <p>{state.error}</p>
+          <p className="text-gray-600">{state.error}</p>
+          <p className="text-gray-600">Si cree que esto es un error, por favor, contacta al administrador del sistema:
+            <a href="mailto:admin@example.com" className="text-blue-500 hover:text-blue-700">admin@example.com</a>
+          </p>
         </div>
       </div>
     );
