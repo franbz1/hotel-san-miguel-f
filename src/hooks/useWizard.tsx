@@ -1,31 +1,92 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+
+export type StepStatus = "completed" | "current" | "upcoming";
 
 export interface UseWizardOptions<StepKey extends string> {
-  steps: StepKey[];               // Keys o identificadores de pasos
+  steps: StepKey[];               // Identificadores de pasos
   defaultStep?: StepKey;          // Paso inicial (por defecto, el primero)
+}
+
+export interface UseWizardReturn<StepKey extends string> {
+  current: StepKey;
+  currentIndex: number;
+  isFirst: boolean;
+  isLast: boolean;
+  goNext: () => void;
+  goBack: () => void;
+  goToStep: (stepKey: StepKey) => void;
+  /** Array de { key, status } en orden de pasos */
+  progress: Array<{ key: StepKey; status: StepStatus }>;
+  /** Lista original de keys, por si la UI la necesita */
+  steps: StepKey[];
 }
 
 export function useWizard<StepKey extends string>(
   options: UseWizardOptions<StepKey>
-) {
+): UseWizardReturn<StepKey> {
   const { steps, defaultStep } = options;
-  const [current, setCurrent] = useState<StepKey>(defaultStep ?? steps[0]);
+  const [current, setCurrent] = useState<StepKey>(
+    defaultStep ?? steps[0]
+  );
+
+  const currentIndex = useMemo(
+    () => {
+      const idx = steps.indexOf(current);
+      if (idx === -1) {
+        throw new Error(
+          `El paso actual "${current}" no existe en la lista de pasos.`
+        );
+      }
+      return idx;
+    },
+    [steps, current]
+  );
+
+  const isFirst = currentIndex === 0;
+  const isLast = currentIndex === steps.length - 1;
 
   const goNext = useCallback(() => {
-    const idx = steps.indexOf(current);
-    if (idx < 0) return;
-    const next = steps[idx + 1];
-    if (next) setCurrent(next);
-  }, [steps, current]);
+    if (!isLast) {
+      setCurrent(steps[currentIndex + 1]);
+    }
+  }, [currentIndex, isLast, steps]);
 
   const goBack = useCallback(() => {
-    const idx = steps.indexOf(current);
-    if (idx < 1) return;
-    setCurrent(steps[idx - 1]);
-  }, [steps, current]);
+    if (!isFirst) {
+      setCurrent(steps[currentIndex - 1]);
+    }
+  }, [currentIndex, isFirst, steps]);
 
-  const isFirst = current === steps[0];
-  const isLast = current === steps[steps.length - 1];
+  const goToStep = useCallback(
+    (stepKey: StepKey) => {
+      if (steps.includes(stepKey)) {
+        setCurrent(stepKey);
+      }
+    },
+    [steps]
+  );
 
-  return { current, goNext, goBack, isFirst, isLast, steps };
+  const progress = useMemo(
+    () =>
+      steps.map((key, idx) => {
+        let status: StepStatus;
+        if (idx < currentIndex) status = "completed";
+        else if (idx === currentIndex) status = "current";
+        else status = "upcoming";
+        return { key, status };
+      }),
+    [steps, currentIndex]
+  );
+
+  return {
+    current,
+    currentIndex,
+    isFirst,
+    isLast,
+    goNext,
+    goBack,
+    goToStep,
+    progress,
+    steps,
+  };
 }
