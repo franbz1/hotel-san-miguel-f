@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 
 export type StepStatus = "completed" | "current" | "upcoming";
+export type AnimationDirection = "forward" | "backward" | "none";
 
 export interface UseWizardOptions<StepKey extends string> {
   steps: StepKey[];               // Identificadores de pasos
@@ -19,6 +20,8 @@ export interface UseWizardReturn<StepKey extends string> {
   progress: Array<{ key: StepKey; status: StepStatus }>;
   /** Lista original de keys, por si la UI la necesita */
   steps: StepKey[];
+  /** Dirección de la animación basada en el último movimiento */
+  animationDirection: AnimationDirection;
 }
 
 export function useWizard<StepKey extends string>(
@@ -28,6 +31,7 @@ export function useWizard<StepKey extends string>(
   const [current, setCurrent] = useState<StepKey>(
     defaultStep ?? steps[0]
   );
+  const [animationDirection, setAnimationDirection] = useState<AnimationDirection>("none");
 
   const currentIndex = useMemo(
     () => {
@@ -47,12 +51,14 @@ export function useWizard<StepKey extends string>(
 
   const goNext = useCallback(() => {
     if (!isLast) {
+      setAnimationDirection("forward");
       setCurrent(steps[currentIndex + 1]);
     }
   }, [currentIndex, isLast, steps]);
 
   const goBack = useCallback(() => {
     if (!isFirst) {
+      setAnimationDirection("backward");
       setCurrent(steps[currentIndex - 1]);
     }
   }, [currentIndex, isFirst, steps]);
@@ -60,10 +66,18 @@ export function useWizard<StepKey extends string>(
   const goToStep = useCallback(
     (stepKey: StepKey) => {
       if (steps.includes(stepKey)) {
+        const targetIndex = steps.indexOf(stepKey);
+        if (targetIndex > currentIndex) {
+          setAnimationDirection("forward");
+        } else if (targetIndex < currentIndex) {
+          setAnimationDirection("backward");
+        } else {
+          setAnimationDirection("none");
+        }
         setCurrent(stepKey);
       }
     },
-    [steps]
+    [steps, currentIndex]
   );
 
   const progress = useMemo(
@@ -88,5 +102,6 @@ export function useWizard<StepKey extends string>(
     goToStep,
     progress,
     steps,
+    animationDirection,
   };
 }
