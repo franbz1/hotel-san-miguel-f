@@ -17,6 +17,7 @@ export interface WizardProps<StepKey extends string> {
     isLast: boolean;
     goBack: () => void;
     goNext: () => void;
+    goToStep: (step: StepKey) => void;
   }) => ReactNode;
   /** renderiza la barra de progreso; recibe:
    * - progress: [{ key, status }]
@@ -235,7 +236,7 @@ export function Wizard<StepKey extends string>(
 
       {/* Botones: uso custom o default */}
       {renderButtons ? (
-        renderButtons({ isFirst, isLast, goBack, goNext })
+        renderButtons({ isFirst, isLast, goBack, goNext, goToStep })
       ) : (
         <div style={{ marginTop: 16 }}>
           {!isFirst && <button onClick={goBack}>Atrás</button>}
