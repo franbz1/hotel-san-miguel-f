@@ -79,7 +79,8 @@ const validateRequiredData = (linkFormulario: LinkFormulario): string | null => 
     linkFormulario.numeroHabitacion,
     linkFormulario.fechaInicio,
     linkFormulario.fechaFin,
-    linkFormulario.costo
+    linkFormulario.costo,
+    linkFormulario.url,
   ];
   
   return requiredFields.some(field => !field) ? ERROR_MESSAGES.MISSING_DATA : null;
