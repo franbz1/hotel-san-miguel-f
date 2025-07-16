@@ -3,7 +3,7 @@ import { Role } from "@/lib/common/constants/constants";
 import { ValidateLinkFormularioResponse } from "@/lib/formulario/link-formulario-service";
 import { LinkFormulario } from "@/Types/link-formulario";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useReducer, cloneElement, isValidElement } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
 
 // Tipos para el state del reducer
 interface FormularioGuardState {
@@ -117,12 +117,8 @@ const handleServerError = (error: unknown, defaultMessage: string): string => {
   return defaultMessage;
 };
 
-interface ChildProps {
-  linkFormulario: LinkFormulario;
-}
-
 interface FormularioGuardProps {
-  children: React.ReactElement<ChildProps>;
+  children: (props: { linkFormulario: LinkFormulario }) => React.ReactNode;
 }
 
 /** 
@@ -242,9 +238,14 @@ export const FormularioGuard = ({ children }: FormularioGuardProps) => {
   }
 
   // Pasar el linkFormulario como prop al child
-  if (isValidElement(children) && 'linkFormulario' in children.props) {
-    return cloneElement(children, { linkFormulario });
+  if (state.isValidated && linkFormulario) {
+    return children({ linkFormulario });
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="text-lg">Cargando...</div>
+    </div>
+  );
+  
 };
