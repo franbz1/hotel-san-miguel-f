@@ -4,4 +4,5 @@ export * from './useLinkFormulario';
 export * from './useRegistroFormulario';
 
 // Hook para manejo de ubicaciones (país, estado, ciudad)
-export * from './useCountryStateCity'; 
+export * from './useCountryStateCity';
+export * from './locationPicker'; 
