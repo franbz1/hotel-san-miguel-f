@@ -8,10 +8,11 @@ import { useCreateRegistroFormulario } from "@/hooks/formulario/useRegistroFormu
 import { toast } from "sonner";
 import { PasoBienvenida } from "./pasos/PasoBienvenida";
 import { PasoInformacionPersonal } from "./pasos/PasoInformacionPersonal";
-import { PasoAcompaniantes } from "./pasos/PasoAcompaniantes";
-import { PasoConfirmacion } from "./pasos/PasoConfirmacion";
+// import { PasoAcompaniantes } from "./pasos/PasoAcompaniantes";
+// import { PasoConfirmacion } from "./pasos/PasoConfirmacion";
 import { WizardProgress } from "../ui/wizard-progress";
 import { WizardControls } from "../ui/wizard-controls";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { useState, useEffect } from "react";
 
 interface FormularioProps {
@@ -189,60 +190,90 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
     Confirmacion: "Confirmación",
   };
 
-  return <Wizard steps={steps}
-    defaultStep="Bienvenida"
-    renderProgress={({ progress, goToStep }) => (
-      <WizardProgress
-        progress={progress}
-        goToStep={(step) => {
-          setCurrentStepKey(step);
-          goToStep(step);
-        }}
-        stepLabels={stepLabels}
-      />
-    )}
-    renderButtons={({ isFirst, isLast, goBack, goNext }) => {
-      const handleNext = () => {
-        if (isLast) {
-          handleSubmitForm();
-        } else {
-          handleNextStep(() => {
-            // Encontrar el siguiente paso
-            const currentIndex = steps.findIndex(s => s.key === currentStepKey);
-            const nextStep = steps[currentIndex + 1];
-            if (nextStep) {
-              setCurrentStepKey(nextStep.key);
-            }
-            goNext();
-          }, currentStepKey);
-        }
-      };
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-4 lg:py-8 px-4 sm:px-6 lg:px-8 xl:px-12">
+      {/* Contenedor responsivo que se adapta al contenido */}
+      <div className="w-full max-w-7xl mx-auto">
+        <Card className="shadow-xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
+          
+          <CardHeader className="text-center lg:text-left lg:flex lg:items-center lg:justify-between space-y-4 lg:space-y-0 pb-2 lg:pb-4">
+            <div className="lg:flex-1">
+              <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent pb-2">
+                Registro de Huésped
+              </CardTitle>
+              <CardDescription className="text-base lg:text-lg text-muted-foreground max-w-3xl lg:mx-0 mx-auto">
+                Complete la información solicitada para completar su registro en el Hotel San Miguel
+              </CardDescription>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-6 lg:space-y-8">
+            {/* Contenedor del wizard optimizado */}
+            <div className="lg:px-6">
+              <Wizard 
+                steps={steps}
+                defaultStep="Bienvenida"
+                renderProgress={({ progress, goToStep }) => (
+                  <WizardProgress
+                    progress={progress}
+                    goToStep={(step) => {
+                      setCurrentStepKey(step);
+                      goToStep(step);
+                    }}
+                    stepLabels={stepLabels}
+                    className="mb-2 lg:mb-4"
+                  />
+                )}
+                renderButtons={({ isFirst, isLast, goBack, goNext }) => {
+                  const handleNext = () => {
+                    if (isLast) {
+                      handleSubmitForm();
+                    } else {
+                      handleNextStep(() => {
+                        // Encontrar el siguiente paso
+                        const currentIndex = steps.findIndex(s => s.key === currentStepKey);
+                        const nextStep = steps[currentIndex + 1];
+                        if (nextStep) {
+                          setCurrentStepKey(nextStep.key);
+                        }
+                        goNext();
+                      }, currentStepKey);
+                    }
+                  };
 
-      const handleBack = () => {
-        // Encontrar el paso anterior
-        const currentIndex = steps.findIndex(s => s.key === currentStepKey);
-        const prevStep = steps[currentIndex - 1];
-        if (prevStep) {
-          setCurrentStepKey(prevStep.key);
-        }
-        goBack();
-      };
+                  const handleBack = () => {
+                    // Encontrar el paso anterior
+                    const currentIndex = steps.findIndex(s => s.key === currentStepKey);
+                    const prevStep = steps[currentIndex - 1];
+                    if (prevStep) {
+                      setCurrentStepKey(prevStep.key);
+                    }
+                    goBack();
+                  };
 
-      return (
-        <WizardControls
-          isFirst={isFirst}
-          isLast={isLast}
-          goBack={handleBack}
-          goNext={handleNext}
-          onCancel={handleCancel}
-          showCancel={true}
-          isLoading={createRegistroFormulario.isPending}
-          backLabel="Anterior"
-          nextLabel="Continuar"
-          finishLabel="Completar Registro"
-          cancelLabel="Cancelar"
-        />
-      );
-    }}
-  />;
+                  return (
+                    <div className="mt-2 lg:mt-4 lg:px-4">
+                      <WizardControls
+                        isFirst={isFirst}
+                        isLast={isLast}
+                        goBack={handleBack}
+                        goNext={handleNext}
+                        onCancel={handleCancel}
+                        showCancel={true}
+                        isLoading={createRegistroFormulario.isPending}
+                        backLabel="Anterior"
+                        nextLabel="Continuar"
+                        finishLabel="Completar Registro"
+                        cancelLabel="Cancelar"
+                      />
+                    </div>
+                  );
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 };
