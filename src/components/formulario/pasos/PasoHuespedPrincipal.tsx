@@ -28,7 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+
 import { InfoIcon } from 'lucide-react'
 
 // Enums
@@ -185,12 +185,7 @@ export const PasoHuespedPrincipal = ({
   const ErrorMessage = ({ message }: { message?: string }) => {
     if (!message) return null
     return (
-      <Alert
-        variant='destructive'
-        className='mt-1'
-      >
-        <AlertDescription className='text-sm'>{message}</AlertDescription>
-      </Alert>
+      <p className='text-sm text-red-600 mt-1'>{message}</p>
     )
   }
 
