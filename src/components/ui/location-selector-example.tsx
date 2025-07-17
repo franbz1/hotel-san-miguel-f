@@ -1,212 +1,264 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { LocationSelector } from "./location-selector";
-import type { ICountry, IState, ICity } from "country-state-city";
-import { Level } from "@/hooks/formulario/locationPicker";
+import React, { useState } from 'react';
+import LocationSelector from './location-selector';
+import { ICountry, IState, ICity } from 'country-state-city';
+import { Level } from '@/hooks/formulario/locationPicker';
 
-export function LocationSelectorExample() {
-  const [selectedLocation, setSelectedLocation] = useState<{
+interface SelectionState {
+  level: Level;
+  country?: ICountry;
+  state?: IState;
+  city?: ICity;
+}
+
+const LocationSelectorExample: React.FC = () => {
+  const [countrySelection, setCountrySelection] = useState<SelectionState | null>(null);
+  const [stateSelection, setStateSelection] = useState<SelectionState | null>(null);
+  const [citySelection, setCitySelection] = useState<SelectionState | null>(null);
+
+  const handleCountryChange = (selection: {
     level: Level;
     country?: ICountry;
     state?: IState;
     city?: ICity;
-  } | null>(null);
+  }) => {
+    setCountrySelection(selection);
+    console.log('Selección de país:', selection);
+  };
 
-  return (
-    <div className="space-y-6 p-6 max-w-2xl mx-auto">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold">Selector de Ubicación</h2>
-        <p className="text-muted-foreground">
-          Ejemplos de uso del componente LocationSelector con diferentes configuraciones.
-        </p>
-      </div>
+  const handleStateChange = (selection: {
+    level: Level;
+    country?: ICountry;
+    state?: IState;
+    city?: ICity;
+  }) => {
+    setStateSelection(selection);
+    console.log('Selección de estado:', selection);
+  };
 
-      {/* Ejemplo básico */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Ejemplo básico</h3>
-        <LocationSelector
-          placeholder="Selecciona tu ubicación..."
-          onSelectionChange={(selection) => {
-            console.log("Ubicación seleccionada:", selection);
-            setSelectedLocation(selection);
-          }}
-        />
-      </div>
-
-      {/* Ejemplo con valores iniciales completos usando ISO codes */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Con valores iniciales completos (ISO)</h3>
-        <p className="text-sm text-muted-foreground">
-          País: CO (Colombia), Estado: ANT (Antioquia), Ciudad: Medellín
-        </p>
-        <LocationSelector
-          initialValues={{
-            countryCode: "CO",      // Colombia
-            stateCode: "ANT",       // Antioquia 
-            cityName: "Medellín"    // Medellín
-          }}
-          placeholder="Ubicación precargada..."
-          onSelectionChange={(selection) => {
-            console.log("Ubicación con valores iniciales:", selection);
-          }}
-        />
-      </div>
-
-      {/* Ejemplo con solo país y estado */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Solo país y estado inicial</h3>
-        <p className="text-sm text-muted-foreground">
-          País: US (Estados Unidos), Estado: CA (California)
-        </p>
-        <LocationSelector
-          initialValues={{
-            countryCode: "US",      // Estados Unidos
-            stateCode: "CA",        // California
-          }}
-          placeholder="Selecciona ciudad en California..."
-          onSelectionChange={(selection) => {
-            console.log("Ubicación US-CA:", selection);
-          }}
-        />
-      </div>
-
-      {/* Ejemplo con valores por defecto (método anterior - retrocompatibilidad) */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Método anterior (retrocompatibilidad)</h3>
-        <LocationSelector
-          defaultCountry="MX" // México
-          initialLevel="state"
-          placeholder="Ubicación en México..."
-          onSelectionChange={(selection) => {
-            console.log("Ubicación en México:", selection);
-          }}
-        />
-      </div>
-
-      {/* Ejemplo solo países */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Solo países</h3>
-        <LocationSelector
-          initialLevel="country"
-          placeholder="Selecciona un país..."
-          onSelectionChange={(selection) => {
-            console.log("País seleccionado:", selection);
-          }}
-        />
-      </div>
-
-      {/* Ejemplo deshabilitado con valores */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Deshabilitado con valores</h3>
-        <LocationSelector
-          disabled
-          initialValues={{
-            countryCode: "ES",      // España
-            stateCode: "M",         // Madrid
-            cityName: "Madrid"      // Madrid
-          }}
-          placeholder="Selector deshabilitado..."
-        />
-      </div>
-
-      {/* Mostrar resultado */}
-      {selectedLocation && (
-        <div className="space-y-4 p-4 bg-muted rounded-lg">
-          <h3 className="text-lg font-semibold">Ubicación seleccionada:</h3>
-          <div className="space-y-2 text-sm">
-            <p><strong>Nivel:</strong> {selectedLocation.level}</p>
-            {selectedLocation.country && (
-              <p><strong>País:</strong> {selectedLocation.country.name} ({selectedLocation.country.isoCode})</p>
-            )}
-            {selectedLocation.state && (
-              <p><strong>Estado:</strong> {selectedLocation.state.name} ({selectedLocation.state.isoCode})</p>
-            )}
-            {selectedLocation.city && (
-              <p><strong>Ciudad:</strong> {selectedLocation.city.name}</p>
-            )}
-          </div>
-          
-          {/* Valores para guardar en base de datos */}
-          <div className="p-3 bg-background rounded border">
-            <h4 className="font-semibold text-sm mb-2">Valores para base de datos:</h4>
-            <pre className="text-xs">
-{JSON.stringify({
-  countryCode: selectedLocation.country?.isoCode || null,
-  stateCode: selectedLocation.state?.isoCode || null,
-  cityName: selectedLocation.city?.name || null
-}, null, 2)}
-            </pre>
-          </div>
-        </div>
-      )}
-
-      {/* Documentación de uso */}
-      <div className="space-y-4 p-4 border rounded-lg">
-        <h3 className="text-lg font-semibold">Uso en formularios - Nuevos valores iniciales</h3>
-        <pre className="text-sm bg-muted p-3 rounded overflow-x-auto">
-{`import { LocationSelector } from "@/components/ui/location-selector";
-
-function MiFormulario() {
-  // Datos del usuario existente
-  const userData = {
-    country: "CO",
-    state: "ANT", 
-    city: "Medellín"
+  const handleCityChange = (selection: {
+    level: Level;
+    country?: ICountry;
+    state?: IState;
+    city?: ICity;
+  }) => {
+    setCitySelection(selection);
+    console.log('Selección de ciudad:', selection);
   };
 
   return (
-    <LocationSelector
-      initialValues={{
-        countryCode: userData.country,    // ISO code del país
-        stateCode: userData.state,        // ISO code del estado
-        cityName: userData.city           // Nombre de la ciudad
-      }}
-      placeholder="Selecciona tu ubicación..."
-      onSelectionChange={(selection) => {
-        // Guardar en formulario
-        if (selection.country) {
-          form.setValue("country", selection.country.isoCode);
-        }
-        if (selection.state) {
-          form.setValue("state", selection.state.isoCode);
-        }
-        if (selection.city) {
-          form.setValue("city", selection.city.name);
-        }
-      }}
-    />
-  );
-}`}
-        </pre>
+    <div className="p-6 max-w-4xl mx-auto space-y-8">
+      <h1 className="text-2xl font-bold mb-6">
+        Ejemplos de LocationSelector
+      </h1>
+
+      {/* Ejemplo 1: Solo País */}
+      <div className="border rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Ejemplo 1: Selector de País únicamente
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <LocationSelector
+              maxLevel="country"
+              onSelectionChange={handleCountryChange}
+              placeholders={{
+                country: 'Elige tu país'
+              }}
+            />
+          </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-medium mb-2">Selección actual:</h3>
+            <pre className="text-sm text-gray-600">
+              {JSON.stringify(countrySelection, null, 2)}
+            </pre>
+          </div>
+        </div>
       </div>
 
-      {/* Códigos ISO comunes */}
-      <div className="space-y-4 p-4 border rounded-lg">
-        <h3 className="text-lg font-semibold">Códigos ISO comunes</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      {/* Ejemplo 2: País + Estado */}
+      <div className="border rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Ejemplo 2: Selector de País y Estado
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="font-semibold mb-2">Países:</h4>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>🇨🇴 Colombia: CO</li>
-              <li>🇺🇸 Estados Unidos: US</li>
-              <li>🇲🇽 México: MX</li>
-              <li>🇪🇸 España: ES</li>
-              <li>🇦🇷 Argentina: AR</li>
+            <LocationSelector
+              maxLevel="state"
+              onSelectionChange={handleStateChange}
+              labels={{
+                country: 'País de residencia',
+                state: 'Departamento/Estado'
+              }}
+              defaultValues={{
+                countryCode: 'CO' // Colombia por defecto
+              }}
+              size="sm"
+            />
+          </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-medium mb-2">Selección actual:</h3>
+            <pre className="text-sm text-gray-600">
+              {JSON.stringify(stateSelection, null, 2)}
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      {/* Ejemplo 3: País + Estado + Ciudad */}
+      <div className="border rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Ejemplo 3: Selector Completo (País, Estado y Ciudad)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <LocationSelector
+              maxLevel="city"
+              onSelectionChange={handleCityChange}
+              labels={{
+                country: 'País',
+                state: 'Estado/Provincia',
+                city: 'Ciudad de residencia'
+              }}
+              placeholders={{
+                country: 'Seleccione su país',
+                state: 'Seleccione su estado',
+                city: 'Seleccione su ciudad'
+              }}
+              className="space-y-3"
+            />
+          </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-medium mb-2">Selección actual:</h3>
+            <pre className="text-sm text-gray-600">
+              {JSON.stringify(citySelection, null, 2)}
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      {/* Ejemplo 4: Selector deshabilitado */}
+      <div className="border rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Ejemplo 4: Selector Deshabilitado
+        </h2>
+        <div className="w-full md:w-1/2">
+          <LocationSelector
+            maxLevel="state"
+            disabled={true}
+            defaultValues={{
+              countryCode: 'US',
+              stateCode: 'CA'
+            }}
+            labels={{
+              country: 'País (deshabilitado)',
+              state: 'Estado (deshabilitado)'
+            }}
+          />
+        </div>
+      </div>
+
+            {/* Ejemplo 5: Con búsqueda habilitada */}
+      <div className="border rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Ejemplo 5: Con Búsqueda Habilitada
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <LocationSelector
+              maxLevel="city"
+              searchable={true}
+              onSelectionChange={(selection) => {
+                console.log('Selección con búsqueda:', selection);
+              }}
+              labels={{
+                country: 'País (con búsqueda)',
+                state: 'Estado (con búsqueda)',
+                city: 'Ciudad (con búsqueda)'
+              }}
+              searchPlaceholders={{
+                country: 'Escriba para buscar país...',
+                state: 'Escriba para buscar estado...',
+                city: 'Escriba para buscar ciudad...'
+              }}
+            />
+          </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-medium mb-2">Características:</h3>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Búsqueda en tiempo real</li>
+              <li>• Filtrado inteligente</li>
+              <li>• Navegación con teclado</li>
+              <li>• Banderas de países</li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      {/* Ejemplo 6: Búsqueda selectiva por nivel */}
+      <div className="border rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Ejemplo 6: Búsqueda Selectiva por Nivel
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="font-semibold mb-2">Estados Colombia:</h4>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>Antioquia: ANT</li>
-              <li>Cundinamarca: CUN</li>
-              <li>Valle del Cauca: VAC</li>
-              <li>Atlántico: ATL</li>
-              <li>Bolívar: BOL</li>
+            <LocationSelector
+              maxLevel="city"
+              searchable={{
+                country: true,  // Solo país con búsqueda
+                state: false,   // Estado sin búsqueda
+                city: true      // Solo ciudad con búsqueda
+              }}
+              onSelectionChange={(selection) => {
+                console.log('Selección mixta:', selection);
+              }}
+              labels={{
+                country: 'País (con búsqueda)',
+                state: 'Estado (selector normal)',
+                city: 'Ciudad (con búsqueda)'
+              }}
+              defaultValues={{
+                countryCode: 'US'
+              }}
+            />
+          </div>
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-medium mb-2">Configuración mixta:</h3>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• País: con búsqueda ✓</li>
+              <li>• Estado: selector normal</li>
+              <li>• Ciudad: con búsqueda ✓</li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      {/* Información de uso */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold mb-4 text-blue-800">
+          Instrucciones de Uso
+        </h2>
+        <div className="text-blue-700 space-y-2">
+          <p><strong>maxLevel:</strong> Define la profundidad máxima del selector</p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li><code>&quot;country&quot;</code>: Solo muestra selector de país</li>
+            <li><code>&quot;state&quot;</code>: Muestra país y estado</li>
+            <li><code>&quot;city&quot;</code>: Muestra país, estado y ciudad</li>
+          </ul>
+          <p><strong>searchable:</strong> Habilita búsqueda (boolean o objeto por nivel)</p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li><code>true/false</code>: Habilita/deshabilita para todos los niveles</li>
+            <li><code>{`{country: true, state: false, city: true}`}</code>: Configuración por nivel</li>
+          </ul>
+          <p><strong>onSelectionChange:</strong> Callback que se ejecuta cada vez que cambia la selección</p>
+          <p><strong>defaultValues:</strong> Valores iniciales para preseleccionar opciones</p>
+          <p><strong>labels/placeholders:</strong> Textos personalizables para cada selector</p>
+          <p><strong>searchPlaceholders:</strong> Textos de búsqueda personalizables</p>
         </div>
       </div>
     </div>
   );
-} 
+};
+
+export default LocationSelectorExample; 
