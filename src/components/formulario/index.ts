@@ -4,7 +4,7 @@ export { RegistroFormulario } from './RegistroFormulario';
 
 // Pasos del formulario
 export { PasoBienvenida } from './pasos/PasoBienvenida';
-export { PasoInformacionPersonal } from './pasos/PasoInformacionPersonal';
+export { PasoInformacionPersonal } from './pasos/PasoHuespedPrincipal';
 export { PasoAcompaniantes } from './pasos/PasoAcompaniantes';
 export { PasoConfirmacion } from './pasos/PasoConfirmacion';
 
