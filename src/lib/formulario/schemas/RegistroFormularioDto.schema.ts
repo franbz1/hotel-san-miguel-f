@@ -42,7 +42,7 @@ export const huespedSecundarioSchema = z.object({
   ciudad_destino: z.string()
     .min(2, "La ciudad de destino es obligatoria y debe tener al menos 2 caracteres")
     .max(50, "La ciudad de destino no puede tener más de 50 caracteres"),
-  fecha_nacimiento: z.date({
+  fecha_nacimiento: z.coerce.date({
     required_error: "La fecha de nacimiento es obligatoria y debe ser una fecha",
     invalid_type_error: "La fecha de nacimiento debe ser una fecha válida"
   }),
@@ -136,7 +136,7 @@ export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormular
   ciudad_procedencia: z.string()
     .min(2, "La ciudad de destino es obligatoria y debe ser un texto")
     .max(50, "La ciudad de destino no puede tener más de 50 caracteres"),
-  fecha_nacimiento: z.date({
+  fecha_nacimiento: z.coerce.date({
     required_error: "La fecha de nacimiento es obligatoria",
     invalid_type_error: "Debe ser una fecha válida"
   }),
