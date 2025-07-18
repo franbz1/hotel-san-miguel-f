@@ -70,11 +70,11 @@ export const huespedSecundarioSchema = z.object({
 
 export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormulario> = z.object({
   // Datos de la reserva (del link + motivo del usuario)
-  fecha_inicio: z.date({
+  fecha_inicio: z.coerce.date({
     required_error: "La fecha de inicio es obligatoria",
     invalid_type_error: "Debe ser una fecha válida"
   }),
-  fecha_fin: z.date({
+  fecha_fin: z.coerce.date({
     required_error: "La fecha de fin es obligatoria", 
     invalid_type_error: "Debe ser una fecha válida"
   }),

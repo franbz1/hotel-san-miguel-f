@@ -141,6 +141,8 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
   // Lógica de envío del formulario en el último paso
   const handleSubmitForm = async () => {
     // Validar todos los campos antes del envío
+    console.log('Formulario', methods.getValues())
+    console.log('Error', methods.formState.errors)
     const isValid = await methods.trigger()
     if (!isValid) {
       toast.error('Por favor, corrige los errores en el formulario')
