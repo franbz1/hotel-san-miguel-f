@@ -21,6 +21,7 @@ import {
 } from '../ui/card'
 import { useState, useEffect } from 'react'
 import { ICity } from 'country-state-city'
+import { PasoAcompaniantes } from './pasos/PasoAcompaniantes'
 
 interface FormularioProps {
   linkFormulario: LinkFormulario
@@ -217,11 +218,16 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
         />
       ),
     },
-    /*
     {
       key: 'Acompañantes',
-      component: () => <PasoAcompaniantes />
+      component: () => (
+        <PasoAcompaniantes
+          procedenciaLocation={selectedProcedenciaLocation}
+          residenciaLocation={selectedResidenciaLocation}
+        />
+      ),
     },
+    /*
     {
       key: 'Confirmacion',
       component: () => <PasoConfirmacion />

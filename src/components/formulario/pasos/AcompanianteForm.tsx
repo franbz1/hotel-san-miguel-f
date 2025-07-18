@@ -1,406 +1,688 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LocationSelector } from '@/components/ui/location-selector';
-import { huespedSecundarioSchema } from '@/lib/formulario/schemas/RegistroFormularioDto.schema';
+import LocationSelector from '@/components/ui/location-selector';
+import { CountryCodeSelector } from '@/components/ui/country-code-selector';
+import { HuespedSecundarioDto, huespedSecundarioSchema } from '@/lib/formulario/schemas/RegistroFormularioDto.schema';
 import { TipoDocumentoHuespedSecundario } from '@/Types/enums/tipoDocumentoHuespedSecundario';
 import { Genero } from '@/Types/enums/generos';
 import { toast } from 'sonner';
-import { z } from 'zod';
-import { X } from 'lucide-react';
+import { ICity, ICountry, IState } from 'country-state-city';
+import type { Level } from '@/hooks/formulario/locationPicker';
 
-type HuespedSecundarioFormData = z.infer<typeof huespedSecundarioSchema>;
+// UI Components
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
+import { InfoIcon, Save, X, Trash2, User } from 'lucide-react';
 
 interface AcompanianteFormProps {
   /** Datos iniciales para edición (opcional) */
-  initialData?: Partial<HuespedSecundarioFormData>;
+  initialData?: Partial<HuespedSecundarioDto>;
   /** Callback cuando se guarda el acompañante */
-  onSave: (data: HuespedSecundarioFormData) => void;
+  onSave: (data: HuespedSecundarioDto) => void;
   /** Callback cuando se cancela la edición */
   onCancel: () => void;
-  /** Título del formulario */
-  title?: string;
+  /** Callback cuando se elimina el acompañante */
+  onDelete?: (data: HuespedSecundarioDto) => void;
+  /** Ubicacion de procedencia huesped Principal*/
+  procedenciaLocation: ICity | null;
+  /** Ubicacion de residencia huesped Principal*/
+  residenciaLocation: ICity | null;
+  /** Nacionalidad huesped Principal*/
+  nacionalidad: string;
   /** Modo de operación */
   mode?: 'create' | 'edit';
 }
 
+// Debe ser un componente que se pueda re usar en el gestor de acompañantes
+// Debe notificar al gestor, la creacion, edicion o eliminacion de un acompañante
+// Debe registrar los campos propios del acompañante
+// Debe permitir re usar los datos de procedencia, nacionalidad y residencia del huesped principal si el usuario lo desea
+// Debe usar location selector para seleccionar la ubicacion de procedencia, residencia y destino solo si el usuario no desea re usar los datos del huesped principal
+// Debe pre cargar automaticamente el codigo de telefono con respescto a la procedencia seleccionada
 export const AcompanianteForm = ({
   initialData,
   onSave,
   onCancel,
-  title = 'Información del Acompañante',
+  onDelete,
+  procedenciaLocation,
+  residenciaLocation,
+  nacionalidad,
   mode = 'create'
 }: AcompanianteFormProps) => {
+  // Estados para reutilizar información del huésped principal
+  const [reutilizarNacionalidad, setReutilizarNacionalidad] = useState(true);
+  const [reutilizarProcedencia, setReutilizarProcedencia] = useState(true);
+  const [reutilizarResidencia, setReutilizarResidencia] = useState(true);
+
+  // Estados para ubicaciones seleccionadas
+  const [, setSelectedProcedenciaLocation] = useState<ICity | null>(null);
+  const [, setSelectedResidenciaLocation] = useState<ICity | null>(null);
+  const [, setSelectedDestinoLocation] = useState<ICity | null>(null);
+
+  // Función para convertir Date a string formato yyyy-MM-dd
+  const formatDateForInput = (date: Date | undefined): string => {
+    if (!date) return '';
+    if (typeof date === 'string') return date; // Ya está en formato string
+    return date.toISOString().split('T')[0]; // Convierte Date a yyyy-MM-dd
+  };
+
+  // Configuración del formulario
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
-    setValue,
+    control,
     watch,
+    setValue,
+    formState: { errors, isSubmitting },
     reset
-  } = useForm<HuespedSecundarioFormData>({
+  } = useForm<HuespedSecundarioDto>({
     resolver: zodResolver(huespedSecundarioSchema),
-    mode: 'onChange',
     defaultValues: {
-      tipo_documento: initialData?.tipo_documento || undefined,
+      tipo_documento: initialData?.tipo_documento || TipoDocumentoHuespedSecundario.CC,
       numero_documento: initialData?.numero_documento || '',
+      nombres: initialData?.nombres || '',
       primer_apellido: initialData?.primer_apellido || '',
       segundo_apellido: initialData?.segundo_apellido || '',
-      nombres: initialData?.nombres || '',
-      pais_residencia: initialData?.pais_residencia || '',
-      ciudad_residencia: initialData?.ciudad_residencia || '',
-      pais_procedencia: initialData?.pais_procedencia || '',
-      ciudad_procedencia: initialData?.ciudad_procedencia || '',
+      fecha_nacimiento: initialData?.fecha_nacimiento || undefined,
+      genero: initialData?.genero || Genero.MASCULINO,
+      ocupacion: initialData?.ocupacion || '',
+      nacionalidad: reutilizarNacionalidad ? nacionalidad : (initialData?.nacionalidad || ''),
+      pais_procedencia: reutilizarProcedencia ? procedenciaLocation?.countryCode || '' : (initialData?.pais_procedencia || ''),
+      ciudad_procedencia: reutilizarProcedencia ? procedenciaLocation?.name || '' : (initialData?.ciudad_procedencia || ''),
+      pais_residencia: reutilizarResidencia ? residenciaLocation?.countryCode || '' : (initialData?.pais_residencia || ''),
+      ciudad_residencia: reutilizarResidencia ? residenciaLocation?.name || '' : (initialData?.ciudad_residencia || ''),
       pais_destino: initialData?.pais_destino || '',
       ciudad_destino: initialData?.ciudad_destino || '',
-      fecha_nacimiento: initialData?.fecha_nacimiento || undefined,
-      nacionalidad: initialData?.nacionalidad || '',
-      ocupacion: initialData?.ocupacion || '',
-      genero: initialData?.genero || undefined,
       telefono: initialData?.telefono || '',
       correo: initialData?.correo || ''
     }
   });
 
-  const handleFormSubmit = async (data: HuespedSecundarioFormData) => {
+  // Observar el país de residencia para sincronizar el código de teléfono
+  const paisResidencia = watch('pais_residencia');
+
+  // Efectos para actualizar campos cuando se cambian las opciones de reutilizar
+  useEffect(() => {
+    if (reutilizarNacionalidad && nacionalidad) {
+      setValue('nacionalidad', nacionalidad);
+    }
+  }, [reutilizarNacionalidad, nacionalidad, setValue]);
+
+  useEffect(() => {
+    if (reutilizarProcedencia && procedenciaLocation) {
+      setValue('pais_procedencia', procedenciaLocation.countryCode);
+      setValue('ciudad_procedencia', procedenciaLocation.name);
+      setSelectedProcedenciaLocation(procedenciaLocation);
+    }
+  }, [reutilizarProcedencia, procedenciaLocation, setValue]);
+
+  useEffect(() => {
+    if (reutilizarResidencia && residenciaLocation) {
+      setValue('pais_residencia', residenciaLocation.countryCode);
+      setValue('ciudad_residencia', residenciaLocation.name);
+      setSelectedResidenciaLocation(residenciaLocation);
+    }
+  }, [reutilizarResidencia, residenciaLocation, setValue]);
+
+  // Handlers para LocationSelector
+  const handleNacionalidadChange = useCallback(
+    (selection: {
+      level: Level;
+      country?: ICountry;
+      state?: IState;
+      city?: ICity;
+    }) => {
+      if (selection.country) {
+        setValue('nacionalidad', selection.country.isoCode);
+      }
+    },
+    [setValue]
+  );
+
+  const handleProcedenciaChange = useCallback(
+    (selection: {
+      level: Level;
+      country?: ICountry;
+      state?: IState;
+      city?: ICity;
+    }) => {
+      if (selection.country) {
+        setValue('pais_procedencia', selection.country.isoCode);
+      }
+      if (selection.city) {
+        setValue('ciudad_procedencia', selection.city.name);
+        setSelectedProcedenciaLocation(selection.city);
+      }
+    },
+    [setValue]
+  );
+
+  const handleResidenciaChange = useCallback(
+    (selection: {
+      level: Level;
+      country?: ICountry;
+      state?: IState;
+      city?: ICity;
+    }) => {
+      if (selection.country) {
+        setValue('pais_residencia', selection.country.isoCode);
+      }
+      if (selection.city) {
+        setValue('ciudad_residencia', selection.city.name);
+        setSelectedResidenciaLocation(selection.city);
+      }
+    },
+    [setValue]
+  );
+
+  const handleDestinoChange = useCallback(
+    (selection: {
+      level: Level;
+      country?: ICountry;
+      state?: IState;
+      city?: ICity;
+    }) => {
+      if (selection.country) {
+        setValue('pais_destino', selection.country.isoCode);
+      }
+      if (selection.city) {
+        setValue('ciudad_destino', selection.city.name);
+        setSelectedDestinoLocation(selection.city);
+      }
+    },
+    [setValue]
+  );
+
+  // Función para obtener defaultValues basado en el modo
+  const getNacionalidadDefaultValues = useMemo(() => {
+    if (reutilizarNacionalidad && nacionalidad) {
+      return { countryCode: nacionalidad };
+    }
+    return initialData?.nacionalidad ? { countryCode: initialData.nacionalidad } : undefined;
+  }, [reutilizarNacionalidad, nacionalidad, initialData?.nacionalidad]);
+
+  const getProcedenciaDefaultValues = useMemo(() => {
+    if (reutilizarProcedencia && procedenciaLocation) {
+      return {
+        countryCode: procedenciaLocation.countryCode,
+        stateCode: procedenciaLocation.stateCode,
+        cityName: procedenciaLocation.name,
+      };
+    } else if (initialData?.pais_procedencia || initialData?.ciudad_procedencia) {
+      return {
+        countryCode: initialData.pais_procedencia,
+        cityName: initialData.ciudad_procedencia,
+      };
+    }
+    return undefined;
+  }, [reutilizarProcedencia, procedenciaLocation, initialData]);
+
+  const getResidenciaDefaultValues = useMemo(() => {
+    if (reutilizarResidencia && residenciaLocation) {
+      return {
+        countryCode: residenciaLocation.countryCode,
+        stateCode: residenciaLocation.stateCode,
+        cityName: residenciaLocation.name,
+      };
+    } else if (initialData?.pais_residencia || initialData?.ciudad_residencia) {
+      return {
+        countryCode: initialData.pais_residencia,
+        cityName: initialData.ciudad_residencia,
+      };
+    }
+    return undefined;
+  }, [reutilizarResidencia, residenciaLocation, initialData]);
+
+  const getDestinoDefaultValues = useMemo(() => {
+    if (initialData?.pais_destino || initialData?.ciudad_destino) {
+      return {
+        countryCode: initialData.pais_destino,
+        cityName: initialData.ciudad_destino,
+      };
+    }
+    return undefined;
+  }, [initialData]);
+
+  // Componente TooltipWrapper
+  const TooltipWrapper = ({
+    children,
+    tooltip,
+  }: {
+    children: React.ReactNode;
+    tooltip: string;
+  }) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className='flex items-center gap-1'>
+            {children}
+            <InfoIcon className='h-4 w-4 text-muted-foreground hover:text-primary cursor-help' />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className='max-w-xs'>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
+  // Componente ErrorMessage
+  const ErrorMessage = ({ message }: { message?: string }) => {
+    if (!message) return null;
+    return <p className='text-sm text-red-600 mt-1'>{message}</p>;
+  };
+
+  // Handler para envío del formulario
+  const onSubmit = async (data: HuespedSecundarioDto) => {
     try {
-      // Validar con el schema antes de enviar
-      const validatedData = huespedSecundarioSchema.parse(data);
-      
-      onSave(validatedData);
-      toast.success(mode === 'create' ? 'Acompañante agregado correctamente' : 'Acompañante actualizado correctamente');
-      
-      // Limpiar formulario si es creación
+      await onSave(data);
+      toast.success(mode === 'create' ? 'Acompañante agregado exitosamente' : 'Acompañante actualizado exitosamente');
       if (mode === 'create') {
         reset();
       }
     } catch (error) {
-      console.error('Error al procesar acompañante:', error);
-      toast.error('Error al procesar la información del acompañante');
+      toast.error('Error al guardar el acompañante');
     }
   };
 
-  const handleCancel = () => {
-    if (mode === 'create') {
-      reset();
+  // Handler para eliminar
+  const handleDelete = () => {
+    if (onDelete && initialData) {
+      onDelete(initialData as HuespedSecundarioDto);
+      toast.success('Acompañante eliminado exitosamente');
     }
-    onCancel();
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleCancel}
-            className="h-8 w-8 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          {/* Información de Documento */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Información de Documento</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Tipo de Documento */}
-              <div className="space-y-2">
-                <Label htmlFor="tipo_documento">Tipo de Documento *</Label>
-                <Select
-                  value={watch('tipo_documento')}
-                  onValueChange={(value) => setValue('tipo_documento', value as TipoDocumentoHuespedSecundario)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione el tipo de documento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={TipoDocumentoHuespedSecundario.CC}>Cédula de Ciudadanía</SelectItem>
-                    <SelectItem value={TipoDocumentoHuespedSecundario.TI}>Tarjeta de Identidad</SelectItem>
-                    <SelectItem value={TipoDocumentoHuespedSecundario.PASAPORTE}>Pasaporte</SelectItem>
-                    <SelectItem value={TipoDocumentoHuespedSecundario.CE}>Cédula de Extranjería</SelectItem>
-                    <SelectItem value={TipoDocumentoHuespedSecundario.REGISTRO_CIVIL}>Registro Civil</SelectItem>
-                    <SelectItem value={TipoDocumentoHuespedSecundario.PEP}>PEP</SelectItem>
-                    <SelectItem value={TipoDocumentoHuespedSecundario.DNI}>DNI</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.tipo_documento && (
-                  <p className="text-sm text-red-600">{errors.tipo_documento.message}</p>
-                )}
-              </div>
-
-              {/* Número de Documento */}
-              <div className="space-y-2">
-                <Label htmlFor="numero_documento">Número de Documento *</Label>
-                <Input
-                  id="numero_documento"
-                  {...register('numero_documento')}
-                  placeholder="Ingrese el número de documento"
-                />
-                {errors.numero_documento && (
-                  <p className="text-sm text-red-600">{errors.numero_documento.message}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+      <Card>
+        <CardHeader>
+          <CardTitle className='text-lg font-semibold text-primary flex items-center gap-2'>
+            <User className='h-5 w-5' />
+            {mode === 'create' ? 'Nuevo Acompañante' : 'Editar Acompañante'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-6'>
           {/* Información Personal */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Información Personal</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='space-y-4'>
+            <h4 className='text-md font-medium text-foreground'>📋 Información Personal</h4>
+            
+            {/* Tipo y Número de Documento */}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Seleccione el tipo de documento de identidad'>
+                  <Label htmlFor='tipo_documento'>Tipo de Documento *</Label>
+                </TooltipWrapper>
+                <Controller
+                  name='tipo_documento'
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Seleccionar tipo de documento' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={TipoDocumentoHuespedSecundario.CC}>
+                          Cédula de Ciudadanía (CC)
+                        </SelectItem>
+                        <SelectItem value={TipoDocumentoHuespedSecundario.CE}>
+                          Cédula de Extranjería (CE)
+                        </SelectItem>
+                        <SelectItem value={TipoDocumentoHuespedSecundario.PASAPORTE}>
+                          Pasaporte
+                        </SelectItem>
+                        <SelectItem value={TipoDocumentoHuespedSecundario.TI}>Tarjeta de Identidad (TI)</SelectItem>
+                        <SelectItem value={TipoDocumentoHuespedSecundario.REGISTRO_CIVIL}>Registro Civil (RC)</SelectItem>
+                        <SelectItem value={TipoDocumentoHuespedSecundario.PEP}>
+                          Permiso Especial de Permanencia (PEP)
+                        </SelectItem>
+                        <SelectItem value={TipoDocumentoHuespedSecundario.DNI}>
+                          Documento Nacional de Identidad (DNI)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <ErrorMessage message={errors.tipo_documento?.message} />
+              </div>
 
-              {/* Nombres */}
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="nombres">Nombres *</Label>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Ingrese el número del documento seleccionado'>
+                  <Label htmlFor='numero_documento'>Número de Documento *</Label>
+                </TooltipWrapper>
                 <Input
-                  id="nombres"
+                  id='numero_documento'
+                  {...register('numero_documento')}
+                  placeholder='Ingrese número de documento'
+                />
+                <ErrorMessage message={errors.numero_documento?.message} />
+              </div>
+            </div>
+
+            {/* Nombres y Apellidos */}
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Nombres completos del acompañante'>
+                  <Label htmlFor='nombres'>Nombres *</Label>
+                </TooltipWrapper>
+                <Input
+                  id='nombres'
                   {...register('nombres')}
-                  placeholder="Ingrese los nombres completos"
+                  placeholder='Nombres completos'
                 />
-                {errors.nombres && (
-                  <p className="text-sm text-red-600">{errors.nombres.message}</p>
-                )}
+                <ErrorMessage message={errors.nombres?.message} />
               </div>
 
-              {/* Primer Apellido */}
-              <div className="space-y-2">
-                <Label htmlFor="primer_apellido">Primer Apellido *</Label>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Primer apellido del acompañante'>
+                  <Label htmlFor='primer_apellido'>Primer Apellido *</Label>
+                </TooltipWrapper>
                 <Input
-                  id="primer_apellido"
+                  id='primer_apellido'
                   {...register('primer_apellido')}
-                  placeholder="Ingrese el primer apellido"
+                  placeholder='Primer apellido'
                 />
-                {errors.primer_apellido && (
-                  <p className="text-sm text-red-600">{errors.primer_apellido.message}</p>
-                )}
+                <ErrorMessage message={errors.primer_apellido?.message} />
               </div>
 
-              {/* Segundo Apellido */}
-              <div className="space-y-2">
-                <Label htmlFor="segundo_apellido">Segundo Apellido</Label>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Segundo apellido del acompañante (opcional)'>
+                  <Label htmlFor='segundo_apellido'>Segundo Apellido</Label>
+                </TooltipWrapper>
                 <Input
-                  id="segundo_apellido"
+                  id='segundo_apellido'
                   {...register('segundo_apellido')}
-                  placeholder="Ingrese el segundo apellido (opcional)"
+                  placeholder='Segundo apellido (opcional)'
                 />
-                {errors.segundo_apellido && (
-                  <p className="text-sm text-red-600">{errors.segundo_apellido.message}</p>
-                )}
+                <ErrorMessage message={errors.segundo_apellido?.message} />
+              </div>
+            </div>
+
+            {/* Fecha de Nacimiento, Género y Ocupación */}
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Fecha de nacimiento del acompañante'>
+                  <Label htmlFor='fecha_nacimiento'>Fecha de Nacimiento *</Label>
+                </TooltipWrapper>
+                <Controller
+                  name='fecha_nacimiento'
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id='fecha_nacimiento'
+                      type='date'
+                      value={formatDateForInput(field.value)}
+                      onChange={(e) => {
+                        const dateValue = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined;
+                        field.onChange(dateValue);
+                      }}
+                    />
+                  )}
+                />
+                <ErrorMessage message={errors.fecha_nacimiento?.message} />
               </div>
 
-              {/* Fecha de Nacimiento */}
-              <div className="space-y-2">
-                <Label htmlFor="fecha_nacimiento">Fecha de Nacimiento *</Label>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Género del acompañante'>
+                  <Label htmlFor='genero'>Género *</Label>
+                </TooltipWrapper>
+                <Controller
+                  name='genero'
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Seleccionar género' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={Genero.MASCULINO}>Masculino</SelectItem>
+                        <SelectItem value={Genero.FEMENINO}>Femenino</SelectItem>
+                        <SelectItem value={Genero.OTRO}>Otro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <ErrorMessage message={errors.genero?.message} />
+              </div>
+
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Profesión u ocupación del acompañante'>
+                  <Label htmlFor='ocupacion'>Ocupación *</Label>
+                </TooltipWrapper>
                 <Input
-                  id="fecha_nacimiento"
-                  type="date"
-                  max={new Date().toISOString().split('T')[0]} // No permitir fechas futuras
-                  min="1900-01-01" // No permitir fechas antes de 1900
-                  value={(() => {
-                    const fechaValue = watch('fecha_nacimiento');
-                    return fechaValue ? new Date(fechaValue).toISOString().split('T')[0] : '';
-                  })()}
-                  onChange={(e) => {
-                    const dateValue = e.target.value ? new Date(e.target.value) : undefined;
-                    setValue('fecha_nacimiento', dateValue);
-                  }}
-                />
-                {errors.fecha_nacimiento && (
-                  <p className="text-sm text-red-600">{errors.fecha_nacimiento.message}</p>
-                )}
-              </div>
-
-              {/* Género */}
-              <div className="space-y-2">
-                <Label htmlFor="genero">Género *</Label>
-                <Select
-                  value={watch('genero')}
-                  onValueChange={(value) => setValue('genero', value as Genero)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione el género" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={Genero.MASCULINO}>Masculino</SelectItem>
-                    <SelectItem value={Genero.FEMENINO}>Femenino</SelectItem>
-                    <SelectItem value={Genero.OTRO}>Otro</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.genero && (
-                  <p className="text-sm text-red-600">{errors.genero.message}</p>
-                )}
-              </div>
-
-              {/* Nacionalidad */}
-              <div className="space-y-2">
-                <Label>Nacionalidad *</Label>
-                <LocationSelector
-                  level="country"
-                  defaultCountryCode="CO"
-                  placeholder={{
-                    country: "Seleccionar nacionalidad..."
-                  }}
-                  onCountryChange={(country) => {
-                    setValue('nacionalidad', country?.name || '');
-                  }}
-                />
-                {errors.nacionalidad && (
-                  <p className="text-sm text-red-600">{errors.nacionalidad.message}</p>
-                )}
-              </div>
-
-              {/* Ocupación */}
-              <div className="space-y-2">
-                <Label htmlFor="ocupacion">Ocupación *</Label>
-                <Input
-                  id="ocupacion"
+                  id='ocupacion'
                   {...register('ocupacion')}
-                  placeholder="Ingrese la ocupación"
+                  placeholder='Profesión u ocupación'
                 />
-                {errors.ocupacion && (
-                  <p className="text-sm text-red-600">{errors.ocupacion.message}</p>
-                )}
+                <ErrorMessage message={errors.ocupacion?.message} />
               </div>
             </div>
           </div>
+
+          <Separator />
 
           {/* Información de Ubicación */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Información de Ubicación</h4>
-            <div className="space-y-6">
-              {/* Residencia */}
-              <div className="space-y-2">
-                <Label>Residencia *</Label>
-                <LocationSelector
-                  level="city"
-                  defaultCountryCode="CO"
-                  placeholder={{
-                    country: "País de residencia...",
-                    state: "Estado/Departamento...",
-                    city: "Ciudad de residencia..."
-                  }}
-                  onLocationChange={(location) => {
-                    setValue('pais_residencia', location.country?.name || '');
-                    setValue('ciudad_residencia', location.city?.name || '');
-                  }}
+          <div className='space-y-4'>
+            <h4 className='text-md font-medium text-foreground'>🌍 Información de Ubicación</h4>
+            
+            {/* Nacionalidad */}
+            <div className='space-y-2'>
+              <div className='flex items-center space-x-3 mb-2'>
+                <Checkbox
+                  id='reutilizar-nacionalidad'
+                  checked={reutilizarNacionalidad}
+                  onCheckedChange={(checked) => setReutilizarNacionalidad(checked === true)}
                 />
-                {(errors.pais_residencia || errors.ciudad_residencia) && (
-                  <p className="text-sm text-red-600">
-                    {errors.pais_residencia?.message || errors.ciudad_residencia?.message}
-                  </p>
-                )}
+                <Label htmlFor='reutilizar-nacionalidad' className='text-sm'>
+                  Usar misma nacionalidad del huésped principal
+                </Label>
               </div>
+              
+              {!reutilizarNacionalidad && (
+                <>
+                  <TooltipWrapper tooltip='Nacionalidad del acompañante'>
+                    <Label>Nacionalidad *</Label>
+                  </TooltipWrapper>
+                  <LocationSelector
+                    searchable={true}
+                    maxLevel='country'
+                    placeholders={{
+                      country: 'Seleccionar país de nacionalidad',
+                    }}
+                    onSelectionChange={handleNacionalidadChange}
+                    defaultValues={getNacionalidadDefaultValues}
+                  />
+                  <ErrorMessage message={errors.nacionalidad?.message} />
+                </>
+              )}
+            </div>
 
-              {/* Procedencia */}
-              <div className="space-y-2">
-                <Label>Procedencia *</Label>
-                <LocationSelector
-                  level="city"
-                  defaultCountryCode="CO"
-                  placeholder={{
-                    country: "País de procedencia...",
-                    state: "Estado/Departamento...",
-                    city: "Ciudad de procedencia..."
-                  }}
-                  onLocationChange={(location) => {
-                    setValue('pais_procedencia', location.country?.name || '');
-                    setValue('ciudad_procedencia', location.city?.name || '');
-                  }}
+            {/* Procedencia */}
+            <div className='space-y-2'>
+              <div className='flex items-center space-x-3 mb-2'>
+                <Checkbox
+                  id='reutilizar-procedencia'
+                  checked={reutilizarProcedencia}
+                  onCheckedChange={(checked) => setReutilizarProcedencia(checked === true)}
                 />
-                {(errors.pais_procedencia || errors.ciudad_procedencia) && (
-                  <p className="text-sm text-red-600">
-                    {errors.pais_procedencia?.message || errors.ciudad_procedencia?.message}
-                  </p>
-                )}
+                <Label htmlFor='reutilizar-procedencia' className='text-sm'>
+                  Usar misma procedencia del huésped principal
+                </Label>
               </div>
+              
+              {!reutilizarProcedencia && (
+                <>
+                  <TooltipWrapper tooltip='Ciudad de procedencia del acompañante'>
+                    <Label>Ciudad de Procedencia *</Label>
+                  </TooltipWrapper>
+                  <LocationSelector
+                    searchable={true}
+                    maxLevel='city'
+                    placeholders={{
+                      country: 'Seleccionar país de procedencia',
+                      state: 'Seleccionar estado de procedencia',
+                      city: 'Seleccionar ciudad de procedencia',
+                    }}
+                    onSelectionChange={handleProcedenciaChange}
+                    defaultValues={getProcedenciaDefaultValues}
+                  />
+                  <ErrorMessage message={errors.pais_procedencia?.message} />
+                  <ErrorMessage message={errors.ciudad_procedencia?.message} />
+                </>
+              )}
+            </div>
 
-              {/* Destino */}
-              <div className="space-y-2">
-                <Label>Destino *</Label>
-                <LocationSelector
-                  level="city"
-                  defaultCountryCode="CO"
-                  placeholder={{
-                    country: "País de destino...",
-                    state: "Estado/Departamento...",
-                    city: "Ciudad de destino..."
-                  }}
-                  onLocationChange={(location) => {
-                    setValue('pais_destino', location.country?.name || '');
-                    setValue('ciudad_destino', location.city?.name || '');
-                  }}
+            {/* Residencia */}
+            <div className='space-y-2'>
+              <div className='flex items-center space-x-3 mb-2'>
+                <Checkbox
+                  id='reutilizar-residencia'
+                  checked={reutilizarResidencia}
+                  onCheckedChange={(checked) => setReutilizarResidencia(checked === true)}
                 />
-                {(errors.pais_destino || errors.ciudad_destino) && (
-                  <p className="text-sm text-red-600">
-                    {errors.pais_destino?.message || errors.ciudad_destino?.message}
-                  </p>
-                )}
+                <Label htmlFor='reutilizar-residencia' className='text-sm'>
+                  Usar misma residencia del huésped principal
+                </Label>
               </div>
+              
+              {!reutilizarResidencia && (
+                <>
+                  <TooltipWrapper tooltip='Ciudad de residencia del acompañante'>
+                    <Label>Ciudad de Residencia *</Label>
+                  </TooltipWrapper>
+                  <LocationSelector
+                    searchable={true}
+                    maxLevel='city'
+                    placeholders={{
+                      country: 'Seleccionar país de residencia',
+                      state: 'Seleccionar estado de residencia',
+                      city: 'Seleccionar ciudad de residencia',
+                    }}
+                    onSelectionChange={handleResidenciaChange}
+                    defaultValues={getResidenciaDefaultValues}
+                  />
+                  <ErrorMessage message={errors.pais_residencia?.message} />
+                  <ErrorMessage message={errors.ciudad_residencia?.message} />
+                </>
+              )}
+            </div>
+
+            {/* Destino */}
+            <div className='space-y-2'>
+              <TooltipWrapper tooltip='Ciudad de destino del acompañante'>
+                <Label>Ciudad de Destino *</Label>
+              </TooltipWrapper>
+              <LocationSelector
+                searchable={true}
+                maxLevel='city'
+                placeholders={{
+                  country: 'Seleccionar país de destino',
+                  state: 'Seleccionar estado de destino',
+                  city: 'Seleccionar ciudad de destino',
+                }}
+                onSelectionChange={handleDestinoChange}
+                defaultValues={getDestinoDefaultValues}
+              />
+              <ErrorMessage message={errors.pais_destino?.message} />
+              <ErrorMessage message={errors.ciudad_destino?.message} />
             </div>
           </div>
 
+          <Separator />
+
           {/* Información de Contacto */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Información de Contacto (Opcional)</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Teléfono */}
-              <div className="space-y-2">
-                <Label htmlFor="telefono">Teléfono</Label>
-                <Input
-                  id="telefono"
-                  {...register('telefono')}
-                  placeholder="Ingrese el número de teléfono"
-                />
-                {errors.telefono && (
-                  <p className="text-sm text-red-600">{errors.telefono.message}</p>
-                )}
+          <div className='space-y-4'>
+            <h4 className='text-md font-medium text-foreground'>📞 Información de Contacto</h4>
+            
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Número de teléfono del acompañante (opcional)'>
+                  <Label>Teléfono</Label>
+                </TooltipWrapper>
+                <div className='flex gap-2'>
+                  <div className='w-40'>
+                    <CountryCodeSelector
+                      value={paisResidencia}
+                      placeholder='Código'
+                    />
+                  </div>
+                  <div className='flex-1'>
+                    <Input
+                      {...register('telefono')}
+                      placeholder='Número de teléfono'
+                      type='tel'
+                    />
+                  </div>
+                </div>
+                <ErrorMessage message={errors.telefono?.message} />
               </div>
 
-              {/* Correo Electrónico */}
-              <div className="space-y-2">
-                <Label htmlFor="correo">Correo Electrónico</Label>
+              <div className='space-y-2'>
+                <TooltipWrapper tooltip='Correo electrónico del acompañante (opcional)'>
+                  <Label htmlFor='correo'>Correo Electrónico</Label>
+                </TooltipWrapper>
                 <Input
-                  id="correo"
-                  type="email"
+                  id='correo'
+                  type='email'
                   {...register('correo')}
-                  placeholder="Ingrese el correo electrónico"
+                  placeholder='correo@ejemplo.com'
                 />
-                {errors.correo && (
-                  <p className="text-sm text-red-600">{errors.correo.message}</p>
-                )}
+                <ErrorMessage message={errors.correo?.message} />
               </div>
             </div>
           </div>
 
           {/* Botones de Acción */}
-          <div className="flex justify-end space-x-4 pt-4 border-t">
+          <div className='flex justify-end gap-2 pt-4'>
             <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
+              type='button'
+              variant='outline'
+              onClick={onCancel}
+              disabled={isSubmitting}
             >
+              <X className='h-4 w-4 mr-2' />
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              disabled={!isValid}
-            >
-              {mode === 'create' ? 'Agregar Acompañante' : 'Actualizar Acompañante'}
+            
+            {mode === 'edit' && onDelete && (
+              <Button
+                type='button'
+                variant='destructive'
+                onClick={handleDelete}
+                disabled={isSubmitting}
+              >
+                <Trash2 className='h-4 w-4 mr-2' />
+                Eliminar
+              </Button>
+            )}
+            
+            <Button type='submit' disabled={isSubmitting}>
+              <Save className='h-4 w-4 mr-2' />
+              {isSubmitting ? 'Guardando...' : (mode === 'create' ? 'Agregar' : 'Actualizar')}
             </Button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </form>
   );
 }; 

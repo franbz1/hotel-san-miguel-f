@@ -1,63 +1,153 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { GestorAcompaniantes } from './GestorAcompaniantes';
-import { useFormularioContext } from '../FormularioWrapper';
-import { huespedSecundarioSchema } from '@/lib/formulario/schemas/RegistroFormularioDto.schema';
-import { z } from 'zod';
+import { ICity } from 'country-state-city'
+import { GestorAcompaniantes } from './GestorAcompaniantes'
+import { useFormContext } from 'react-hook-form'
+import { HuespedSecundarioDto } from '@/lib/formulario/schemas/RegistroFormularioDto.schema'
+import { useState, useEffect } from 'react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { InfoIcon, Users } from 'lucide-react'
 
-type HuespedSecundarioFormData = z.infer<typeof huespedSecundarioSchema>;
+// Debe permitir crud de acompañantes con el componente gestor de acompañantes
+// Debe preguntar si viaja con acompañantes o solo (si lo marca como verdadero renderiza gestor de acompañantes)
+// Debe recibir los datos de locacion de procedencia, nacionalidad y residencia del huesped principal y pasarlos al gestor de acompañantes
+// Debe calcular el numero de acompañantes y actualizar el campo numero_acompaniantes
+export const PasoAcompaniantes = ({
+  procedenciaLocation,
+  residenciaLocation,
+}: {
+  procedenciaLocation: ICity | null
+  residenciaLocation: ICity | null
+}) => {
+  const [viajaConAcompaniantes, setViajaConAcompaniantes] = useState(false)
 
-export const PasoAcompaniantes = () => {
-  const { setValue, watch } = useFormContext();
-  const { stepData, updateStepData } = useFormularioContext();
+  const {
+    watch,
+    setValue,
+  } = useFormContext()
 
-  // Obtener datos actuales del formulario
-  const currentAcompaniantes = watch('huespedes_secundarios') || [];
+  const initialAcompaniantes = watch('huespedes_secundarios') || []
+  const nacionalidad = watch('nacionalidad')
 
-  // Sincronizar con datos del paso si existen
-  const initialAcompaniantes = stepData.acompaniantes?.huespedes_secundarios || currentAcompaniantes;
-
-  // Función para manejar cambios en la lista de acompañantes
-  const handleAcompaniantesChange = (acompaniantes: HuespedSecundarioFormData[]) => {
-    const numeroAcompaniantes = acompaniantes.length;
-    
-    // Actualizar campos del formulario principal
-    setValue('huespedes_secundarios', acompaniantes);
-    setValue('numero_acompaniantes', numeroAcompaniantes);
-    
-    // Actualizar datos del paso
-    updateStepData('acompaniantes', {
-      numero_acompaniantes: numeroAcompaniantes,
-      huespedes_secundarios: acompaniantes
-    });
-  };
-
-  // Sincronizar estado inicial si hay datos previos
+  // Inicializar el estado del checkbox basado en si ya hay acompañantes
   useEffect(() => {
     if (initialAcompaniantes.length > 0) {
-      const numeroAcompaniantes = initialAcompaniantes.length;
-      setValue('huespedes_secundarios', initialAcompaniantes);
-      setValue('numero_acompaniantes', numeroAcompaniantes);
+      setViajaConAcompaniantes(true)
     }
-  }, [initialAcompaniantes, setValue]);
+  }, [initialAcompaniantes.length])
+
+  const handleAcompaniantesChange = (acompaniantes: HuespedSecundarioDto[]) => {
+    setValue('huespedes_secundarios', acompaniantes)
+    // Calcular y actualizar el número de acompañantes
+    setValue('numero_acompaniantes', acompaniantes.length)
+  }
+
+  const handleViajaConAcompaniantesChange = (checked: boolean | 'indeterminate') => {
+    const isChecked = checked === 'indeterminate' ? false : checked
+    setViajaConAcompaniantes(isChecked)
+    
+    // Si se desmarca, limpiar los acompañantes
+    if (!isChecked) {
+      setValue('huespedes_secundarios', [])
+      setValue('numero_acompaniantes', 0)
+    }
+  }
+
+  const TooltipWrapper = ({
+    children,
+    tooltip,
+  }: {
+    children: React.ReactNode
+    tooltip: string
+  }) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className='flex items-center gap-1'>
+            {children}
+            <InfoIcon className='h-4 w-4 text-muted-foreground hover:text-primary cursor-help' />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className='max-w-xs'>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Información de Acompañantes</h3>
-        <p className="text-sm text-muted-foreground">
-          Agregue la información de las personas que lo acompañarán durante su estadía.
-          Si viaja solo, puede omitir este paso.
-        </p>
-      </div>
+    <div className='space-y-8 max-w-4xl mx-auto'>
+      {/* Información de Acompañantes */}
+      <Card>
+        <CardHeader>
+          <CardTitle className='text-xl font-semibold text-primary flex items-center gap-2'>
+            <Users className='h-5 w-5' />
+            👥 Información de Acompañantes
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-6'>
+          <div className='space-y-4'>
+            <p className='text-sm text-muted-foreground'>
+              Agregue la información de las personas que lo acompañarán durante su
+              estadía. Si viaja solo, puede omitir este paso.
+            </p>
+            
+            <div className='flex items-center space-x-3 p-4 border rounded-lg bg-muted/50'>
+              <Checkbox
+                id='viaja-con-acompaniantes'
+                checked={viajaConAcompaniantes}
+                onCheckedChange={handleViajaConAcompaniantesChange}
+              />
+              <TooltipWrapper
+                tooltip='Marque esta opción si viaja con otras personas'
+              >
+                <label 
+                  htmlFor='viaja-con-acompaniantes'
+                  className='text-sm font-medium cursor-pointer'
+                >
+                  Viaja con acompañantes
+                </label>
+              </TooltipWrapper>
+            </div>
+          </div>
 
-      <GestorAcompaniantes
-        initialAcompaniantes={initialAcompaniantes}
-        onAcompaniantesChange={handleAcompaniantesChange}
-        disabled={false}
-      />
+          {/* Gestor de Acompañantes */}
+          <div className={`transition-all duration-300 ${
+            viajaConAcompaniantes ? 'opacity-100' : 'opacity-50'
+          }`}>
+            <GestorAcompaniantes
+              nacionalidad={nacionalidad}
+              procedenciaLocation={procedenciaLocation}
+              residenciaLocation={residenciaLocation}
+              initialAcompaniantes={initialAcompaniantes}
+              onAcompaniantesChange={handleAcompaniantesChange}
+              disabled={!viajaConAcompaniantes}
+            />
+          </div>
+
+          {/* Resumen de acompañantes */}
+          {viajaConAcompaniantes && initialAcompaniantes.length > 0 && (
+            <div className='mt-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
+              <div className='flex items-center gap-2 text-green-800'>
+                <Users className='h-4 w-4' />
+                <span className='font-medium'>
+                  Total de acompañantes: {initialAcompaniantes.length}
+                </span>
+              </div>
+              <p className='text-sm text-green-600 mt-1'>
+                Se han registrado {initialAcompaniantes.length} persona{initialAcompaniantes.length !== 1 ? 's' : ''} como acompañante{initialAcompaniantes.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
-  );
-}; 
+  )
+}

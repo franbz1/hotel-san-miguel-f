@@ -1,311 +1,271 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { AcompanianteForm } from './AcompanianteForm';
-import { huespedSecundarioSchema } from '@/lib/formulario/schemas/RegistroFormularioDto.schema';
-import { TipoDocumentoHuespedSecundario } from '@/Types/enums/tipoDocumentoHuespedSecundario';
-import { Genero } from '@/Types/enums/generos';
-import { toast } from 'sonner';
-import { z } from 'zod';
-import { Plus, Edit, Trash2, Users, User } from 'lucide-react';
-
-type HuespedSecundarioFormData = z.infer<typeof huespedSecundarioSchema>;
+import { useState } from 'react'
+import { useFormContext, useFieldArray } from 'react-hook-form'
+import { HuespedSecundarioDto } from '@/lib/formulario/schemas/RegistroFormularioDto.schema'
+import { toast } from 'sonner'
+import { ICity } from 'country-state-city'
+import { AcompanianteForm } from './AcompanianteForm'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { Plus, Edit, Trash2, User, Users } from 'lucide-react'
 
 interface GestorAcompaniantesProps {
   /** Lista inicial de acompañantes */
-  initialAcompaniantes?: HuespedSecundarioFormData[];
+  initialAcompaniantes?: HuespedSecundarioDto[]
   /** Callback cuando cambia la lista de acompañantes */
-  onAcompaniantesChange?: (acompaniantes: HuespedSecundarioFormData[]) => void;
+  onAcompaniantesChange?: (acompaniantes: HuespedSecundarioDto[]) => void
+  /** Ubicacion de procedencia huesped Principal*/
+  procedenciaLocation: ICity | null
+  /** Ubicacion de residencia huesped Principal*/
+  residenciaLocation: ICity | null
+  /** Nacionalidad huesped Principal*/
+  nacionalidad: string
   /** Componente deshabilitado */
-  disabled?: boolean;
+  disabled?: boolean
 }
 
+// Debe gestionar la logica de creacion, actualizacion y eliminacion de acompañantes
+// Debe pasarle el control del contexto del formulario al field array de acompañantes
+// Debe permitirle al usuario agregar, editar (actualizar) y eliminar acompañantes del contexto del formulario
+// Debe pasarle los datos de procedencia, nacionalidad y residencia del huesped principal al componente AcompanianteForm
 export const GestorAcompaniantes = ({
-  initialAcompaniantes = [],
   onAcompaniantesChange,
-  disabled = false
+  disabled = false,
+  procedenciaLocation,
+  residenciaLocation,
+  nacionalidad,
 }: GestorAcompaniantesProps) => {
-  // Estado local de acompañantes
-  const [acompaniantes, setAcompaniantes] = useState<HuespedSecundarioFormData[]>(initialAcompaniantes);
-  
-  // Estado del formulario
-  const [showForm, setShowForm] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const { control, watch } = useFormContext()
 
-  // Función para notificar cambios al componente padre
-  const notifyChange = (newAcompaniantes: HuespedSecundarioFormData[]) => {
-    setAcompaniantes(newAcompaniantes);
-    onAcompaniantesChange?.(newAcompaniantes);
-  };
+  const { append, remove, update } = useFieldArray({
+    control,
+    name: 'huespedes_secundarios',
+  })
 
-  // Manejar agregar nuevo acompañante
-  const handleAddAcompaniante = () => {
-    setEditingIndex(null);
-    setIsEditing(false);
-    setShowForm(true);
-  };
+  // Estados para controlar la UI
+  const [showForm, setShowForm] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingData, setEditingData] = useState<Partial<HuespedSecundarioDto> | undefined>(undefined)
 
-  // Manejar editar acompañante
-  const handleEditAcompaniante = (index: number) => {
-    setEditingIndex(index);
-    setIsEditing(true);
-    setShowForm(true);
-  };
+  // Observar cambios en la lista para notificar al padre
+  const currentAcompaniantes = watch('huespedes_secundarios') || []
 
-  // Manejar eliminar acompañante
-  const handleDeleteAcompaniante = (index: number) => {
-    const acompaniante = acompaniantes[index];
-    const newAcompaniantes = acompaniantes.filter((_, i) => i !== index);
-    notifyChange(newAcompaniantes);
-    
-    toast.success(`Acompañante ${acompaniante.nombres} ${acompaniante.primer_apellido} eliminado`);
-  };
+  // Notificar cambios al componente padre
+  const notifyChange = (acompaniantes: HuespedSecundarioDto[]) => {
+    if (onAcompaniantesChange) {
+      onAcompaniantesChange(acompaniantes)
+    }
+  }
 
-  // Manejar guardar acompañante (crear o actualizar)
-  const handleSaveAcompaniante = (data: HuespedSecundarioFormData) => {
-    let newAcompaniantes: HuespedSecundarioFormData[];
-
-    if (isEditing && editingIndex !== null) {
+  // Handler para guardar acompañante (crear o actualizar)
+  const handleSave = (acompaniante: HuespedSecundarioDto) => {
+    if (editingIndex !== null) {
       // Actualizar acompañante existente
-      newAcompaniantes = acompaniantes.map((acompaniante, index) => 
-        index === editingIndex ? data : acompaniante
-      );
-      toast.success('Acompañante actualizado correctamente');
+      update(editingIndex, acompaniante)
+      setEditingIndex(null)
+      setEditingData(undefined)
+      toast.success('Acompañante actualizado exitosamente')
     } else {
       // Agregar nuevo acompañante
-      newAcompaniantes = [...acompaniantes, data];
-      toast.success('Acompañante agregado correctamente');
+      append(acompaniante)
+      toast.success('Acompañante agregado exitosamente')
     }
+    
+    setShowForm(false)
+    
+    // Notificar cambio con la nueva lista
+    const updatedList = editingIndex !== null 
+      ? currentAcompaniantes.map((item: HuespedSecundarioDto, index: number) => 
+          index === editingIndex ? acompaniante : item
+        )
+      : [...currentAcompaniantes, acompaniante]
+    
+    notifyChange(updatedList)
+  }
 
-    notifyChange(newAcompaniantes);
-    handleCancelForm();
-  };
+  // Handler para eliminar acompañante
+  const handleDelete = (acompaniante: HuespedSecundarioDto) => {
+    const indexToDelete = currentAcompaniantes.findIndex(
+      (item: HuespedSecundarioDto) => 
+        item.numero_documento === acompaniante.numero_documento
+    )
+    
+    if (indexToDelete !== -1) {
+      remove(indexToDelete)
+      toast.success('Acompañante eliminado exitosamente')
+      
+             // Notificar cambio con la nueva lista
+       const updatedList = currentAcompaniantes.filter((_: HuespedSecundarioDto, index: number) => index !== indexToDelete)
+       notifyChange(updatedList)
+    }
+    
+    // Si estamos editando este elemento, cancelar la edición
+    if (editingIndex === indexToDelete) {
+      setEditingIndex(null)
+      setEditingData(undefined)
+      setShowForm(false)
+    }
+  }
 
-  // Manejar cancelar formulario
-  const handleCancelForm = () => {
-    setShowForm(false);
-    setEditingIndex(null);
-    setIsEditing(false);
-  };
+  // Handler para cancelar edición/creación
+  const handleCancel = () => {
+    setShowForm(false)
+    setEditingIndex(null)
+    setEditingData(undefined)
+  }
 
-  // Formatear tipo de documento para mostrar
-  const formatTipoDocumento = (tipo: TipoDocumentoHuespedSecundario) => {
-    const labels = {
-      [TipoDocumentoHuespedSecundario.CC]: 'CC',
-      [TipoDocumentoHuespedSecundario.TI]: 'TI',
-      [TipoDocumentoHuespedSecundario.PASAPORTE]: 'Pasaporte',
-      [TipoDocumentoHuespedSecundario.CE]: 'CE',
-      [TipoDocumentoHuespedSecundario.REGISTRO_CIVIL]: 'RC',
-      [TipoDocumentoHuespedSecundario.PEP]: 'PEP',
-      [TipoDocumentoHuespedSecundario.DNI]: 'DNI'
-    };
-    return labels[tipo] || tipo;
-  };
+  // Handler para iniciar edición
+  const handleEdit = (index: number) => {
+    const acompaniante = currentAcompaniantes[index] as HuespedSecundarioDto
+    setEditingIndex(index)
+    setEditingData(acompaniante)
+    setShowForm(true)
+  }
 
-  // Formatear género para mostrar
-  const formatGenero = (genero: Genero) => {
-    const labels = {
-      [Genero.MASCULINO]: 'M',
-      [Genero.FEMENINO]: 'F',
-      [Genero.OTRO]: 'Otro'
-    };
-    return labels[genero] || genero;
-  };
+  // Handler para iniciar creación
+  const handleAdd = () => {
+    setEditingIndex(null)
+    setEditingData(undefined)
+    setShowForm(true)
+  }
+
+  // Handler para eliminar desde la lista
+  const handleDeleteFromList = (index: number) => {
+    remove(index)
+    toast.success('Acompañante eliminado exitosamente')
+    
+         // Notificar cambio con la nueva lista
+     const updatedList = currentAcompaniantes.filter((_: HuespedSecundarioDto, idx: number) => idx !== index)
+     notifyChange(updatedList)
+    
+    // Si estamos editando este elemento, cancelar la edición
+    if (editingIndex === index) {
+      setEditingIndex(null)
+      setEditingData(undefined)
+      setShowForm(false)
+    }
+  }
+
+  if (disabled) {
+    return (
+      <div className='space-y-4'>
+        <div className='text-center py-8 text-muted-foreground'>
+          <Users className='h-12 w-12 mx-auto mb-4 opacity-50' />
+                     <p>Marque la opción &quot;Viaja con acompañantes&quot; para gestionar acompañantes</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Encabezado */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <Users className="h-5 w-5 text-blue-600" />
-          <h3 className="text-lg font-medium">Acompañantes</h3>
-          <Badge variant="secondary" className="ml-2">
-            {acompaniantes.length}
-          </Badge>
-        </div>
-        
-        {!showForm && (
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm"
-            onClick={handleAddAcompaniante}
-            disabled={disabled}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Agregar Acompañante
-          </Button>
-        )}
-      </div>
-
-      {/* Información */}
-      <div className="text-sm text-muted-foreground">
-        Agregue la información de las personas que lo acompañarán durante su estadía.
-        Si viaja solo, puede omitir este paso.
-      </div>
-
-      {/* Formulario de Acompañante */}
-      {showForm && (
-        <AcompanianteForm
-          mode={isEditing ? 'edit' : 'create'}
-          title={isEditing ? 'Editar Acompañante' : 'Agregar Acompañante'}
-          initialData={isEditing && editingIndex !== null ? acompaniantes[editingIndex] : undefined}
-          onSave={handleSaveAcompaniante}
-          onCancel={handleCancelForm}
-        />
-      )}
-
-      {/* Lista de Acompañantes */}
-      <div className="space-y-4">
-        {acompaniantes.length === 0 ? (
-          // Estado vacío
-          <Card className="border-dashed border-2 border-gray-300">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <User className="h-12 w-12 text-gray-400 mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">
-                No hay acompañantes registrados
-              </h4>
-                             <p className="text-sm text-gray-600 text-center mb-4">
-                 Haga clic en &quot;Agregar Acompañante&quot; para registrar a las personas que lo acompañan.
-               </p>
-              {!showForm && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleAddAcompaniante}
-                  disabled={disabled}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Agregar Primer Acompañante
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          // Lista de acompañantes
-          acompaniantes.map((acompaniante, index) => (
-            <Card key={index} className="relative">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">
-                        {acompaniante.nombres} {acompaniante.primer_apellido}
-                        {acompaniante.segundo_apellido && ` ${acompaniante.segundo_apellido}`}
-                      </CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {formatTipoDocumento(acompaniante.tipo_documento)} {acompaniante.numero_documento}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {formatGenero(acompaniante.genero)}
-                        </Badge>
+    <div className='space-y-6'>
+      {/* Lista de acompañantes existentes */}
+      {currentAcompaniantes.length > 0 && (
+        <div className='space-y-4'>
+          <h4 className='text-md font-medium text-foreground flex items-center gap-2'>
+            <Users className='h-4 w-4' />
+            Acompañantes Registrados ({currentAcompaniantes.length})
+          </h4>
+          
+          <div className='grid gap-4'>
+            {currentAcompaniantes.map((acompaniante: HuespedSecundarioDto, index: number) => (
+              <Card key={`${acompaniante.numero_documento}-${index}`} className='border-l-4 border-l-primary'>
+                <CardContent className='pt-6'>
+                  <div className='flex justify-between items-start'>
+                    <div className='space-y-2'>
+                      <div className='flex items-center gap-2'>
+                        <User className='h-4 w-4 text-muted-foreground' />
+                        <span className='font-medium'>
+                          {acompaniante.nombres} {acompaniante.primer_apellido} {acompaniante.segundo_apellido || ''}
+                        </span>
+                        <Badge variant='secondary'>{acompaniante.tipo_documento}</Badge>
+                      </div>
+                      
+                      <div className='text-sm text-muted-foreground space-y-1'>
+                        <p><span className='font-medium'>Documento:</span> {acompaniante.numero_documento}</p>
+                        <p><span className='font-medium'>Género:</span> {acompaniante.genero}</p>
+                        <p><span className='font-medium'>Ocupación:</span> {acompaniante.ocupacion}</p>
+                        {acompaniante.telefono && (
+                          <p><span className='font-medium'>Teléfono:</span> {acompaniante.telefono}</p>
+                        )}
+                        {acompaniante.correo && (
+                          <p><span className='font-medium'>Email:</span> {acompaniante.correo}</p>
+                        )}
                       </div>
                     </div>
+                    
+                    <div className='flex gap-2'>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() => handleEdit(index)}
+                        disabled={showForm}
+                      >
+                        <Edit className='h-4 w-4' />
+                      </Button>
+                      
+                      <Button
+                        type='button'
+                        variant='destructive'
+                        size='sm'
+                        onClick={() => handleDeleteFromList(index)}
+                        disabled={showForm}
+                      >
+                        <Trash2 className='h-4 w-4' />
+                      </Button>
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditAcompaniante(index)}
-                      disabled={disabled || showForm}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteAcompaniante(index)}
-                      disabled={disabled || showForm}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-600">Nacionalidad:</span>
-                    <p className="text-gray-900">{acompaniante.nacionalidad}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Ocupación:</span>
-                    <p className="text-gray-900">{acompaniante.ocupacion}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Fecha de Nacimiento:</span>
-                    <p className="text-gray-900">
-                      {new Date(acompaniante.fecha_nacimiento).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Residencia:</span>
-                    <p className="text-gray-900">
-                      {acompaniante.ciudad_residencia}, {acompaniante.pais_residencia}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Procedencia:</span>
-                    <p className="text-gray-900">
-                      {acompaniante.ciudad_procedencia}, {acompaniante.pais_procedencia}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Destino:</span>
-                    <p className="text-gray-900">
-                      {acompaniante.ciudad_destino}, {acompaniante.pais_destino}
-                    </p>
-                  </div>
-                  
-                  {/* Información de contacto (si existe) */}
-                  {(acompaniante.telefono || acompaniante.correo) && (
-                    <>
-                      {acompaniante.telefono && (
-                        <div>
-                          <span className="font-medium text-gray-600">Teléfono:</span>
-                          <p className="text-gray-900">{acompaniante.telefono}</p>
-                        </div>
-                      )}
-                      {acompaniante.correo && (
-                        <div>
-                          <span className="font-medium text-gray-600">Correo:</span>
-                          <p className="text-gray-900">{acompaniante.correo}</p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Información adicional */}
-      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <h4 className="font-medium text-blue-900 mb-2">Información importante:</h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Toda la información es obligatoria excepto el teléfono y correo electrónico</li>
-          <li>• Puede editar o eliminar acompañantes en cualquier momento</li>
-          <li>• Los datos se validarán automáticamente antes de continuar</li>
-        </ul>
-      </div>
+      {/* Botón para agregar nuevo acompañante */}
+      {!showForm && (
+        <div className='flex justify-center'>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={handleAdd}
+            className='w-full max-w-md'
+          >
+            <Plus className='h-4 w-4 mr-2' />
+            Agregar Acompañante
+          </Button>
+        </div>
+      )}
+
+      {/* Formulario para crear/editar acompañante */}
+      {showForm && (
+        <div className='mt-6'>
+          <Separator className='mb-6' />
+          <AcompanianteForm
+            initialData={editingData}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            onDelete={editingIndex !== null ? handleDelete : undefined}
+            procedenciaLocation={procedenciaLocation}
+            residenciaLocation={residenciaLocation}
+            nacionalidad={nacionalidad}
+            mode={editingIndex !== null ? 'edit' : 'create'}
+          />
+        </div>
+      )}
+
+      {/* Mensaje cuando no hay acompañantes */}
+      {currentAcompaniantes.length === 0 && !showForm && (
+        <div className='text-center py-8 text-muted-foreground'>
+          <Users className='h-12 w-12 mx-auto mb-4 opacity-50' />
+          <p>No hay acompañantes registrados</p>
+                     <p className='text-sm'>Haga clic en &quot;Agregar Acompañante&quot; para comenzar</p>
+        </div>
+      )}
     </div>
-  );
-}; 
+  )
+}
