@@ -21,6 +21,8 @@ interface GestorAcompaniantesProps {
   procedenciaLocation: ICity | null
   /** Ubicacion de residencia huesped Principal*/
   residenciaLocation: ICity | null
+  /** Ubicacion de destino huesped Principal*/
+  destinoLocation: ICity | null
   /** Nacionalidad huesped Principal*/
   nacionalidad: string
   /** Componente deshabilitado */
@@ -36,6 +38,7 @@ export const GestorAcompaniantes = ({
   disabled = false,
   procedenciaLocation,
   residenciaLocation,
+  destinoLocation,
   nacionalidad,
 }: GestorAcompaniantesProps) => {
   const { control, watch } = useFormContext()
@@ -252,6 +255,7 @@ export const GestorAcompaniantes = ({
             onDelete={editingIndex !== null ? handleDelete : undefined}
             procedenciaLocation={procedenciaLocation}
             residenciaLocation={residenciaLocation}
+            destinoLocation={destinoLocation}
             nacionalidad={nacionalidad}
             mode={editingIndex !== null ? 'edit' : 'create'}
           />

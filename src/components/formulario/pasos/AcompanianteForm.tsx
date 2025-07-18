@@ -47,6 +47,8 @@ interface AcompanianteFormProps {
   procedenciaLocation: ICity | null;
   /** Ubicacion de residencia huesped Principal*/
   residenciaLocation: ICity | null;
+  /** Ubicacion de destino huesped Principal*/
+  destinoLocation: ICity | null;
   /** Nacionalidad huesped Principal*/
   nacionalidad: string;
   /** Modo de operación */
@@ -66,6 +68,7 @@ export const AcompanianteForm = ({
   onDelete,
   procedenciaLocation,
   residenciaLocation,
+  destinoLocation,
   nacionalidad,
   mode = 'create'
 }: AcompanianteFormProps) => {
@@ -73,6 +76,7 @@ export const AcompanianteForm = ({
   const [reutilizarNacionalidad, setReutilizarNacionalidad] = useState(true);
   const [reutilizarProcedencia, setReutilizarProcedencia] = useState(true);
   const [reutilizarResidencia, setReutilizarResidencia] = useState(true);
+  const [reutilizarDestino, setReutilizarDestino] = useState(true);
 
   // Estados para ubicaciones seleccionadas
   const [, setSelectedProcedenciaLocation] = useState<ICity | null>(null);
@@ -111,8 +115,8 @@ export const AcompanianteForm = ({
       ciudad_procedencia: reutilizarProcedencia ? procedenciaLocation?.name || '' : (initialData?.ciudad_procedencia || ''),
       pais_residencia: reutilizarResidencia ? residenciaLocation?.countryCode || '' : (initialData?.pais_residencia || ''),
       ciudad_residencia: reutilizarResidencia ? residenciaLocation?.name || '' : (initialData?.ciudad_residencia || ''),
-      pais_destino: initialData?.pais_destino || '',
-      ciudad_destino: initialData?.ciudad_destino || '',
+      pais_destino: reutilizarDestino ? destinoLocation?.countryCode || '' : (initialData?.pais_destino || ''),
+      ciudad_destino: reutilizarDestino ? destinoLocation?.name || '' : (initialData?.ciudad_destino || ''),
       telefono: initialData?.telefono || '',
       correo: initialData?.correo || ''
     }
@@ -143,6 +147,14 @@ export const AcompanianteForm = ({
       setSelectedResidenciaLocation(residenciaLocation);
     }
   }, [reutilizarResidencia, residenciaLocation, setValue]);
+
+  useEffect(() => {
+    if (reutilizarDestino && destinoLocation) {
+      setValue('pais_destino', destinoLocation.countryCode);
+      setValue('ciudad_destino', destinoLocation.name);
+      setSelectedDestinoLocation(destinoLocation);
+    }
+  }, [reutilizarDestino, destinoLocation, setValue]);
 
   // Handlers para LocationSelector
   const handleNacionalidadChange = useCallback(
@@ -254,14 +266,20 @@ export const AcompanianteForm = ({
   }, [reutilizarResidencia, residenciaLocation, initialData]);
 
   const getDestinoDefaultValues = useMemo(() => {
-    if (initialData?.pais_destino || initialData?.ciudad_destino) {
+    if (reutilizarDestino && destinoLocation) {
+      return {
+        countryCode: destinoLocation.countryCode,
+        stateCode: destinoLocation.stateCode,
+        cityName: destinoLocation.name,
+      };
+    } else if (initialData?.pais_destino || initialData?.ciudad_destino) {
       return {
         countryCode: initialData.pais_destino,
         cityName: initialData.ciudad_destino,
       };
     }
     return undefined;
-  }, [initialData]);
+  }, [reutilizarDestino, destinoLocation, initialData]);
 
   // Componente TooltipWrapper
   const TooltipWrapper = ({
@@ -300,7 +318,7 @@ export const AcompanianteForm = ({
       if (mode === 'create') {
         reset();
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al guardar el acompañante');
     }
   };
@@ -589,22 +607,37 @@ export const AcompanianteForm = ({
 
             {/* Destino */}
             <div className='space-y-2'>
-              <TooltipWrapper tooltip='Ciudad de destino del acompañante'>
-                <Label>Ciudad de Destino *</Label>
-              </TooltipWrapper>
-              <LocationSelector
-                searchable={true}
-                maxLevel='city'
-                placeholders={{
-                  country: 'Seleccionar país de destino',
-                  state: 'Seleccionar estado de destino',
-                  city: 'Seleccionar ciudad de destino',
-                }}
-                onSelectionChange={handleDestinoChange}
-                defaultValues={getDestinoDefaultValues}
-              />
-              <ErrorMessage message={errors.pais_destino?.message} />
-              <ErrorMessage message={errors.ciudad_destino?.message} />
+              <div className='flex items-center space-x-3 mb-2'>
+                <Checkbox
+                  id='reutilizar-destino'
+                  checked={reutilizarDestino}
+                  onCheckedChange={(checked) => setReutilizarDestino(checked === true)}
+                />
+                <Label htmlFor='reutilizar-destino' className='text-sm'>
+                  Usar misma ciudad de destino del huésped principal
+                </Label>
+              </div>
+              
+              {!reutilizarDestino && (
+                <>
+                  <TooltipWrapper tooltip='Ciudad de destino del acompañante'>
+                    <Label>Ciudad de Destino *</Label>
+                  </TooltipWrapper>
+                  <LocationSelector
+                    searchable={true}
+                    maxLevel='city'
+                    placeholders={{
+                      country: 'Seleccionar país de destino',
+                      state: 'Seleccionar estado de destino',
+                      city: 'Seleccionar ciudad de destino',
+                    }}
+                    onSelectionChange={handleDestinoChange}
+                    defaultValues={getDestinoDefaultValues}
+                  />
+                  <ErrorMessage message={errors.pais_destino?.message} />
+                  <ErrorMessage message={errors.ciudad_destino?.message} />
+                </>
+              )}
             </div>
           </div>
 

@@ -20,7 +20,7 @@ import {
   CardDescription,
 } from '../ui/card'
 import { useState, useEffect } from 'react'
-import { ICity } from 'country-state-city'
+import { ICity, ICountry } from 'country-state-city'
 import { PasoAcompaniantes } from './pasos/PasoAcompaniantes'
 
 interface FormularioProps {
@@ -46,6 +46,10 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
   const [selectedProcedenciaLocation, setSelectedProcedenciaLocation] =
     useState<ICity | null>(null)
   const [selectedResidenciaLocation, setSelectedResidenciaLocation] =
+    useState<ICity | null>(null)
+  const [selectedNacionalidad, setSelectedNacionalidad] =
+    useState<ICountry | null>(null)
+  const [selectedDestinoLocation, setSelectedDestinoLocation] =
     useState<ICity | null>(null)
 
   const extraerToken = (linkFormulario: LinkFormulario) => {
@@ -74,6 +78,8 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
       ciudad_residencia: undefined,
       pais_procedencia: undefined,
       ciudad_procedencia: undefined,
+      pais_destino: undefined,
+      ciudad_destino: undefined,
       fecha_nacimiento: undefined,
       nacionalidad: undefined,
       ocupacion: undefined,
@@ -98,6 +104,8 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
       'ciudad_residencia',
       'pais_procedencia',
       'ciudad_procedencia',
+      'pais_destino',
+      'ciudad_destino',
       'fecha_nacimiento',
       'nacionalidad',
       'ocupacion',
@@ -215,6 +223,10 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
           setSelectedProcedenciaLocation={setSelectedProcedenciaLocation}
           selectedResidenciaLocation={selectedResidenciaLocation}
           setSelectedResidenciaLocation={setSelectedResidenciaLocation}
+          selectedNacionalidad={selectedNacionalidad}
+          setSelectedNacionalidad={setSelectedNacionalidad}
+          selectedDestinoLocation={selectedDestinoLocation}
+          setSelectedDestinoLocation={setSelectedDestinoLocation}
         />
       ),
     },
@@ -224,6 +236,8 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
         <PasoAcompaniantes
           procedenciaLocation={selectedProcedenciaLocation}
           residenciaLocation={selectedResidenciaLocation}
+          nacionalidad={methods.watch('nacionalidad')}
+          destinoLocation={selectedDestinoLocation}
         />
       ),
     },

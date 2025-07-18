@@ -45,11 +45,19 @@ export const PasoHuespedPrincipal = ({
   setSelectedProcedenciaLocation,
   selectedResidenciaLocation,
   setSelectedResidenciaLocation,
+  selectedNacionalidad,
+  setSelectedNacionalidad,
+  selectedDestinoLocation,
+  setSelectedDestinoLocation,
 }: {
   selectedProcedenciaLocation: ICity | null
   setSelectedProcedenciaLocation: (location: ICity | null) => void
   selectedResidenciaLocation: ICity | null
   setSelectedResidenciaLocation: (location: ICity | null) => void
+  selectedNacionalidad: ICountry | null
+  setSelectedNacionalidad: (country: ICountry | null) => void
+  selectedDestinoLocation: ICity | null
+  setSelectedDestinoLocation: (location: ICity | null) => void
 }) => {
   const {
     register,
@@ -67,6 +75,8 @@ export const PasoHuespedPrincipal = ({
   const paisProcedencia = watch('pais_procedencia')
   const ciudadProcedencia = watch('ciudad_procedencia')
   const ciudadResidencia = watch('ciudad_residencia')
+  const paisDestino = watch('pais_destino')
+  const ciudadDestino = watch('ciudad_destino')
 
   // Crear callbacks memoizados para evitar re-creaciones constantes
   const handleNacionalidadChange = React.useCallback(
@@ -78,9 +88,11 @@ export const PasoHuespedPrincipal = ({
     }) => {
       if (selection.country) {
         setValue('nacionalidad', selection.country.isoCode)
+        // Almacenar el país completo para retrocompatibilidad
+        setSelectedNacionalidad(selection.country)
       }
     },
-    [setValue]
+    [setValue, setSelectedNacionalidad]
   )
 
   const handleProcedenciaChange = React.useCallback(
@@ -123,6 +135,26 @@ export const PasoHuespedPrincipal = ({
     [setValue, setSelectedResidenciaLocation]
   )
 
+  const handleDestinoChange = React.useCallback(
+    (selection: {
+      level: Level
+      country?: ICountry
+      state?: IState
+      city?: ICity
+    }) => {
+      // Actualizar los campos del formulario
+      if (selection.country) {
+        setValue('pais_destino', selection.country.isoCode)
+      }
+      if (selection.city) {
+        setValue('ciudad_destino', selection.city.name)
+        // Almacenar la ICity completa para retrocompatibilidad
+        setSelectedDestinoLocation(selection.city)
+      }
+    },
+    [setValue, setSelectedDestinoLocation]
+  )
+
   // Función para obtener defaultValues del LocationSelector basado en ICity almacenada o valores del formulario
   const getProcedenciaDefaultValues = React.useMemo(() => {
     if (selectedProcedenciaLocation) {
@@ -159,6 +191,37 @@ export const PasoHuespedPrincipal = ({
     }
     return undefined
   }, [selectedResidenciaLocation, paisResidencia, ciudadResidencia])
+
+  const getNacionalidadDefaultValues = React.useMemo(() => {
+    if (selectedNacionalidad) {
+      return {
+        countryCode: selectedNacionalidad.isoCode,
+      }
+    } else if (nacionalidad) {
+      return {
+        countryCode: nacionalidad,
+      }
+    }
+    return undefined
+  }, [selectedNacionalidad, nacionalidad])
+
+  const getDestinoDefaultValues = React.useMemo(() => {
+    if (selectedDestinoLocation) {
+      // Si tenemos la ICity completa, usarla para obtener todos los códigos
+      return {
+        countryCode: selectedDestinoLocation.countryCode,
+        stateCode: selectedDestinoLocation.stateCode,
+        cityName: selectedDestinoLocation.name,
+      }
+    } else if (paisDestino || ciudadDestino) {
+      // Fallback a los valores individuales del formulario
+      return {
+        countryCode: paisDestino,
+        cityName: ciudadDestino,
+      }
+    }
+    return undefined
+  }, [selectedDestinoLocation, paisDestino, ciudadDestino])
 
   const TooltipWrapper = ({
     children,
@@ -389,9 +452,7 @@ export const PasoHuespedPrincipal = ({
                 country: 'Seleccionar país de nacionalidad',
               }}
               onSelectionChange={handleNacionalidadChange}
-              defaultValues={{
-                countryCode: nacionalidad,
-              }}
+              defaultValues={getNacionalidadDefaultValues}
             />
             <ErrorMessage message={errors.nacionalidad?.message as string} />
           </div>
@@ -445,6 +506,33 @@ export const PasoHuespedPrincipal = ({
             <ErrorMessage message={errors.pais_residencia?.message as string} />
             <ErrorMessage
               message={errors.ciudad_residencia?.message as string}
+            />
+          </div>
+
+          {/* Destino */}
+          <div className='space-y-2'>
+            <TooltipWrapper tooltip={tooltips.contacto_ubicacion.destino}>
+              <Label>Ciudad de Destino *</Label>
+            </TooltipWrapper>
+            <LocationSelector
+              searchable={true}
+              maxLevel='city'
+              placeholders={{
+                country: 'Seleccionar país de destino',
+                state: 'Seleccionar estado de destino',
+                city: 'Seleccionar ciudad de destino',
+              }}
+              onSelectionChange={handleDestinoChange}
+              defaultValues={getDestinoDefaultValues}
+            />
+            <div className='text-xs text-muted-foreground'>
+              Navegue hasta seleccionar la ciudad de destino
+            </div>
+            <ErrorMessage
+              message={errors.pais_destino?.message as string}
+            />
+            <ErrorMessage
+              message={errors.ciudad_destino?.message as string}
             />
           </div>
 

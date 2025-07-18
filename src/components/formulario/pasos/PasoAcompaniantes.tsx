@@ -22,9 +22,13 @@ import { InfoIcon, Users } from 'lucide-react'
 export const PasoAcompaniantes = ({
   procedenciaLocation,
   residenciaLocation,
+  nacionalidad,
+  destinoLocation,
 }: {
   procedenciaLocation: ICity | null
   residenciaLocation: ICity | null
+  nacionalidad: string
+  destinoLocation: ICity | null
 }) => {
   const [viajaConAcompaniantes, setViajaConAcompaniantes] = useState(false)
 
@@ -34,7 +38,6 @@ export const PasoAcompaniantes = ({
   } = useFormContext()
 
   const initialAcompaniantes = watch('huespedes_secundarios') || []
-  const nacionalidad = watch('nacionalidad')
 
   // Inicializar el estado del checkbox basado en si ya hay acompañantes
   useEffect(() => {
@@ -126,6 +129,7 @@ export const PasoAcompaniantes = ({
               nacionalidad={nacionalidad}
               procedenciaLocation={procedenciaLocation}
               residenciaLocation={residenciaLocation}
+              destinoLocation={destinoLocation}
               initialAcompaniantes={initialAcompaniantes}
               onAcompaniantesChange={handleAcompaniantesChange}
               disabled={!viajaConAcompaniantes}
