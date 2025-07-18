@@ -8,8 +8,7 @@ import { useCreateRegistroFormulario } from '@/hooks/formulario/useRegistroFormu
 import { toast } from 'sonner'
 import { PasoBienvenida } from './pasos/PasoBienvenida'
 import { PasoHuespedPrincipal } from './pasos/PasoHuespedPrincipal'
-// import { PasoAcompaniantes } from "./pasos/PasoAcompaniantes";
-// import { PasoConfirmacion } from "./pasos/PasoConfirmacion";
+import { Confirmacion } from './pasos/Confirmacion'
 import { WizardProgress } from '../ui/wizard-progress'
 import { WizardControls } from '../ui/wizard-controls'
 import {
@@ -19,7 +18,7 @@ import {
   CardTitle,
   CardDescription,
 } from '../ui/card'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { ICity, ICountry } from 'country-state-city'
 import { PasoAcompaniantes } from './pasos/PasoAcompaniantes'
 import { CuentaRegresiva } from './CuentaRegresiva'
@@ -122,26 +121,10 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
 
   const createRegistroFormulario = useCreateRegistroFormulario()
 
-  // Efectos para manejar estados de la mutación
-  useEffect(() => {
-    if (createRegistroFormulario.isSuccess) {
-      methods.reset()
-      toast.success('¡Registro completado exitosamente!')
-    }
-  }, [createRegistroFormulario.isSuccess, methods])
-
-  useEffect(() => {
-    if (createRegistroFormulario.isError) {
-      const errorMessage =
-        createRegistroFormulario.error instanceof Error
-          ? createRegistroFormulario.error.message
-          : 'Error desconocido'
-      toast.error(`Error al crear el registro: ${errorMessage}`)
-    }
-  }, [createRegistroFormulario.isError, createRegistroFormulario.error])
+  // Los estados de la mutación se manejan en el componente Confirmacion
 
   // Lógica de envío del formulario en el último paso
-  const handleSubmitForm = async () => {
+  const handleSubmitForm = async (goToConfirmation: () => void) => {
     // Validar todos los campos antes del envío
     console.log('Formulario', methods.getValues())
     console.log('Error', methods.formState.errors)
@@ -151,11 +134,14 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
       return
     }
 
+    // Ir al paso de confirmación antes de enviar
+    setCurrentStepKey('Confirmacion')
+    goToConfirmation()
+
     const token = extraerToken(linkFormulario)
     const data = methods.getValues()
 
     // React Query maneja automáticamente los estados de carga, éxito y error
-    // Los useEffect se encargan de mostrar toasts y resetear el formulario
     createRegistroFormulario.mutate({
       token,
       data,
@@ -245,12 +231,29 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
         />
       ),
     },
-    /*
     {
       key: 'Confirmacion',
-      component: () => <PasoConfirmacion />
-    }
-    */
+      component: () => (
+        <Confirmacion
+          isLoading={createRegistroFormulario.isPending}
+          isSuccess={createRegistroFormulario.isSuccess}
+          isError={createRegistroFormulario.isError}
+          error={createRegistroFormulario.error}
+          onRetry={() => {
+            // Reintentar el envío
+            const token = extraerToken(linkFormulario)
+            const data = methods.getValues()
+            createRegistroFormulario.mutate({ token, data })
+          }}
+          onGoToStart={() => {
+            // Resetear el formulario y volver al inicio
+            methods.reset()
+            createRegistroFormulario.reset()
+            setCurrentStepKey('Bienvenida')
+          }}
+        />
+      ),
+    },
   ]
 
   const stepLabels: Record<string, string> = {
@@ -310,7 +313,15 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
                   }) => {
                     const handleNext = () => {
                       if (isLast) {
-                        handleSubmitForm()
+                        handleSubmitForm(() => {
+                          // Encontrar el paso de confirmación
+                          const confirmacionIndex = steps.findIndex(
+                            (s) => s.key === 'Confirmacion'
+                          )
+                          if (confirmacionIndex !== -1) {
+                            goToStep('Confirmacion')
+                          }
+                        })
                       } else {
                         handleNextStep(() => {
                           // Encontrar el siguiente paso

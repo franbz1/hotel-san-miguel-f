@@ -7,7 +7,7 @@ export { CuentaRegresiva } from './CuentaRegresiva';
 export { PasoBienvenida } from './pasos/PasoBienvenida';
 export { PasoHuespedPrincipal } from './pasos/PasoHuespedPrincipal';
 export { PasoAcompaniantes } from './pasos/PasoAcompaniantes';
-export { PasoConfirmacion } from './pasos/PasoConfirmacion';
+export { Confirmacion } from './pasos/Confirmacion';
 
 // Hook del contexto del formulario
 export { useFormularioContext } from './FormularioWrapper'; 

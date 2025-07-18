@@ -4,7 +4,7 @@ import { useFormularioContext } from './FormularioWrapper';
 import { PasoBienvenida } from './pasos/PasoBienvenida';
 import { PasoInformacionPersonal } from './pasos/PasoInformacionPersonal';
 import { PasoAcompaniantes } from './pasos/PasoAcompaniantes';
-import { PasoConfirmacion } from './pasos/PasoConfirmacion';
+import { PasoConfirmacion } from './pasos/Confirmacion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LinkFormulario } from '@/Types/link-formulario';
