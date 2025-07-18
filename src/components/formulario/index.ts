@@ -1,10 +1,11 @@
 // Componentes principales del formulario
 export { FormularioWrapper } from './FormularioWrapper';
 export { RegistroFormulario } from './RegistroFormulario';
+export { CuentaRegresiva } from './CuentaRegresiva';
 
 // Pasos del formulario
 export { PasoBienvenida } from './pasos/PasoBienvenida';
-export { PasoInformacionPersonal } from './pasos/PasoHuespedPrincipal';
+export { PasoHuespedPrincipal } from './pasos/PasoHuespedPrincipal';
 export { PasoAcompaniantes } from './pasos/PasoAcompaniantes';
 export { PasoConfirmacion } from './pasos/PasoConfirmacion';
 

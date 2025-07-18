@@ -22,9 +22,11 @@ import {
 import { useState, useEffect } from 'react'
 import { ICity, ICountry } from 'country-state-city'
 import { PasoAcompaniantes } from './pasos/PasoAcompaniantes'
+import { CuentaRegresiva } from './CuentaRegresiva'
 
 interface FormularioProps {
   linkFormulario: LinkFormulario
+  onTimeExpired: () => void
 }
 
 /**
@@ -38,7 +40,7 @@ interface FormularioProps {
  * - Manejar los errores del servidor
  * @param linkFormulario - Link del formulario
  */
-export const Formulario = ({ linkFormulario }: FormularioProps) => {
+export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) => {
   // Estado para trackear el paso actual
   const [currentStepKey, setCurrentStepKey] = useState('Bienvenida')
 
@@ -265,9 +267,15 @@ export const Formulario = ({ linkFormulario }: FormularioProps) => {
         <Card className='shadow-xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60'>
           <CardHeader className='text-center lg:text-left lg:flex lg:items-center lg:justify-between space-y-4 lg:space-y-0 pb-2 lg:pb-4'>
             <div className='lg:flex-1'>
-              <CardTitle className='text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent pb-2'>
-                Registro de Huésped
-              </CardTitle>
+              <div className='flex items-center justify-between pb-2'>
+                <CardTitle className='text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent pb-2'>
+                  Registro de Huésped
+                </CardTitle>
+                <CuentaRegresiva 
+                  fechaVencimiento={linkFormulario.vencimiento} 
+                  onExpired={onTimeExpired}
+                />
+              </div>
               <CardDescription className='text-base lg:text-lg text-muted-foreground max-w-3xl lg:mx-0 mx-auto'>
                 Complete la información solicitada para completar su registro en
                 el Hotel San Miguel

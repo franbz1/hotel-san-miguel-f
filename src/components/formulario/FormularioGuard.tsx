@@ -10,6 +10,7 @@ interface FormularioGuardState {
   error: string | null;
   validatedLinkId: number | null;
   isValidated: boolean;
+  isTimeExpired: boolean;
 }
 
 // Acciones del reducer
@@ -17,7 +18,8 @@ type FormularioGuardAction =
   | { type: 'SET_ERROR'; payload: string }
   | { type: 'SET_VALIDATED_LINK_ID'; payload: number }
   | { type: 'SET_VALIDATED'; payload: boolean }
-  | { type: 'RESET_ERROR' };
+  | { type: 'RESET_ERROR' }
+  | { type: 'SET_TIME_EXPIRED' };
 
 // Mensajes de error consolidados
 const ERROR_MESSAGES = {
@@ -27,14 +29,16 @@ const ERROR_MESSAGES = {
   INSUFFICIENT_PERMISSIONS: 'No tienes permiso para acceder a esta página',
   VALIDATION_ERROR: 'Error al validar el link del formulario',
   LINK_ERROR: 'Error al obtener el link del formulario',
-  INVALID_LINK: 'Link inválido o expirado'
+  INVALID_LINK: 'Link inválido o expirado',
+  TIME_EXPIRED: 'El tiempo para completar el formulario ha expirado'
 } as const;
 
 // Estado inicial del reducer
 const initialState: FormularioGuardState = {
   error: null,
   validatedLinkId: null,
-  isValidated: false
+  isValidated: false,
+  isTimeExpired: false
 };
 
 // Reducer para manejar el estado
@@ -51,6 +55,8 @@ const formularioGuardReducer = (
       return { ...state, isValidated: action.payload };
     case 'RESET_ERROR':
       return { ...state, error: null };
+    case 'SET_TIME_EXPIRED':
+      return { ...state, isTimeExpired: true, error: ERROR_MESSAGES.TIME_EXPIRED };
     default:
       return state;
   }
@@ -119,7 +125,7 @@ const handleServerError = (error: unknown, defaultMessage: string): string => {
 };
 
 interface FormularioGuardProps {
-  children: (props: { linkFormulario: LinkFormulario }) => React.ReactNode;
+  children: (props: { linkFormulario: LinkFormulario; onTimeExpired: () => void }) => React.ReactNode;
 }
 
 /** 
@@ -164,6 +170,11 @@ export const FormularioGuard = ({ children }: FormularioGuardProps) => {
   const handleLinkError = useCallback((error: unknown) => {
     const errorMessage = handleServerError(error, ERROR_MESSAGES.LINK_ERROR);
     dispatch({ type: 'SET_ERROR', payload: errorMessage });
+  }, []);
+
+  // Callback para manejar la expiración del tiempo
+  const handleTimeExpired = useCallback(() => {
+    dispatch({ type: 'SET_TIME_EXPIRED' });
   }, []);
 
   // Efecto para manejar la validación inicial del token
@@ -219,12 +230,41 @@ export const FormularioGuard = ({ children }: FormularioGuardProps) => {
   if (state.error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-600 text-center">
-          <h2 className="text-xl font-semibold mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">{state.error}</p>
-          <p className="text-gray-600">Si cree que esto es un error, por favor, contacta al administrador del sistema:
-            <a href="mailto:admin@example.com" className="text-blue-500 hover:text-blue-700">admin@example.com</a>
-          </p>
+        <div className="text-red-600 text-center max-w-md mx-auto p-6">
+          <h2 className="text-xl font-semibold mb-4">
+            {state.isTimeExpired ? '⏰ Tiempo Expirado' : 'Acceso Denegado'}
+          </h2>
+          <p className="text-gray-600 mb-4">{state.error}</p>
+          
+          {state.isTimeExpired || state.error === ERROR_MESSAGES.TIME_EXPIRED ? (
+            <div className="space-y-3">
+              <p className="text-gray-600">
+                El tiempo para completar este formulario ha expirado. Si necesita más tiempo, 
+                puede contactar al hotel para solicitar un nuevo enlace.
+              </p>
+              <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+                <p className="text-blue-700 dark:text-blue-300 font-medium mb-2">
+                  📧 Contacto para nuevo enlace:
+                </p>
+                <a 
+                  href="mailto:reservas@hotelsanmiguel.com?subject=Solicitud de nuevo enlace de formulario" 
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 underline"
+                >
+                  reservas@hotelsanmiguel.com
+                </a>
+                <p className="text-sm text-gray-500 mt-2">
+                  Incluya su número de habitación en el correo para un servicio más rápido.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-600">
+              Si cree que esto es un error, por favor, contacta al administrador del sistema:
+              <a href="mailto:admin@example.com" className="text-blue-500 hover:text-blue-700 ml-1">
+                admin@example.com
+              </a>
+            </p>
+          )}
         </div>
       </div>
     );
@@ -240,7 +280,7 @@ export const FormularioGuard = ({ children }: FormularioGuardProps) => {
 
   // Pasar el linkFormulario como prop al child
   if (state.isValidated && linkFormulario) {
-    return children({ linkFormulario });
+    return children({ linkFormulario, onTimeExpired: handleTimeExpired });
   }
 
   return (
