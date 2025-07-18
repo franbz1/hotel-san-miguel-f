@@ -51,7 +51,9 @@ export const GestorAcompaniantes = ({
   // Estados para controlar la UI
   const [showForm, setShowForm] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const [editingData, setEditingData] = useState<Partial<HuespedSecundarioDto> | undefined>(undefined)
+  const [editingData, setEditingData] = useState<
+    Partial<HuespedSecundarioDto> | undefined
+  >(undefined)
 
   // Observar cambios en la lista para notificar al padre
   const currentAcompaniantes = watch('huespedes_secundarios') || []
@@ -76,35 +78,39 @@ export const GestorAcompaniantes = ({
       append(acompaniante)
       toast.success('Acompañante agregado exitosamente')
     }
-    
+
     setShowForm(false)
-    
+
     // Notificar cambio con la nueva lista
-    const updatedList = editingIndex !== null 
-      ? currentAcompaniantes.map((item: HuespedSecundarioDto, index: number) => 
-          index === editingIndex ? acompaniante : item
+    const updatedList =
+      editingIndex !== null
+        ? currentAcompaniantes.map(
+          (item: HuespedSecundarioDto, index: number) =>
+            index === editingIndex ? acompaniante : item
         )
-      : [...currentAcompaniantes, acompaniante]
-    
+        : [...currentAcompaniantes, acompaniante]
+
     notifyChange(updatedList)
   }
 
   // Handler para eliminar acompañante
   const handleDelete = (acompaniante: HuespedSecundarioDto) => {
     const indexToDelete = currentAcompaniantes.findIndex(
-      (item: HuespedSecundarioDto) => 
+      (item: HuespedSecundarioDto) =>
         item.numero_documento === acompaniante.numero_documento
     )
-    
+
     if (indexToDelete !== -1) {
       remove(indexToDelete)
       toast.success('Acompañante eliminado exitosamente')
-      
-             // Notificar cambio con la nueva lista
-       const updatedList = currentAcompaniantes.filter((_: HuespedSecundarioDto, index: number) => index !== indexToDelete)
-       notifyChange(updatedList)
+
+      // Notificar cambio con la nueva lista
+      const updatedList = currentAcompaniantes.filter(
+        (_: HuespedSecundarioDto, index: number) => index !== indexToDelete
+      )
+      notifyChange(updatedList)
     }
-    
+
     // Si estamos editando este elemento, cancelar la edición
     if (editingIndex === indexToDelete) {
       setEditingIndex(null)
@@ -139,11 +145,13 @@ export const GestorAcompaniantes = ({
   const handleDeleteFromList = (index: number) => {
     remove(index)
     toast.success('Acompañante eliminado exitosamente')
-    
-         // Notificar cambio con la nueva lista
-     const updatedList = currentAcompaniantes.filter((_: HuespedSecundarioDto, idx: number) => idx !== index)
-     notifyChange(updatedList)
-    
+
+    // Notificar cambio con la nueva lista
+    const updatedList = currentAcompaniantes.filter(
+      (_: HuespedSecundarioDto, idx: number) => idx !== index
+    )
+    notifyChange(updatedList)
+
     // Si estamos editando este elemento, cancelar la edición
     if (editingIndex === index) {
       setEditingIndex(null)
@@ -157,7 +165,10 @@ export const GestorAcompaniantes = ({
       <div className='space-y-4'>
         <div className='text-center py-8 text-muted-foreground'>
           <Users className='h-12 w-12 mx-auto mb-4 opacity-50' />
-                     <p>Marque la opción &quot;Viaja con acompañantes&quot; para gestionar acompañantes</p>
+          <p>
+            Marque la opción &quot;Viaja con acompañantes&quot; para gestionar
+            acompañantes
+          </p>
         </div>
       </div>
     )
@@ -165,69 +176,6 @@ export const GestorAcompaniantes = ({
 
   return (
     <div className='space-y-6'>
-      {/* Lista de acompañantes existentes */}
-      {currentAcompaniantes.length > 0 && (
-        <div className='space-y-4'>
-          <h4 className='text-md font-medium text-foreground flex items-center gap-2'>
-            <Users className='h-4 w-4' />
-            Acompañantes Registrados ({currentAcompaniantes.length})
-          </h4>
-          
-          <div className='grid gap-4'>
-            {currentAcompaniantes.map((acompaniante: HuespedSecundarioDto, index: number) => (
-              <Card key={`${acompaniante.numero_documento}-${index}`} className='border-l-4 border-l-primary'>
-                <CardContent className='pt-6'>
-                  <div className='flex justify-between items-start'>
-                    <div className='space-y-2'>
-                      <div className='flex items-center gap-2'>
-                        <User className='h-4 w-4 text-muted-foreground' />
-                        <span className='font-medium'>
-                          {acompaniante.nombres} {acompaniante.primer_apellido} {acompaniante.segundo_apellido || ''}
-                        </span>
-                        <Badge variant='secondary'>{acompaniante.tipo_documento}</Badge>
-                      </div>
-                      
-                      <div className='text-sm text-muted-foreground space-y-1'>
-                        <p><span className='font-medium'>Documento:</span> {acompaniante.numero_documento}</p>
-                        <p><span className='font-medium'>Género:</span> {acompaniante.genero}</p>
-                        <p><span className='font-medium'>Ocupación:</span> {acompaniante.ocupacion}</p>
-                        {acompaniante.telefono && (
-                          <p><span className='font-medium'>Teléfono:</span> {acompaniante.telefono}</p>
-                        )}
-                        {acompaniante.correo && (
-                          <p><span className='font-medium'>Email:</span> {acompaniante.correo}</p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className='flex gap-2'>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
-                        onClick={() => handleEdit(index)}
-                        disabled={showForm}
-                      >
-                        <Edit className='h-4 w-4' />
-                      </Button>
-                      
-                      <Button
-                        type='button'
-                        variant='destructive'
-                        size='sm'
-                        onClick={() => handleDeleteFromList(index)}
-                        disabled={showForm}
-                      >
-                        <Trash2 className='h-4 w-4' />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Botón para agregar nuevo acompañante */}
       {!showForm && (
@@ -241,6 +189,74 @@ export const GestorAcompaniantes = ({
             <Plus className='h-4 w-4 mr-2' />
             Agregar Acompañante
           </Button>
+        </div>
+      )}
+
+      {/* Lista de acompañantes existentes */}
+      {currentAcompaniantes.length > 0 && (
+        <div className='space-y-4'>
+          <h4 className='text-md font-medium text-foreground flex items-center gap-2'>
+            <Users className='h-4 w-4' />
+            Acompañantes Registrados ({currentAcompaniantes.length})
+          </h4>
+
+          <div className='grid gap-4'>
+            {currentAcompaniantes.map(
+              (acompaniante: HuespedSecundarioDto, index: number) => (
+                <Card
+                  key={`${acompaniante.numero_documento}-${index}`}
+                  className='border-l-4 border-l-primary'
+                >
+                  <CardContent className='pt-2'>
+                    <div className='flex justify-between items-start'>
+                      <div className='space-y-2'>
+                        <div className='flex items-center gap-2'>
+                          <User className='h-4 w-4 text-muted-foreground' />
+                          <span className='font-medium'>
+                            {acompaniante.nombres}{' '}
+                            {acompaniante.primer_apellido}{' '}
+                            {acompaniante.segundo_apellido || ''}
+                          </span>
+                          <Badge variant='secondary'>
+                            {acompaniante.tipo_documento}
+                          </Badge>
+                        </div>
+
+                        <div className='text-sm text-muted-foreground space-y-1'>
+                          <p>
+                            <span className='font-medium'>Documento:</span>{' '}
+                            {acompaniante.numero_documento}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className='flex gap-2'>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='sm'
+                          onClick={() => handleEdit(index)}
+                          disabled={showForm}
+                        >
+                          <Edit className='h-4 w-4' />
+                        </Button>
+
+                        <Button
+                          type='button'
+                          variant='destructive'
+                          size='sm'
+                          onClick={() => handleDeleteFromList(index)}
+                          disabled={showForm}
+                        >
+                          <Trash2 className='h-4 w-4' />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            )}
+          </div>
         </div>
       )}
 
@@ -267,7 +283,9 @@ export const GestorAcompaniantes = ({
         <div className='text-center py-8 text-muted-foreground'>
           <Users className='h-12 w-12 mx-auto mb-4 opacity-50' />
           <p>No hay acompañantes registrados</p>
-                     <p className='text-sm'>Haga clic en &quot;Agregar Acompañante&quot; para comenzar</p>
+          <p className='text-sm'>
+            Haga clic en &quot;Agregar Acompañante&quot; para comenzar
+          </p>
         </div>
       )}
     </div>

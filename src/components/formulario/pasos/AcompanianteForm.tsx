@@ -72,11 +72,8 @@ export const AcompanianteForm = ({
   nacionalidad,
   mode = 'create'
 }: AcompanianteFormProps) => {
-  // Estados para reutilizar información del huésped principal
-  const [reutilizarNacionalidad, setReutilizarNacionalidad] = useState(true);
-  const [reutilizarProcedencia, setReutilizarProcedencia] = useState(true);
-  const [reutilizarResidencia, setReutilizarResidencia] = useState(true);
-  const [reutilizarDestino, setReutilizarDestino] = useState(true);
+  // Estado general para reutilizar información del huésped principal
+  const [reutilizarDatosHuespedPrincipal, setReutilizarDatosHuespedPrincipal] = useState(false);
 
   // Estados para ubicaciones seleccionadas
   const [, setSelectedProcedenciaLocation] = useState<ICity | null>(null);
@@ -102,59 +99,58 @@ export const AcompanianteForm = ({
   } = useForm<HuespedSecundarioDto>({
     resolver: zodResolver(huespedSecundarioSchema),
     defaultValues: {
-      tipo_documento: initialData?.tipo_documento || TipoDocumentoHuespedSecundario.CC,
-      numero_documento: initialData?.numero_documento || '',
-      nombres: initialData?.nombres || '',
-      primer_apellido: initialData?.primer_apellido || '',
-      segundo_apellido: initialData?.segundo_apellido || '',
+      tipo_documento: initialData?.tipo_documento || undefined,
+      numero_documento: initialData?.numero_documento || undefined,
+      nombres: initialData?.nombres || undefined,
+      primer_apellido: initialData?.primer_apellido || undefined,
+      segundo_apellido: initialData?.segundo_apellido || undefined,
       fecha_nacimiento: initialData?.fecha_nacimiento || undefined,
-      genero: initialData?.genero || Genero.MASCULINO,
-      ocupacion: initialData?.ocupacion || '',
-      nacionalidad: reutilizarNacionalidad ? nacionalidad : (initialData?.nacionalidad || ''),
-      pais_procedencia: reutilizarProcedencia ? procedenciaLocation?.countryCode || '' : (initialData?.pais_procedencia || ''),
-      ciudad_procedencia: reutilizarProcedencia ? procedenciaLocation?.name || '' : (initialData?.ciudad_procedencia || ''),
-      pais_residencia: reutilizarResidencia ? residenciaLocation?.countryCode || '' : (initialData?.pais_residencia || ''),
-      ciudad_residencia: reutilizarResidencia ? residenciaLocation?.name || '' : (initialData?.ciudad_residencia || ''),
-      pais_destino: reutilizarDestino ? destinoLocation?.countryCode || '' : (initialData?.pais_destino || ''),
-      ciudad_destino: reutilizarDestino ? destinoLocation?.name || '' : (initialData?.ciudad_destino || ''),
-      telefono: initialData?.telefono || '',
-      correo: initialData?.correo || ''
+      genero: initialData?.genero || undefined,
+      ocupacion: initialData?.ocupacion || undefined,
+      nacionalidad: reutilizarDatosHuespedPrincipal ? nacionalidad : (initialData?.nacionalidad || undefined),
+      pais_procedencia: reutilizarDatosHuespedPrincipal ? procedenciaLocation?.countryCode || undefined : (initialData?.pais_procedencia || undefined),
+      ciudad_procedencia: reutilizarDatosHuespedPrincipal ? procedenciaLocation?.name || undefined : (initialData?.ciudad_procedencia || undefined),
+      pais_residencia: reutilizarDatosHuespedPrincipal ? residenciaLocation?.countryCode || undefined : (initialData?.pais_residencia || undefined),
+      ciudad_residencia: reutilizarDatosHuespedPrincipal ? residenciaLocation?.name || undefined : (initialData?.ciudad_residencia || undefined),
+      pais_destino: reutilizarDatosHuespedPrincipal ? destinoLocation?.countryCode || undefined : (initialData?.pais_destino || undefined),
+      ciudad_destino: reutilizarDatosHuespedPrincipal ? destinoLocation?.name || undefined : (initialData?.ciudad_destino || undefined),
+      telefono: initialData?.telefono || undefined,
+      correo: initialData?.correo || undefined
     }
   });
 
   // Observar el país de residencia para sincronizar el código de teléfono
   const paisResidencia = watch('pais_residencia');
 
-  // Efectos para actualizar campos cuando se cambian las opciones de reutilizar
+  // Efecto para actualizar todos los campos cuando se cambia la opción de reutilizar
   useEffect(() => {
-    if (reutilizarNacionalidad && nacionalidad) {
-      setValue('nacionalidad', nacionalidad);
+    if (reutilizarDatosHuespedPrincipal) {
+      // Aplicar datos del huésped principal
+      if (nacionalidad) setValue('nacionalidad', nacionalidad);
+      if (procedenciaLocation) {
+        setValue('pais_procedencia', procedenciaLocation.countryCode);
+        setValue('ciudad_procedencia', procedenciaLocation.name);
+        setSelectedProcedenciaLocation(procedenciaLocation);
+      }
+      if (residenciaLocation) {
+        setValue('pais_residencia', residenciaLocation.countryCode);
+        setValue('ciudad_residencia', residenciaLocation.name);
+        setSelectedResidenciaLocation(residenciaLocation);
+      }
+      if (destinoLocation) {
+        setValue('pais_destino', destinoLocation.countryCode);
+        setValue('ciudad_destino', destinoLocation.name);
+        setSelectedDestinoLocation(destinoLocation);
+      }
     }
-  }, [reutilizarNacionalidad, nacionalidad, setValue]);
-
-  useEffect(() => {
-    if (reutilizarProcedencia && procedenciaLocation) {
-      setValue('pais_procedencia', procedenciaLocation.countryCode);
-      setValue('ciudad_procedencia', procedenciaLocation.name);
-      setSelectedProcedenciaLocation(procedenciaLocation);
-    }
-  }, [reutilizarProcedencia, procedenciaLocation, setValue]);
-
-  useEffect(() => {
-    if (reutilizarResidencia && residenciaLocation) {
-      setValue('pais_residencia', residenciaLocation.countryCode);
-      setValue('ciudad_residencia', residenciaLocation.name);
-      setSelectedResidenciaLocation(residenciaLocation);
-    }
-  }, [reutilizarResidencia, residenciaLocation, setValue]);
-
-  useEffect(() => {
-    if (reutilizarDestino && destinoLocation) {
-      setValue('pais_destino', destinoLocation.countryCode);
-      setValue('ciudad_destino', destinoLocation.name);
-      setSelectedDestinoLocation(destinoLocation);
-    }
-  }, [reutilizarDestino, destinoLocation, setValue]);
+  }, [
+    reutilizarDatosHuespedPrincipal,
+    nacionalidad,
+    procedenciaLocation,
+    residenciaLocation,
+    destinoLocation,
+    setValue
+  ]);
 
   // Handlers para LocationSelector
   const handleNacionalidadChange = useCallback(
@@ -227,14 +223,14 @@ export const AcompanianteForm = ({
 
   // Función para obtener defaultValues basado en el modo
   const getNacionalidadDefaultValues = useMemo(() => {
-    if (reutilizarNacionalidad && nacionalidad) {
+    if (reutilizarDatosHuespedPrincipal && nacionalidad) {
       return { countryCode: nacionalidad };
     }
     return initialData?.nacionalidad ? { countryCode: initialData.nacionalidad } : undefined;
-  }, [reutilizarNacionalidad, nacionalidad, initialData?.nacionalidad]);
+  }, [reutilizarDatosHuespedPrincipal, nacionalidad, initialData?.nacionalidad]);
 
   const getProcedenciaDefaultValues = useMemo(() => {
-    if (reutilizarProcedencia && procedenciaLocation) {
+    if (reutilizarDatosHuespedPrincipal && procedenciaLocation) {
       return {
         countryCode: procedenciaLocation.countryCode,
         stateCode: procedenciaLocation.stateCode,
@@ -247,10 +243,10 @@ export const AcompanianteForm = ({
       };
     }
     return undefined;
-  }, [reutilizarProcedencia, procedenciaLocation, initialData]);
+  }, [reutilizarDatosHuespedPrincipal, procedenciaLocation, initialData]);
 
   const getResidenciaDefaultValues = useMemo(() => {
-    if (reutilizarResidencia && residenciaLocation) {
+    if (reutilizarDatosHuespedPrincipal && residenciaLocation) {
       return {
         countryCode: residenciaLocation.countryCode,
         stateCode: residenciaLocation.stateCode,
@@ -263,10 +259,10 @@ export const AcompanianteForm = ({
       };
     }
     return undefined;
-  }, [reutilizarResidencia, residenciaLocation, initialData]);
+  }, [reutilizarDatosHuespedPrincipal, residenciaLocation, initialData]);
 
   const getDestinoDefaultValues = useMemo(() => {
-    if (reutilizarDestino && destinoLocation) {
+    if (reutilizarDatosHuespedPrincipal && destinoLocation) {
       return {
         countryCode: destinoLocation.countryCode,
         stateCode: destinoLocation.stateCode,
@@ -279,7 +275,7 @@ export const AcompanianteForm = ({
       };
     }
     return undefined;
-  }, [reutilizarDestino, destinoLocation, initialData]);
+  }, [reutilizarDatosHuespedPrincipal, destinoLocation, initialData]);
 
   // Componente TooltipWrapper
   const TooltipWrapper = ({
@@ -503,21 +499,39 @@ export const AcompanianteForm = ({
           <div className='space-y-4'>
             <h4 className='text-md font-medium text-foreground'>🌍 Información de Ubicación</h4>
             
-            {/* Nacionalidad */}
-            <div className='space-y-2'>
-              <div className='flex items-center space-x-3 mb-2'>
-                <Checkbox
-                  id='reutilizar-nacionalidad'
-                  checked={reutilizarNacionalidad}
-                  onCheckedChange={(checked) => setReutilizarNacionalidad(checked === true)}
-                />
-                <Label htmlFor='reutilizar-nacionalidad' className='text-sm'>
-                  Usar misma nacionalidad del huésped principal
-                </Label>
+            {/* Switch principal para reutilizar datos del huésped principal */}
+            <div className='flex items-center space-x-3 p-4 border rounded-lg bg-muted/50'>
+              <Checkbox
+                id='reutilizar-datos-huesped-principal'
+                checked={reutilizarDatosHuespedPrincipal}
+                onCheckedChange={(checked) => setReutilizarDatosHuespedPrincipal(checked === true)}
+              />
+              <TooltipWrapper
+                tooltip='Marque esta opción para usar la misma nacionalidad, procedencia, residencia y destino del huésped principal'
+              >
+                <label 
+                  htmlFor='reutilizar-datos-huesped-principal'
+                  className='text-sm font-medium cursor-pointer'
+                >
+                  Usar la misma información de ubicación del huésped principal
+                </label>
+              </TooltipWrapper>
+            </div>
+
+            {/* Mensaje informativo cuando se reutilizan datos */}
+            {reutilizarDatosHuespedPrincipal && (
+              <div className='p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+                <p className='text-sm text-blue-800'>
+                  ✅ Se utilizarán automáticamente los mismos datos de nacionalidad, procedencia, residencia y destino del huésped principal.
+                </p>
               </div>
-              
-              {!reutilizarNacionalidad && (
-                <>
+            )}
+
+            {/* Formularios de ubicación cuando NO se reutilizan datos */}
+            {!reutilizarDatosHuespedPrincipal && (
+              <div className='space-y-4'>
+                {/* Nacionalidad */}
+                <div className='space-y-2'>
                   <TooltipWrapper tooltip='Nacionalidad del acompañante'>
                     <Label>Nacionalidad *</Label>
                   </TooltipWrapper>
@@ -531,25 +545,10 @@ export const AcompanianteForm = ({
                     defaultValues={getNacionalidadDefaultValues}
                   />
                   <ErrorMessage message={errors.nacionalidad?.message} />
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Procedencia */}
-            <div className='space-y-2'>
-              <div className='flex items-center space-x-3 mb-2'>
-                <Checkbox
-                  id='reutilizar-procedencia'
-                  checked={reutilizarProcedencia}
-                  onCheckedChange={(checked) => setReutilizarProcedencia(checked === true)}
-                />
-                <Label htmlFor='reutilizar-procedencia' className='text-sm'>
-                  Usar misma procedencia del huésped principal
-                </Label>
-              </div>
-              
-              {!reutilizarProcedencia && (
-                <>
+                {/* Procedencia */}
+                <div className='space-y-2'>
                   <TooltipWrapper tooltip='Ciudad de procedencia del acompañante'>
                     <Label>Ciudad de Procedencia *</Label>
                   </TooltipWrapper>
@@ -566,25 +565,10 @@ export const AcompanianteForm = ({
                   />
                   <ErrorMessage message={errors.pais_procedencia?.message} />
                   <ErrorMessage message={errors.ciudad_procedencia?.message} />
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Residencia */}
-            <div className='space-y-2'>
-              <div className='flex items-center space-x-3 mb-2'>
-                <Checkbox
-                  id='reutilizar-residencia'
-                  checked={reutilizarResidencia}
-                  onCheckedChange={(checked) => setReutilizarResidencia(checked === true)}
-                />
-                <Label htmlFor='reutilizar-residencia' className='text-sm'>
-                  Usar misma residencia del huésped principal
-                </Label>
-              </div>
-              
-              {!reutilizarResidencia && (
-                <>
+                {/* Residencia */}
+                <div className='space-y-2'>
                   <TooltipWrapper tooltip='Ciudad de residencia del acompañante'>
                     <Label>Ciudad de Residencia *</Label>
                   </TooltipWrapper>
@@ -601,25 +585,10 @@ export const AcompanianteForm = ({
                   />
                   <ErrorMessage message={errors.pais_residencia?.message} />
                   <ErrorMessage message={errors.ciudad_residencia?.message} />
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Destino */}
-            <div className='space-y-2'>
-              <div className='flex items-center space-x-3 mb-2'>
-                <Checkbox
-                  id='reutilizar-destino'
-                  checked={reutilizarDestino}
-                  onCheckedChange={(checked) => setReutilizarDestino(checked === true)}
-                />
-                <Label htmlFor='reutilizar-destino' className='text-sm'>
-                  Usar misma ciudad de destino del huésped principal
-                </Label>
-              </div>
-              
-              {!reutilizarDestino && (
-                <>
+                {/* Destino */}
+                <div className='space-y-2'>
                   <TooltipWrapper tooltip='Ciudad de destino del acompañante'>
                     <Label>Ciudad de Destino *</Label>
                   </TooltipWrapper>
@@ -636,9 +605,9 @@ export const AcompanianteForm = ({
                   />
                   <ErrorMessage message={errors.pais_destino?.message} />
                   <ErrorMessage message={errors.ciudad_destino?.message} />
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <Separator />
@@ -657,6 +626,7 @@ export const AcompanianteForm = ({
                     <CountryCodeSelector
                       value={paisResidencia}
                       placeholder='Código'
+                      displayMode='code-only'
                     />
                   </div>
                   <div className='flex-1'>

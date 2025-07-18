@@ -547,6 +547,7 @@ export const PasoHuespedPrincipal = ({
                   <CountryCodeSelector
                     value={paisResidencia}
                     placeholder='Código'
+                    displayMode='code-only'
                   />
                 </div>
                 <div className='flex-1'>

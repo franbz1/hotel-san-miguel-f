@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { InfoIcon, Users } from 'lucide-react'
+import { InfoIcon } from 'lucide-react'
 
 // Debe permitir crud de acompañantes con el componente gestor de acompañantes
 // Debe preguntar si viaja con acompañantes o solo (si lo marca como verdadero renderiza gestor de acompañantes)
@@ -91,7 +91,6 @@ export const PasoAcompaniantes = ({
       <Card>
         <CardHeader>
           <CardTitle className='text-xl font-semibold text-primary flex items-center gap-2'>
-            <Users className='h-5 w-5' />
             👥 Información de Acompañantes
           </CardTitle>
         </CardHeader>
@@ -135,21 +134,6 @@ export const PasoAcompaniantes = ({
               disabled={!viajaConAcompaniantes}
             />
           </div>
-
-          {/* Resumen de acompañantes */}
-          {viajaConAcompaniantes && initialAcompaniantes.length > 0 && (
-            <div className='mt-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
-              <div className='flex items-center gap-2 text-green-800'>
-                <Users className='h-4 w-4' />
-                <span className='font-medium'>
-                  Total de acompañantes: {initialAcompaniantes.length}
-                </span>
-              </div>
-              <p className='text-sm text-green-600 mt-1'>
-                Se han registrado {initialAcompaniantes.length} persona{initialAcompaniantes.length !== 1 ? 's' : ''} como acompañante{initialAcompaniantes.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
