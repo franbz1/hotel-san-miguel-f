@@ -28,10 +28,16 @@ export interface CountryCodeSelectorProps {
   // Código de país por defecto (ej: "CO" para Colombia)
   defaultCountryCode?: string;
   
-  // Valor inicial seleccionado
+  // Código de marcado por defecto (ej: "+57" para Colombia) - tiene prioridad sobre defaultCountryCode
+  defaultDialCode?: string;
+  
+  // Valor inicial seleccionado por código ISO
   initialCountryCode?: string;
   
-  // Valor controlado externamente (para sincronización)
+  // Valor inicial seleccionado por código de marcado (tiene prioridad sobre initialCountryCode)
+  initialDialCode?: string;
+  
+  // Valor controlado externamente (puede ser código ISO o dial code)
   value?: string;
   
   // Callback cuando cambia la selección
@@ -51,8 +57,10 @@ export interface CountryCodeSelectorProps {
 }
 
 export const CountryCodeSelector = ({
-  defaultCountryCode = 'CO',
+  defaultCountryCode,
+  defaultDialCode,
   initialCountryCode,
+  initialDialCode,
   value,
   onCountryCodeChange,
   placeholder = "Seleccionar código...",
@@ -61,30 +69,56 @@ export const CountryCodeSelector = ({
   displayMode = 'code-with-name'
 }: CountryCodeSelectorProps) => {
   const [open, setOpen] = useState(false);
+  
+  // Función helper para buscar país por código ISO o dial code
+  const findCountryByCodeOrDialCode = (code: string): CountryCode | null => {
+    // Primero intentar buscar por dial code (si empieza con +)
+    if (code.startsWith('+')) {
+      return COUNTRY_CODES.find(c => c.dial_code === code) || null;
+    }
+    // Si no es dial code, buscar por código ISO
+    return COUNTRY_CODES.find(c => c.code === code) || null;
+  };
+  
   const [selectedCountry, setSelectedCountry] = useState<CountryCode | null>(() => {
+    // Priorizar dialCode sobre countryCode
+    if (initialDialCode) {
+      return findCountryByCodeOrDialCode(initialDialCode);
+    }
     if (initialCountryCode) {
-      return COUNTRY_CODES.find(c => c.code === initialCountryCode) || null;
+      return findCountryByCodeOrDialCode(initialCountryCode);
     }
     return null;
   });
 
   // Ordenar países con el país por defecto primero
   const sortedCountries = useMemo(() => {
-    const defaultCountry = COUNTRY_CODES.find(c => c.code === defaultCountryCode);
-    const otherCountries = COUNTRY_CODES.filter(c => c.code !== defaultCountryCode);
+    // Priorizar defaultDialCode sobre defaultCountryCode
+    let defaultCountry: CountryCode | undefined;
     
-    return defaultCountry ? [defaultCountry, ...otherCountries] : COUNTRY_CODES;
-  }, [defaultCountryCode]);
+    if (defaultDialCode) {
+      defaultCountry = COUNTRY_CODES.find(c => c.dial_code === defaultDialCode);
+    } else if (defaultCountryCode) {
+      defaultCountry = COUNTRY_CODES.find(c => c.code === defaultCountryCode);
+    }
+    
+    if (defaultCountry) {
+      const otherCountries = COUNTRY_CODES.filter(c => c.code !== defaultCountry!.code);
+      return [defaultCountry, ...otherCountries];
+    }
+    
+    return COUNTRY_CODES;
+  }, [defaultCountryCode, defaultDialCode]);
 
   // Sincronizar con valor externo (para control desde fuera del componente)
   useEffect(() => {
-    if (value && value !== selectedCountry?.code) {
-      const country = COUNTRY_CODES.find(c => c.code === value);
+    if (value && value !== selectedCountry?.code && value !== selectedCountry?.dial_code) {
+      const country = findCountryByCodeOrDialCode(value);
       if (country) {
         setSelectedCountry(country);
       }
     }
-  }, [value, selectedCountry?.code]);
+  }, [value, selectedCountry?.code, selectedCountry?.dial_code]);
 
   // Manejar selección
   const handleSelect = (country: CountryCode) => {
@@ -110,6 +144,13 @@ export const CountryCodeSelector = ({
     }
   };
 
+  // Función helper para determinar si un país es el por defecto
+  const isDefaultCountry = (country: CountryCode): boolean => {
+    if (defaultDialCode) {
+      return country.dial_code === defaultDialCode;
+    }
+    return country.code === defaultCountryCode;
+  };
 
 
   return (
@@ -161,7 +202,7 @@ export const CountryCodeSelector = ({
                     <span className="truncate">
                       {country.name}
                     </span>
-                    {country.code === defaultCountryCode && (
+                    {isDefaultCountry(country) && (
                       <span className="ml-auto text-xs text-muted-foreground">
                         Por defecto
                       </span>
@@ -180,11 +221,26 @@ export const CountryCodeSelector = ({
 // Hook personalizado para usar con react-hook-form
 export const useCountryCodeSelector = (
   defaultCountryCode?: string,
+  defaultDialCode?: string, // Nuevo parámetro para dial code por defecto
   onCodeChange?: (dialCode: string, countryCode: string) => void
 ) => {
+  // Función helper para buscar país por código ISO o dial code
+  const findCountryByCodeOrDialCode = (code: string): CountryCode | null => {
+    // Primero intentar buscar por dial code (si empieza con +)
+    if (code.startsWith('+')) {
+      return COUNTRY_CODES.find(c => c.dial_code === code) || null;
+    }
+    // Si no es dial code, buscar por código ISO
+    return COUNTRY_CODES.find(c => c.code === code) || null;
+  };
+
   const [selectedCountry, setSelectedCountry] = useState<CountryCode | null>(() => {
+    // Priorizar defaultDialCode sobre defaultCountryCode
+    if (defaultDialCode) {
+      return findCountryByCodeOrDialCode(defaultDialCode);
+    }
     if (defaultCountryCode) {
-      return COUNTRY_CODES.find(c => c.code === defaultCountryCode) || null;
+      return findCountryByCodeOrDialCode(defaultCountryCode);
     }
     return null;
   });
@@ -197,7 +253,18 @@ export const useCountryCodeSelector = (
   };
 
   const setCountryByCode = (countryCode: string) => {
-    const country = COUNTRY_CODES.find(c => c.code === countryCode);
+    const country = findCountryByCodeOrDialCode(countryCode);
+    if (country) {
+      setSelectedCountry(country);
+      if (onCodeChange) {
+        onCodeChange(country.dial_code, country.code);
+      }
+    }
+  };
+
+  // Nueva función para configurar por dial code específicamente
+  const setCountryByDialCode = (dialCode: string) => {
+    const country = COUNTRY_CODES.find(c => c.dial_code === dialCode);
     if (country) {
       setSelectedCountry(country);
       if (onCodeChange) {
@@ -209,7 +276,8 @@ export const useCountryCodeSelector = (
   return {
     selectedCountry,
     handleCountryCodeChange,
-    setCountryByCode,
+    setCountryByCode, // Maneja tanto ISO como dial codes
+    setCountryByDialCode, // Específico para dial codes
     dialCode: selectedCountry?.dial_code || '',
     countryCode: selectedCountry?.code || ''
   };
