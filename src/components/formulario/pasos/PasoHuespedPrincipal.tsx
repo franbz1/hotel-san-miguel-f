@@ -1,14 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import LocationSelector from '@/components/ui/location-selector'
 import type { Level } from '@/hooks/formulario/locationPicker'
-import type {
-  ICountry,
-  IState,
-  ICity,
-} from 'country-state-city'
+import type { ICountry, IState, ICity } from 'country-state-city'
 import { CountryCodeSelector } from '@/components/ui/country-code-selector'
 
 // UI Components
@@ -65,18 +61,56 @@ export const PasoHuespedPrincipal = ({
     control,
     watch,
     setValue,
+    getValues,
   } = useFormContext()
 
-  // Observar el país de residencia para sincronizar el código de teléfono
-  const paisResidencia = watch('pais_residencia')
-
   // Observar valores actuales para defaultValues
+  const paisResidencia = watch('pais_residencia')
   const nacionalidad = watch('nacionalidad')
   const paisProcedencia = watch('pais_procedencia')
   const ciudadProcedencia = watch('ciudad_procedencia')
   const ciudadResidencia = watch('ciudad_residencia')
   const paisDestino = watch('pais_destino')
   const ciudadDestino = watch('ciudad_destino')
+
+  // Función para combinar teléfono solo cuando se pierde el foco o cambian los campos auxiliares
+  const handlePhoneBlur = React.useCallback(() => {
+    const dialCode = getValues('telefono_dial_code')
+    const number = getValues('telefono_number')
+
+    if (dialCode && number && dialCode.trim() !== '' && number.trim() !== '') {
+      const full = `${dialCode}${number}`
+      const currentTelefono = getValues('telefono')
+
+      // Solo actualizar si el valor ha cambiado realmente
+      if (currentTelefono !== full) {
+        setValue('telefono', full, { shouldValidate: false })
+      }
+    } else if (dialCode && dialCode.trim() !== '' && (!number || number.trim() === '')) {
+      // Si solo tenemos dial code, limpiar el teléfono completo
+      setValue('telefono', '', { shouldValidate: false })
+    }
+  }, [setValue, getValues])
+
+    // Al montar el componente, verificar si hay valores que inicializar (solo una vez)
+  useEffect(() => {
+    const dialCode = getValues('telefono_dial_code')
+    const number = getValues('telefono_number')
+    const fullPhone = getValues('telefono')
+    
+    // Si tenemos teléfono completo pero no los campos auxiliares, descomponer
+    if (fullPhone && !dialCode && !number) {
+      const m = fullPhone.match(/^(\+\d+)\s*(.*)$/)
+      if (m && m[1] && m[2]) {
+        setValue('telefono_dial_code', m[1], { shouldValidate: false })
+        setValue('telefono_number', m[2], { shouldValidate: false })
+      }
+    }
+    // Si tenemos campos auxiliares pero no teléfono completo, combinar
+    else if (dialCode && number && !fullPhone) {
+      setValue('telefono', `${dialCode}${number}`, { shouldValidate: false })
+    }
+  }, []) // Solo al montar - sin dependencias que cambien
 
   // Crear callbacks memoizados para evitar re-creaciones constantes
   const handleNacionalidadChange = React.useCallback(
@@ -247,9 +281,7 @@ export const PasoHuespedPrincipal = ({
 
   const ErrorMessage = ({ message }: { message?: string }) => {
     if (!message) return null
-    return (
-      <p className='text-sm text-red-600 mt-1'>{message}</p>
-    )
+    return <p className='text-sm text-red-600 mt-1'>{message}</p>
   }
 
   return (
@@ -278,7 +310,7 @@ export const PasoHuespedPrincipal = ({
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id='tipo_documento'>
                       <SelectValue placeholder='Seleccionar tipo de documento' />
                     </SelectTrigger>
                     <SelectContent>
@@ -401,7 +433,7 @@ export const PasoHuespedPrincipal = ({
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id='genero'>
                       <SelectValue placeholder='Seleccionar género' />
                     </SelectTrigger>
                     <SelectContent>
@@ -443,9 +475,10 @@ export const PasoHuespedPrincipal = ({
           {/* Nacionalidad */}
           <div className='space-y-2'>
             <TooltipWrapper tooltip={tooltips.contacto_ubicacion.nacionalidad}>
-              <Label>Nacionalidad *</Label>
+              <Label htmlFor='nacionalidad-country'>Nacionalidad *</Label>
             </TooltipWrapper>
             <LocationSelector
+              idPrefix='nacionalidad'
               searchable={true}
               maxLevel='country'
               placeholders={{
@@ -460,9 +493,12 @@ export const PasoHuespedPrincipal = ({
           {/* Procedencia */}
           <div className='space-y-2'>
             <TooltipWrapper tooltip={tooltips.contacto_ubicacion.procedencia}>
-              <Label>Ciudad de Procedencia *</Label>
+              <Label htmlFor='procedencia-country'>
+                Ciudad de Procedencia *
+              </Label>
             </TooltipWrapper>
             <LocationSelector
+              idPrefix='procedencia'
               searchable={true}
               maxLevel='city'
               placeholders={{
@@ -487,9 +523,10 @@ export const PasoHuespedPrincipal = ({
           {/* Residencia */}
           <div className='space-y-2'>
             <TooltipWrapper tooltip={tooltips.contacto_ubicacion.residencia}>
-              <Label>Ciudad de Residencia *</Label>
+              <Label htmlFor='residencia-country'>Ciudad de Residencia *</Label>
             </TooltipWrapper>
             <LocationSelector
+              idPrefix='residencia'
               searchable={true}
               maxLevel='city'
               placeholders={{
@@ -512,9 +549,10 @@ export const PasoHuespedPrincipal = ({
           {/* Destino */}
           <div className='space-y-2'>
             <TooltipWrapper tooltip={tooltips.contacto_ubicacion.destino}>
-              <Label>Ciudad de Destino *</Label>
+              <Label htmlFor='destino-country'>Ciudad de Destino *</Label>
             </TooltipWrapper>
             <LocationSelector
+              idPrefix='destino'
               searchable={true}
               maxLevel='city'
               placeholders={{
@@ -528,12 +566,8 @@ export const PasoHuespedPrincipal = ({
             <div className='text-xs text-muted-foreground'>
               Navegue hasta seleccionar la ciudad de destino
             </div>
-            <ErrorMessage
-              message={errors.pais_destino?.message as string}
-            />
-            <ErrorMessage
-              message={errors.ciudad_destino?.message as string}
-            />
+            <ErrorMessage message={errors.pais_destino?.message as string} />
+            <ErrorMessage message={errors.ciudad_destino?.message as string} />
           </div>
 
           {/* Contacto */}
@@ -544,22 +578,59 @@ export const PasoHuespedPrincipal = ({
               </TooltipWrapper>
               <div className='flex gap-2'>
                 <div className='w-40'>
-                  <CountryCodeSelector
-                    value={paisResidencia}
-                    placeholder='Código'
-                    displayMode='code-only'
+                  <Label
+                    htmlFor='telefono_dial_code'
+                    className='sr-only'
+                  >
+                    Código de país
+                  </Label>
+                  <Controller
+                    name='telefono_dial_code'
+                    control={control}
+                    render={({ field }) => (
+                      <CountryCodeSelector
+                        id='telefono_dial_code'
+                        placeholder='Código'
+                        displayMode='code-only'
+                        value={field.value || ''}
+                        onCountryCodeChange={(country) => {
+                          const newDialCode = country?.dial_code || ''
+                          field.onChange(newDialCode)
+                          // Combinar teléfono cuando cambie el código (solo si hay número)
+                          const currentNumber = getValues('telefono_number')
+                          if (currentNumber && currentNumber.trim() !== '') {
+                            setTimeout(handlePhoneBlur, 0)
+                          }
+                        }}
+                        defaultDialCode='+57'
+                      />
+                    )}
+                  />
+                  <ErrorMessage
+                    message={errors.telefono_dial_code?.message as string}
                   />
                 </div>
                 <div className='flex-1'>
+                  <Label
+                    htmlFor='telefono_number'
+                    className='sr-only'
+                  >
+                    Teléfono *
+                  </Label>
                   <Input
-                    {...register('telefono')}
+                    id='telefono_number'
+                    {...register('telefono_number')}
                     placeholder='Número de teléfono'
                     type='tel'
+                    onBlur={handlePhoneBlur}
                   />
                 </div>
               </div>
-              <ErrorMessage message={errors.telefono?.message as string} />
+              <ErrorMessage
+                message={errors.telefono_number?.message as string}
+              />
             </div>
+            <ErrorMessage message={errors.telefono?.message as string} />
 
             <div className='space-y-2'>
               <TooltipWrapper tooltip={tooltips.contacto_ubicacion.email}>
@@ -587,7 +658,7 @@ export const PasoHuespedPrincipal = ({
         <CardContent className='space-y-4'>
           <div className='space-y-2'>
             <TooltipWrapper tooltip={tooltips.reserva.motivo_viaje}>
-              <Label>Motivo del Viaje *</Label>
+              <Label htmlFor='motivo_viaje'>Motivo del Viaje *</Label>
             </TooltipWrapper>
             <Controller
               name='motivo_viaje'
@@ -597,7 +668,7 @@ export const PasoHuespedPrincipal = ({
                   onValueChange={field.onChange}
                   value={field.value}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id='motivo_viaje'>
                     <SelectValue placeholder='Seleccionar motivo del viaje' />
                   </SelectTrigger>
                   <SelectContent>

@@ -22,6 +22,7 @@ import { useState } from 'react'
 import { ICity, ICountry } from 'country-state-city'
 import { PasoAcompaniantes } from './pasos/PasoAcompaniantes'
 import { CuentaRegresiva } from './CuentaRegresiva'
+import { z } from 'zod'
 
 interface FormularioProps {
   linkFormulario: LinkFormulario
@@ -62,8 +63,17 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
     return token
   }
 
-  const methods = useForm<CreateRegistroFormulario>({
-    resolver: zodResolver(createRegistroFormularioDtoSchema),
+  // Tipo campos del formulario con campos auxiliares
+  type FormFields = CreateRegistroFormulario & {
+    telefono_dial_code?: string
+    telefono_number?: string
+  }
+
+  const methods = useForm<FormFields>({
+    resolver: zodResolver(createRegistroFormularioDtoSchema.extend({
+      telefono_dial_code: z.string().optional(),
+      telefono_number: z.string().min(10, 'El número de teléfono debe tener 10 caracteres').max(10, 'El número de teléfono debe tener 10 caracteres').optional(),
+    })),
     defaultValues: {
       fecha_inicio: linkFormulario.fechaInicio,
       fecha_fin: linkFormulario.fechaFin,
@@ -90,10 +100,14 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
       motivo_viaje: undefined,
 
       huespedes_secundarios: undefined,
+
+      //Datos auxiliares (no se envian al servidor)
+      telefono_dial_code: undefined,
+      telefono_number: undefined,
     },
   })
 
-  const camposPorPaso: Record<string, (keyof CreateRegistroFormulario)[]> = {
+  const camposPorPaso: Record<string, (keyof FormFields)[]> = {
     Bienvenida: [],
     HuespedPrincipal: [
       'tipo_documento',
@@ -114,6 +128,10 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
       'telefono',
       'correo',
       'motivo_viaje',
+
+      //Datos auxiliares (no se envian al servidor)
+      'telefono_dial_code',
+      'telefono_number',
     ],
     Acompañantes: ['huespedes_secundarios'],
     Confirmacion: [],
