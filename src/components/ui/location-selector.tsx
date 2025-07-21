@@ -80,6 +80,9 @@ export interface LocationSelectorProps {
   
   /** Clases CSS adicionales */
   className?: string;
+  
+  /** IDs base para generar IDs únicos para cada selector */
+  idPrefix?: string;
 }
 
 const LocationSelector: React.FC<LocationSelectorProps> = ({
@@ -104,7 +107,8 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   searchable = false,
   disabled = false,
   size = "default",
-  className = ""
+  className = "",
+  idPrefix = "location"
 }) => {
   const {
     countries,
@@ -131,6 +135,11 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   const showCountrySelect = maxLevel === 'country' || maxLevel === 'state' || maxLevel === 'city';
   const showStateSelect = (maxLevel === 'state' || maxLevel === 'city') && selectedCountry;
   const showCitySelect = maxLevel === 'city' && selectedCountry && selectedState;
+
+  // Generar IDs únicos para cada selector
+  const countryId = `${idPrefix}-country`;
+  const stateId = `${idPrefix}-state`;
+  const cityId = `${idPrefix}-city`;
 
   // Determinar si usar búsqueda para cada nivel
   const isSearchableConfig = typeof searchable === 'object' ? searchable : { country: searchable, state: searchable, city: searchable };
@@ -164,6 +173,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     onOpenChange: (open: boolean) => void;
     disabled?: boolean;
     emptyMessage?: string;
+    id?: string;
   }
 
   const SearchableSelector: React.FC<SearchableSelectorProps> = ({
@@ -175,7 +185,8 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     open,
     onOpenChange,
     disabled = false,
-    emptyMessage = "No se encontraron resultados"
+    emptyMessage = "No se encontraron resultados",
+    id
   }) => {
     const selectedItem = items.find(item => item.code === value);
 
@@ -183,6 +194,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <Button
+            id={id}
             variant="outline"
             role="combobox"
             aria-expanded={open}
@@ -236,7 +248,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       {/* Selector de País */}
       {showCountrySelect && (
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+          <label htmlFor={countryId} className="text-sm font-medium text-gray-700">
             {labels.country}
           </label>
           {isCountrySearchable ? (
@@ -254,6 +266,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               onOpenChange={setCountryOpen}
               disabled={disabled}
               emptyMessage="No se encontraron países"
+              id={countryId}
             />
           ) : (
             <Select
@@ -261,7 +274,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               onValueChange={handleCountryChange}
               disabled={disabled}
             >
-              <SelectTrigger size={size} className="w-full">
+              <SelectTrigger id={countryId} size={size} className="w-full">
                 <SelectValue placeholder={placeholders.country} />
               </SelectTrigger>
               <SelectContent>
@@ -285,7 +298,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       {/* Selector de Estado */}
       {showStateSelect && (
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+          <label htmlFor={stateId} className="text-sm font-medium text-gray-700">
             {labels.state}
           </label>
           {isStateSearchable ? (
@@ -302,6 +315,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               onOpenChange={setStateOpen}
               disabled={disabled || !selectedCountry}
               emptyMessage="No se encontraron estados"
+              id={stateId}
             />
           ) : (
             <Select
@@ -309,7 +323,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               onValueChange={handleStateChange}
               disabled={disabled || !selectedCountry}
             >
-              <SelectTrigger size={size} className="w-full">
+              <SelectTrigger id={stateId} size={size} className="w-full">
                 <SelectValue placeholder={placeholders.state} />
               </SelectTrigger>
               <SelectContent>
@@ -336,7 +350,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       {/* Selector de Ciudad */}
       {showCitySelect && (
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+          <label htmlFor={cityId} className="text-sm font-medium text-gray-700">
             {labels.city}
           </label>
           {isCitySearchable ? (
@@ -353,6 +367,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               onOpenChange={setCityOpen}
               disabled={disabled || !selectedCountry || !selectedState}
               emptyMessage="No se encontraron ciudades"
+              id={cityId}
             />
           ) : (
             <Select
@@ -360,7 +375,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               onValueChange={handleCityChange}
               disabled={disabled || !selectedCountry || !selectedState}
             >
-              <SelectTrigger size={size} className="w-full">
+              <SelectTrigger id={cityId} size={size} className="w-full">
                 <SelectValue placeholder={placeholders.city} />
               </SelectTrigger>
               <SelectContent>

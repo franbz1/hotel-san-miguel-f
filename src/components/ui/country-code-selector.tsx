@@ -54,6 +54,9 @@ export interface CountryCodeSelectorProps {
   
   // Mostrar solo el código o incluir el nombre del país
   displayMode?: 'code-only' | 'code-with-name' | 'name-with-code';
+  
+  // ID para asociar con un label
+  id?: string;
 }
 
 export const CountryCodeSelector = ({
@@ -66,7 +69,8 @@ export const CountryCodeSelector = ({
   placeholder = "Seleccionar código...",
   className,
   disabled = false,
-  displayMode = 'code-with-name'
+  displayMode = 'code-with-name',
+  id
 }: CountryCodeSelectorProps) => {
   const [open, setOpen] = useState(false);
   
@@ -158,6 +162,7 @@ export const CountryCodeSelector = ({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            id={id}
             variant="outline"
             role="combobox"
             aria-expanded={open}
