@@ -247,12 +247,20 @@ export const Formulario = ({
         methods.reset()
         setCurrentStepKey('Bienvenida')
         goToFirstStep()
+        setSelectedProcedenciaLocation(null)
+        setSelectedResidenciaLocation(null)
+        setSelectedNacionalidad(null)
+        setSelectedDestinoLocation(null)
         toast.info('Formulario cancelado')
       }
     } else {
       methods.reset()
       setCurrentStepKey('Bienvenida')
       goToFirstStep()
+      setSelectedProcedenciaLocation(null)
+      setSelectedResidenciaLocation(null)
+      setSelectedNacionalidad(null)
+      setSelectedDestinoLocation(null)
       toast.info('Regresando al inicio')
     }
   }
