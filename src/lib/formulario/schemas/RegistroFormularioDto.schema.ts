@@ -19,7 +19,7 @@ export const huespedSecundarioSchema = z.object({
   segundo_apellido: z.string()
     .min(2, "El segundo apellido es opcional y debe tener al menos 2 caracteres")
     .max(50, "El segundo apellido no puede tener más de 50 caracteres")
-    .optional(),
+    .optional().or(z.literal("")),
   nombres: z.string()
     .min(2, "Los nombres son obligatorios y deben tener al menos 2 caracteres")
     .max(100, "Los nombres no pueden tener más de 100 caracteres"),
@@ -56,7 +56,7 @@ export const huespedSecundarioSchema = z.object({
     invalid_type_error: "El genero debe ser uno de los siguientes: MASCULINO, FEMENINO, OTRO"
   }),
   telefono: z.string()
-    .optional(),
+    .optional().or(z.literal("")),
   correo: z.string()
     .email("El correo es opcional y debe ser un correo válido")
     .optional()
@@ -65,7 +65,7 @@ export const huespedSecundarioSchema = z.object({
 
 // Schema extendido para huésped secundario con campos auxiliares de teléfono
 export const huespedSecundarioSchemaConAuxiliares = huespedSecundarioSchema.extend({
-  telefono_dial_code: z.string().optional(),
+  telefono_dial_code: z.string().optional().or(z.literal("")),
   telefono_number: z.string().min(10, 'El número de teléfono debe tener 10 caracteres').max(10, 'El número de teléfono debe tener 10 caracteres').optional(),
 });
 
