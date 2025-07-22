@@ -46,6 +46,13 @@ export const PasoAcompaniantes = ({
     }
   }, [initialAcompaniantes.length])
 
+  // Asegurar que si no hay acompañantes, el número de acompañantes sea 0
+  useEffect(() => {
+    if (initialAcompaniantes.length === 0) {
+      setValue('numero_acompaniantes', 0)
+    }
+  }, [initialAcompaniantes.length, setValue])
+
   const handleAcompaniantesChange = (acompaniantes: HuespedSecundarioDto[]) => {
     setValue('huespedes_secundarios', acompaniantes)
     // Calcular y actualizar el número de acompañantes
