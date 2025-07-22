@@ -23,6 +23,7 @@ import { ICity, ICountry } from 'country-state-city'
 import { PasoAcompaniantes } from './pasos/PasoAcompaniantes'
 import { CuentaRegresiva } from './CuentaRegresiva'
 import { z } from 'zod'
+import { CreateHuespedSecundarioWithoutIdDto } from '@/Types/huesped-secundario-sin-id-Dto'
 
 interface FormularioProps {
   linkFormulario: LinkFormulario
@@ -40,7 +41,10 @@ interface FormularioProps {
  * - Manejar los errores del servidor
  * @param linkFormulario - Link del formulario
  */
-export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) => {
+export const Formulario = ({
+  linkFormulario,
+  onTimeExpired,
+}: FormularioProps) => {
   // Estado para trackear el paso actual
   const [currentStepKey, setCurrentStepKey] = useState('Bienvenida')
 
@@ -64,16 +68,29 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
   }
 
   // Tipo campos del formulario con campos auxiliares
-  type FormFields = CreateRegistroFormulario & {
+  type FormFields = Omit<CreateRegistroFormulario, 'huespedes_secundarios'> & {
     telefono_dial_code?: string
     telefono_number?: string
+
+    huespedes_secundarios?: Array<
+      CreateHuespedSecundarioWithoutIdDto & {
+        telefono_dial_code?: string
+        telefono_number?: string
+      }
+    >
   }
 
   const methods = useForm<FormFields>({
-    resolver: zodResolver(createRegistroFormularioDtoSchema.extend({
-      telefono_dial_code: z.string().optional(),
-      telefono_number: z.string().min(10, 'El número de teléfono debe tener 10 caracteres').max(10, 'El número de teléfono debe tener 10 caracteres').optional(),
-    })),
+    resolver: zodResolver(
+      createRegistroFormularioDtoSchema.extend({
+        telefono_dial_code: z.string().optional(),
+        telefono_number: z
+          .string()
+          .min(10, 'El número de teléfono debe tener 10 caracteres')
+          .max(10, 'El número de teléfono debe tener 10 caracteres')
+          .optional(),
+      })
+    ),
     defaultValues: {
       fecha_inicio: linkFormulario.fechaInicio,
       fecha_fin: linkFormulario.fechaFin,
@@ -139,6 +156,27 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
 
   const createRegistroFormulario = useCreateRegistroFormulario()
 
+  function cleanFormData(data: FormFields): CreateRegistroFormulario {
+    // Extraigo y descarto auxiliares del huésped principal
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { telefono_dial_code, telefono_number, huespedes_secundarios, ...mainData } = data
+
+    // Si hay secundarios, limpio sus auxiliares de la misma forma
+    const cleanHuespedes = Array.isArray(huespedes_secundarios)
+      ? huespedes_secundarios.map(huesped => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { telefono_dial_code: _, telefono_number: __, ...cleanHuesped } = huesped
+          return cleanHuesped
+        })
+      : undefined
+
+    // Devuelvo sólo lo que el DTO espera
+    return {
+      ...mainData,
+      ...(cleanHuespedes ? { huespedes_secundarios: cleanHuespedes } : {}),
+    }
+  }
+
   // Los estados de la mutación se manejan en el componente Confirmacion
 
   // Lógica de envío del formulario en el último paso
@@ -158,11 +196,12 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
 
     const token = extraerToken(linkFormulario)
     const data = methods.getValues()
+    const cleanData = cleanFormData(data)
 
     // React Query maneja automáticamente los estados de carga, éxito y error
     createRegistroFormulario.mutate({
       token,
-      data,
+      data: cleanData,
     })
   }
 
@@ -261,7 +300,8 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
             // Reintentar el envío
             const token = extraerToken(linkFormulario)
             const data = methods.getValues()
-            createRegistroFormulario.mutate({ token, data })
+            const cleanData = cleanFormData(data)
+            createRegistroFormulario.mutate({ token, data: cleanData })
           }}
           onGoToStart={() => {
             // Resetear el formulario y volver al inicio
@@ -292,8 +332,8 @@ export const Formulario = ({ linkFormulario, onTimeExpired }: FormularioProps) =
                 <CardTitle className='text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent pb-2'>
                   Registro de Huésped
                 </CardTitle>
-                <CuentaRegresiva 
-                  fechaVencimiento={linkFormulario.vencimiento} 
+                <CuentaRegresiva
+                  fechaVencimiento={linkFormulario.vencimiento}
                   onExpired={onTimeExpired}
                 />
               </div>

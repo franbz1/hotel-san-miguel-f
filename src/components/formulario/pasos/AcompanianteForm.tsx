@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import LocationSelector from '@/components/ui/location-selector';
 import { CountryCodeSelector } from '@/components/ui/country-code-selector';
-import { HuespedSecundarioDto, huespedSecundarioSchema } from '@/lib/formulario/schemas/RegistroFormularioDto.schema';
+import { HuespedSecundarioDtoConAuxiliares, huespedSecundarioSchemaConAuxiliares } from '@/lib/formulario/schemas/RegistroFormularioDto.schema';
 import { TipoDocumentoHuespedSecundario } from '@/Types/enums/tipoDocumentoHuespedSecundario';
 import { Genero } from '@/Types/enums/generos';
 import { toast } from 'sonner';
@@ -36,13 +36,13 @@ import { InfoIcon, Save, X, Trash2, User } from 'lucide-react';
 
 interface AcompanianteFormProps {
   /** Datos iniciales para edición (opcional) */
-  initialData?: Partial<HuespedSecundarioDto>;
+  initialData?: Partial<HuespedSecundarioDtoConAuxiliares>;
   /** Callback cuando se guarda el acompañante */
-  onSave: (data: HuespedSecundarioDto) => void;
+  onSave: (data: HuespedSecundarioDtoConAuxiliares) => void;
   /** Callback cuando se cancela la edición */
   onCancel: () => void;
   /** Callback cuando se elimina el acompañante */
-  onDelete?: (data: HuespedSecundarioDto) => void;
+  onDelete?: (data: HuespedSecundarioDtoConAuxiliares) => void;
   /** Ubicacion de procedencia huesped Principal*/
   procedenciaLocation: ICity | null;
   /** Ubicacion de residencia huesped Principal*/
@@ -92,12 +92,12 @@ export const AcompanianteForm = ({
     register,
     handleSubmit,
     control,
-    watch,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
     reset
-  } = useForm<HuespedSecundarioDto>({
-    resolver: zodResolver(huespedSecundarioSchema),
+  } = useForm<HuespedSecundarioDtoConAuxiliares>({
+    resolver: zodResolver(huespedSecundarioSchemaConAuxiliares),
     defaultValues: {
       tipo_documento: initialData?.tipo_documento || undefined,
       numero_documento: initialData?.numero_documento || undefined,
@@ -115,12 +115,66 @@ export const AcompanianteForm = ({
       pais_destino: reutilizarDatosHuespedPrincipal ? destinoLocation?.countryCode || undefined : (initialData?.pais_destino || undefined),
       ciudad_destino: reutilizarDatosHuespedPrincipal ? destinoLocation?.name || undefined : (initialData?.ciudad_destino || undefined),
       telefono: initialData?.telefono || undefined,
-      correo: initialData?.correo || undefined
+      correo: initialData?.correo || undefined,
+
+      // Campos auxiliares de teléfono
+      telefono_dial_code: initialData?.telefono_dial_code || undefined,
+      telefono_number: initialData?.telefono_number || undefined,
     }
   });
 
-  // Observar el país de residencia para sincronizar el código de teléfono
-  const paisResidencia = watch('pais_residencia');
+  // Función para combinar teléfono solo cuando se pierde el foco o cambian los campos auxiliares
+  const handlePhoneBlur = React.useCallback(() => {
+    const dialCode = getValues('telefono_dial_code')
+    const number = getValues('telefono_number')
+
+    if (dialCode && number && dialCode.trim() !== '' && number.trim() !== '') {
+      const full = `${dialCode}${number}`
+      const currentTelefono = getValues('telefono')
+
+      // Solo actualizar si el valor ha cambiado realmente
+      if (currentTelefono !== full) {
+        setValue('telefono', full, { shouldValidate: false })
+      }
+    } else if (dialCode && dialCode.trim() !== '' && (!number || number.trim() === '')) {
+      // Si solo tenemos dial code, limpiar el teléfono completo
+      setValue('telefono', '', { shouldValidate: false })
+    }
+  }, [setValue, getValues])
+
+  // Al montar el componente, verificar si hay valores que inicializar (solo una vez)
+  useEffect(() => {
+    const dialCode = getValues('telefono_dial_code')
+    const number = getValues('telefono_number')
+    const fullPhone = getValues('telefono')
+    
+    // Si tenemos teléfono completo pero no los campos auxiliares, descomponer
+    if (fullPhone && (!dialCode || !number)) {
+      // Buscar pattern +código seguido de número
+      const m = fullPhone.match(/^(\+\d{1,4})(.*)$/)
+      if (m && m[1] && m[2]) {
+        setValue('telefono_dial_code', m[1], { shouldValidate: false })
+        setValue('telefono_number', m[2], { shouldValidate: false })
+      } else {
+        // Si no hay código, asumir +57 (Colombia) como default
+        setValue('telefono_dial_code', '+57', { shouldValidate: false })
+        setValue('telefono_number', fullPhone, { shouldValidate: false })
+      }
+    }
+    // Si tenemos campos auxiliares pero no teléfono completo, combinar
+    else if (dialCode && number && !fullPhone) {
+      setValue('telefono', `${dialCode}${number}`, { shouldValidate: false })
+    }
+    // Si tenemos initialData pero ningún campo está lleno, inicializar con defaults
+    else if (!fullPhone && !dialCode && !number && initialData?.telefono) {
+      const m = initialData.telefono.match(/^(\+\d{1,4})(.*)$/)
+      if (m && m[1] && m[2]) {
+        setValue('telefono_dial_code', m[1], { shouldValidate: false })
+        setValue('telefono_number', m[2], { shouldValidate: false })
+        setValue('telefono', initialData.telefono, { shouldValidate: false })
+      }
+    }
+  }, [setValue, getValues, initialData?.telefono]) // Incluir dependencias necesarias
 
   // Efecto para actualizar todos los campos cuando se cambia la opción de reutilizar
   useEffect(() => {
@@ -307,7 +361,7 @@ export const AcompanianteForm = ({
   };
 
   // Handler para envío del formulario
-  const onSubmit = async (data: HuespedSecundarioDto) => {
+  const onSubmit = async (data: HuespedSecundarioDtoConAuxiliares) => {
     try {
       await onSave(data);
       toast.success(mode === 'create' ? 'Acompañante agregado exitosamente' : 'Acompañante actualizado exitosamente');
@@ -322,7 +376,7 @@ export const AcompanianteForm = ({
   // Handler para eliminar
   const handleDelete = () => {
     if (onDelete && initialData) {
-      onDelete(initialData as HuespedSecundarioDto);
+      onDelete(initialData as HuespedSecundarioDtoConAuxiliares);
       toast.success('Acompañante eliminado exitosamente');
     }
   };
@@ -352,7 +406,7 @@ export const AcompanianteForm = ({
                   control={control}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
+                      <SelectTrigger id='tipo_documento'>
                         <SelectValue placeholder='Seleccionar tipo de documento' />
                       </SelectTrigger>
                       <SelectContent>
@@ -465,7 +519,7 @@ export const AcompanianteForm = ({
                   control={control}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
+                      <SelectTrigger id='genero'>
                         <SelectValue placeholder='Seleccionar género' />
                       </SelectTrigger>
                       <SelectContent>
@@ -533,9 +587,10 @@ export const AcompanianteForm = ({
                 {/* Nacionalidad */}
                 <div className='space-y-2'>
                   <TooltipWrapper tooltip='Nacionalidad del acompañante'>
-                    <Label>Nacionalidad *</Label>
+                    <Label htmlFor='acompaniante-nacionalidad-country'>Nacionalidad *</Label>
                   </TooltipWrapper>
                   <LocationSelector
+                    idPrefix='acompaniante-nacionalidad'
                     searchable={true}
                     maxLevel='country'
                     placeholders={{
@@ -550,9 +605,10 @@ export const AcompanianteForm = ({
                 {/* Procedencia */}
                 <div className='space-y-2'>
                   <TooltipWrapper tooltip='Ciudad de procedencia del acompañante'>
-                    <Label>Ciudad de Procedencia *</Label>
+                    <Label htmlFor='acompaniante-procedencia-country'>Ciudad de Procedencia *</Label>
                   </TooltipWrapper>
                   <LocationSelector
+                    idPrefix='acompaniante-procedencia'
                     searchable={true}
                     maxLevel='city'
                     placeholders={{
@@ -570,9 +626,10 @@ export const AcompanianteForm = ({
                 {/* Residencia */}
                 <div className='space-y-2'>
                   <TooltipWrapper tooltip='Ciudad de residencia del acompañante'>
-                    <Label>Ciudad de Residencia *</Label>
+                    <Label htmlFor='acompaniante-residencia-country'>Ciudad de Residencia *</Label>
                   </TooltipWrapper>
                   <LocationSelector
+                    idPrefix='acompaniante-residencia'
                     searchable={true}
                     maxLevel='city'
                     placeholders={{
@@ -590,9 +647,10 @@ export const AcompanianteForm = ({
                 {/* Destino */}
                 <div className='space-y-2'>
                   <TooltipWrapper tooltip='Ciudad de destino del acompañante'>
-                    <Label>Ciudad de Destino *</Label>
+                    <Label htmlFor='acompaniante-destino-country'>Ciudad de Destino *</Label>
                   </TooltipWrapper>
                   <LocationSelector
+                    idPrefix='acompaniante-destino'
                     searchable={true}
                     maxLevel='city'
                     placeholders={{
@@ -623,20 +681,47 @@ export const AcompanianteForm = ({
                 </TooltipWrapper>
                 <div className='flex gap-2'>
                   <div className='w-40'>
-                    <CountryCodeSelector
-                      value={paisResidencia}
-                      placeholder='Código'
-                      displayMode='code-only'
+                    <Label htmlFor='telefono_dial_code_acompaniante' className='sr-only'>
+                      Código de país del acompañante
+                    </Label>
+                    <Controller
+                      name='telefono_dial_code'
+                      control={control}
+                      render={({ field }) => (
+                        <CountryCodeSelector
+                          id='telefono_dial_code_acompaniante'
+                          placeholder='Código'
+                          displayMode='code-only'
+                          value={field.value || ''}
+                          onCountryCodeChange={(country) => {
+                            const newDialCode = country?.dial_code || ''
+                            field.onChange(newDialCode)
+                            // Combinar teléfono cuando cambie el código (solo si hay número)
+                            const currentNumber = getValues('telefono_number')
+                            if (currentNumber && currentNumber.trim() !== '') {
+                              setTimeout(handlePhoneBlur, 0)
+                            }
+                          }}
+                          defaultDialCode='+57'
+                        />
+                      )}
                     />
+                    <ErrorMessage message={errors.telefono_dial_code?.message} />
                   </div>
                   <div className='flex-1'>
+                    <Label htmlFor='telefono_number_acompaniante' className='sr-only'>
+                      Número de teléfono del acompañante
+                    </Label>
                     <Input
-                      {...register('telefono')}
+                      id='telefono_number_acompaniante'
+                      {...register('telefono_number')}
                       placeholder='Número de teléfono'
                       type='tel'
+                      onBlur={handlePhoneBlur}
                     />
                   </div>
                 </div>
+                <ErrorMessage message={errors.telefono_number?.message} />
                 <ErrorMessage message={errors.telefono?.message} />
               </div>
 

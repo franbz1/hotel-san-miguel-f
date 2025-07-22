@@ -1,4 +1,3 @@
-import { CreateRegistroFormulario } from "@/Types/registro-formularioDto";
 import { z } from "zod";
 import { MotivosViajes } from "@/Types/enums/motivosViajes";
 import { TipoDoc } from "@/Types/enums/tiposDocumento";
@@ -64,11 +63,17 @@ export const huespedSecundarioSchema = z.object({
     .or(z.literal(""))
 });
 
+// Schema extendido para huésped secundario con campos auxiliares de teléfono
+export const huespedSecundarioSchemaConAuxiliares = huespedSecundarioSchema.extend({
+  telefono_dial_code: z.string().optional(),
+  telefono_number: z.string().min(10, 'El número de teléfono debe tener 10 caracteres').max(10, 'El número de teléfono debe tener 10 caracteres').optional(),
+});
+
 // ==========================================
 // SCHEMA COMPLETO PARA VALIDACIÓN FINAL
 // ==========================================
 
-export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormulario> = z.object({
+export const createRegistroFormularioDtoSchema = z.object({
   // Datos de la reserva (del link + motivo del usuario)
   fecha_inicio: z.coerce.date({
     required_error: "La fecha de inicio es obligatoria",
@@ -120,7 +125,7 @@ export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormular
   segundo_apellido: z.string()
     .min(2, "El segundo apellido debe tener al menos 2 caracteres")
     .max(50, "El segundo apellido no puede tener más de 50 caracteres")
-    .optional(),
+    .optional().or(z.literal("")),
   nombres: z.string()
     .min(2, "Los nombres deben tener al menos 2 caracteres")
     .max(50, "Los nombres no pueden tener más de 50 caracteres"),
@@ -162,15 +167,6 @@ export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormular
   // Huéspedes secundarios (opcional)
   huespedes_secundarios: z.array(huespedSecundarioSchema).optional()
 })
-.refine((data) => {
-  // Validación cruzada: número de acompañantes debe coincidir con la cantidad de huéspedes secundarios
-  const numeroAcompaniantes = data.numero_acompaniantes || 0;
-  const cantidadHuespedes = data.huespedes_secundarios?.length || 0;
-  return numeroAcompaniantes === cantidadHuespedes;
-}, {
-  message: "El número de acompañantes debe coincidir con la cantidad de huéspedes secundarios registrados",
-  path: ["numero_acompaniantes"]
-});
 
 // ==========================================
 // TIPOS DERIVADOS DE LOS SCHEMAS
@@ -178,3 +174,4 @@ export const createRegistroFormularioDtoSchema: z.ZodType<CreateRegistroFormular
 
 export type RegistroFormularioDto = z.infer<typeof createRegistroFormularioDtoSchema>;
 export type HuespedSecundarioDto = z.infer<typeof huespedSecundarioSchema>;
+export type HuespedSecundarioDtoConAuxiliares = z.infer<typeof huespedSecundarioSchemaConAuxiliares>;
