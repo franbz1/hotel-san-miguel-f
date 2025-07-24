@@ -3,6 +3,7 @@
 import { CheckCircle, XCircle, Loader2, RotateCcw, Mail } from 'lucide-react';
 import { Card, CardContent } from '../../ui/card';
 import { Button } from '../../ui/button';
+import { useState } from 'react';
 
 interface ConfirmacionProps {
   isLoading: boolean;
@@ -10,7 +11,6 @@ interface ConfirmacionProps {
   isError: boolean;
   error?: Error | null;
   onRetry?: () => void;
-  onGoToStart?: () => void;
 }
 
 /**
@@ -22,11 +22,24 @@ export const Confirmacion = ({
   isSuccess, 
   isError, 
   error, 
-  onRetry,
-  onGoToStart 
+  onRetry
 }: ConfirmacionProps) => {
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  // Estado de carga
+  const handleRetry = () => {
+    if (onRetry) {
+      setIsRetrying(true);
+      onRetry();
+      // El estado se limpiará cuando cambie isLoading o isError
+    }
+  };
+
+  // Resetear estado de retry cuando cambian los props
+  if ((isLoading && isRetrying) || (isSuccess && isRetrying) || (!isError && isRetrying)) {
+    setIsRetrying(false);
+  }
+
+  // Estado de carga (inicial o retry)
   if (isLoading) {
     return (
       <Card className="mx-auto max-w-2xl">
@@ -34,11 +47,13 @@ export const Confirmacion = ({
           <div className="flex flex-col items-center space-y-4">
             <Loader2 className="h-16 w-16 text-blue-500 animate-spin" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Enviando formulario...
+              {isRetrying ? 'Reintentando envío...' : 'Enviando formulario...'}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-md">
-              Por favor espere mientras procesamos su información. 
-              Este proceso puede tomar unos segundos.
+              {isRetrying 
+                ? 'Intentando enviar el formulario nuevamente. Por favor espere.'
+                : 'Por favor espere mientras procesamos su información. Este proceso puede tomar unos segundos.'
+              }
             </p>
             <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg max-w-md">
               <p className="text-blue-700 dark:text-blue-300 text-sm">
@@ -81,17 +96,6 @@ export const Confirmacion = ({
                 <li>• Puede cerrar esta ventana de forma segura</li>
                 <li>• Recibirá confirmación por email si proporcionó uno</li>
               </ul>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                onClick={onGoToStart}
-                variant="outline"
-                className="border-green-200 hover:bg-green-50 dark:border-green-800 dark:hover:bg-green-950/20"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Volver al inicio
-              </Button>
             </div>
 
             <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg max-w-md">
@@ -146,20 +150,13 @@ export const Confirmacion = ({
 
             <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
               <Button
-                onClick={onRetry}
+                onClick={handleRetry}
                 variant="default"
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                disabled={isRetrying}
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Intentar de nuevo
-              </Button>
-              
-              <Button
-                onClick={onGoToStart}
-                variant="outline"
-                className="flex-1 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950/20"
-              >
-                Volver al inicio
+                <RotateCcw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+                {isRetrying ? 'Reintentando...' : 'Intentar de nuevo'}
               </Button>
             </div>
 

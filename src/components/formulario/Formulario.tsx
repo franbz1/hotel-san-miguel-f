@@ -48,6 +48,9 @@ export const Formulario = ({
   // Estado para trackear el paso actual
   const [currentStepKey, setCurrentStepKey] = useState('Bienvenida')
 
+  // Estado para saber cuando se envio el formulario
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false)
+
   // Estado de seleccion de pais, estado y ciudad huespes principal, para reusar en secundarios
   const [selectedProcedenciaLocation, setSelectedProcedenciaLocation] =
     useState<ICity | null>(null)
@@ -151,21 +154,45 @@ export const Formulario = ({
       'telefono_number',
     ],
     Acompañantes: ['huespedes_secundarios'],
-    Confirmacion: [],
   }
 
   const createRegistroFormulario = useCreateRegistroFormulario()
 
+  // Función para manejar el retry sin parpadeo
+  const handleRetry = () => {
+    // Reset de la mutación para limpiar el estado de error
+    createRegistroFormulario.resetMutation()
+
+    // Volver a ejecutar el envío
+    const token = extraerToken(linkFormulario)
+    const data = methods.getValues()
+    const cleanData = cleanFormData(data)
+
+    createRegistroFormulario.mutate({
+      token,
+      data: cleanData,
+    })
+  }
+
   function cleanFormData(data: FormFields): CreateRegistroFormulario {
     // Extraigo y descarto auxiliares del huésped principal
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { telefono_dial_code, telefono_number, huespedes_secundarios, ...mainData } = data
+    const {
+      telefono_dial_code,
+      telefono_number,
+      huespedes_secundarios,
+      ...mainData
+    } = data
 
     // Si hay secundarios, limpio sus auxiliares de la misma forma
     const cleanHuespedes = Array.isArray(huespedes_secundarios)
-      ? huespedes_secundarios.map(huesped => {
+      ? huespedes_secundarios.map((huesped) => {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { telefono_dial_code: _, telefono_number: __, ...cleanHuesped } = huesped
+          const {
+            telefono_dial_code: _,
+            telefono_number: __,
+            ...cleanHuesped
+          } = huesped
           return cleanHuesped
         })
       : undefined
@@ -180,19 +207,13 @@ export const Formulario = ({
   // Los estados de la mutación se manejan en el componente Confirmacion
 
   // Lógica de envío del formulario en el último paso
-  const handleSubmitForm = async (goToConfirmation: () => void) => {
+  const handleSubmitForm = async () => {
     // Validar todos los campos antes del envío
-    console.log('Formulario', methods.getValues())
-    console.log('Error', methods.formState.errors)
     const isValid = await methods.trigger()
     if (!isValid) {
       toast.error('Por favor, corrige los errores en el formulario')
       return
     }
-
-    // Ir al paso de confirmación antes de enviar
-    setCurrentStepKey('Confirmacion')
-    goToConfirmation()
 
     const token = extraerToken(linkFormulario)
     const data = methods.getValues()
@@ -203,6 +224,7 @@ export const Formulario = ({
       token,
       data: cleanData,
     })
+    setIsFormSubmitted(true)
   }
 
   // Lógica de validación por pasos
@@ -296,37 +318,12 @@ export const Formulario = ({
         />
       ),
     },
-    {
-      key: 'Confirmacion',
-      component: () => (
-        <Confirmacion
-          isLoading={createRegistroFormulario.isPending}
-          isSuccess={createRegistroFormulario.isSuccess}
-          isError={createRegistroFormulario.isError}
-          error={createRegistroFormulario.error}
-          onRetry={() => {
-            // Reintentar el envío
-            const token = extraerToken(linkFormulario)
-            const data = methods.getValues()
-            const cleanData = cleanFormData(data)
-            createRegistroFormulario.mutate({ token, data: cleanData })
-          }}
-          onGoToStart={() => {
-            // Resetear el formulario y volver al inicio
-            methods.reset()
-            createRegistroFormulario.reset()
-            setCurrentStepKey('Bienvenida')
-          }}
-        />
-      ),
-    },
   ]
 
   const stepLabels: Record<string, string> = {
     Bienvenida: 'Bienvenida',
     HuespedPrincipal: 'Huesped Principal',
     Acompañantes: 'Acompañantes',
-    Confirmacion: 'Confirmación',
   }
 
   return (
@@ -356,89 +353,93 @@ export const Formulario = ({
             {/* Contenedor del wizard optimizado */}
             <div className='lg:px-6'>
               <FormProvider {...methods}>
-                <Wizard
-                  steps={steps}
-                  defaultStep='Bienvenida'
-                  renderProgress={({ progress, goToStep }) => (
-                    <WizardProgress
-                      progress={progress}
-                      goToStep={(step) => {
-                        setCurrentStepKey(step)
-                        goToStep(step)
-                      }}
-                      stepLabels={stepLabels}
-                      className='mb-2 lg:mb-4'
-                    />
-                  )}
-                  renderButtons={({
-                    isFirst,
-                    isLast,
-                    goBack,
-                    goNext,
-                    goToStep,
-                  }) => {
-                    const handleNext = () => {
-                      if (isLast) {
-                        handleSubmitForm(() => {
-                          // Encontrar el paso de confirmación
-                          const confirmacionIndex = steps.findIndex(
-                            (s) => s.key === 'Confirmacion'
-                          )
-                          if (confirmacionIndex !== -1) {
-                            goToStep('Confirmacion')
-                          }
-                        })
-                      } else {
-                        handleNextStep(() => {
-                          // Encontrar el siguiente paso
-                          const currentIndex = steps.findIndex(
-                            (s) => s.key === currentStepKey
-                          )
-                          const nextStep = steps[currentIndex + 1]
-                          if (nextStep) {
-                            setCurrentStepKey(nextStep.key)
-                          }
-                          goNext()
-                        }, currentStepKey)
+                {!isFormSubmitted && (
+                  <Wizard
+                    steps={steps}
+                    defaultStep='Bienvenida'
+                    renderProgress={({ progress, goToStep }) => (
+                      <WizardProgress
+                        progress={progress}
+                        goToStep={(step) => {
+                          setCurrentStepKey(step)
+                          goToStep(step)
+                        }}
+                        stepLabels={stepLabels}
+                        className='mb-2 lg:mb-4'
+                      />
+                    )}
+                    renderButtons={({
+                      isFirst,
+                      isLast,
+                      goBack,
+                      goNext,
+                      goToStep,
+                    }) => {
+                      const handleNext = () => {
+                        if (isLast) {
+                          handleSubmitForm()
+                        } else {
+                          handleNextStep(() => {
+                            // Encontrar el siguiente paso
+                            const currentIndex = steps.findIndex(
+                              (s) => s.key === currentStepKey
+                            )
+                            const nextStep = steps[currentIndex + 1]
+                            if (nextStep) {
+                              setCurrentStepKey(nextStep.key)
+                            }
+                            goNext()
+                          }, currentStepKey)
+                        }
                       }
-                    }
 
-                    const handleBack = () => {
-                      // Encontrar el paso anterior
-                      const currentIndex = steps.findIndex(
-                        (s) => s.key === currentStepKey
+                      const handleBack = () => {
+                        // Encontrar el paso anterior
+                        const currentIndex = steps.findIndex(
+                          (s) => s.key === currentStepKey
+                        )
+                        const prevStep = steps[currentIndex - 1]
+                        if (prevStep) {
+                          setCurrentStepKey(prevStep.key)
+                        }
+                        goBack()
+                      }
+
+                      const goToFirstStep = () => {
+                        setCurrentStepKey('Bienvenida')
+                        goToStep('Bienvenida')
+                      }
+
+                      return (
+                        <div className='mt-2 lg:mt-4 lg:px-4'>
+                          <WizardControls
+                            isFirst={isFirst}
+                            isLast={isLast}
+                            goBack={handleBack}
+                            goNext={handleNext}
+                            onCancel={() => handleCancel(goToFirstStep)}
+                            showCancel={true}
+                            isLoading={createRegistroFormulario.isPending}
+                            backLabel='Anterior'
+                            nextLabel='Continuar'
+                            finishLabel='Completar Registro'
+                            cancelLabel='Cancelar'
+                          />
+                        </div>
                       )
-                      const prevStep = steps[currentIndex - 1]
-                      if (prevStep) {
-                        setCurrentStepKey(prevStep.key)
-                      }
-                      goBack()
-                    }
+                    }}
+                  />
+                )}
 
-                    const goToFirstStep = () => {
-                      setCurrentStepKey('Bienvenida')
-                      goToStep('Bienvenida')
-                    }
-
-                    return (
-                      <div className='mt-2 lg:mt-4 lg:px-4'>
-                        <WizardControls
-                          isFirst={isFirst}
-                          isLast={isLast}
-                          goBack={handleBack}
-                          goNext={handleNext}
-                          onCancel={() => handleCancel(goToFirstStep)}
-                          showCancel={true}
-                          isLoading={createRegistroFormulario.isPending}
-                          backLabel='Anterior'
-                          nextLabel='Continuar'
-                          finishLabel='Completar Registro'
-                          cancelLabel='Cancelar'
-                        />
-                      </div>
-                    )
-                  }}
-                />
+                {isFormSubmitted && (
+                  <Confirmacion
+                    isLoading={createRegistroFormulario.isPending}
+                    isSuccess={createRegistroFormulario.isSuccess}
+                    isError={createRegistroFormulario.isError}
+                    error={createRegistroFormulario.error}
+                    onRetry={handleRetry}
+                  />
+                )}
               </FormProvider>
             </div>
           </CardContent>

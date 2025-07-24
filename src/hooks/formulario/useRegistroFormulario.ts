@@ -1,20 +1,27 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  createRegistroFormularioFn,
+  createRegistroFormulario,
   REGISTRO_FORMULARIO_KEYS
 } from '@/lib/formulario/registro-formulario-service';
 
-/**
- * Hook para crear un nuevo registro de formulario
- */
+// Hook para crear registro
 export const useCreateRegistroFormulario = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: createRegistroFormularioFn,
+  const mutation = useMutation({
+    mutationFn: createRegistroFormulario,
     onSuccess: () => {
-      // Invalidar consultas relacionadas si es necesario
       queryClient.invalidateQueries({ queryKey: REGISTRO_FORMULARIO_KEYS.all });
     },
   });
-}; 
+
+  // Función para resetear el estado de la mutación
+  const resetMutation = () => {
+    mutation.reset();
+  };
+
+  return {
+    ...mutation,
+    resetMutation,
+  };
+};

@@ -4,13 +4,12 @@ import { CreateRegistroFormulario } from '@/Types/registro-formularioDto'
 // Keys para React Query
 export const REGISTRO_FORMULARIO_KEYS = {
   all: ['registro-formulario'] as const,
-  creates: () => [...REGISTRO_FORMULARIO_KEYS.all, 'create'] as const,
 };
 
 /**
  * Función para crear un nuevo registro de formulario
  */
-export const createRegistroFormularioFn = async (params: { token: string; data: CreateRegistroFormulario }) => {
+export const createRegistroFormulario = async (params: { token: string; data: CreateRegistroFormulario }) => {
   const { token, data } = params;
   
   try {
@@ -32,11 +31,4 @@ export const createRegistroFormularioFn = async (params: { token: string; data: 
     console.error('Error en createRegistroFormulario:', error)
     throw error
   }
-}
-
-/**
- * Función legacy para compatibilidad (opcional, se puede eliminar después de migrar todos los usos)
- */
-export async function createRegistroFormulario(token: string, data: CreateRegistroFormulario) {
-  return createRegistroFormularioFn({ token, data });
 }
