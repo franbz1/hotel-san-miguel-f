@@ -1,4 +1,1 @@
-hay que hacer que cuando el formulario se envie o cuando se cancele se cancelen los estados de locacion
-hay que hacer que si los campos con "" se mande null al servidor
-hay que mejorar el feedback del paso de confirmacion
-hay que validar que huesped principal sea mayor de edad
+Arreglar el guard del tiempo
