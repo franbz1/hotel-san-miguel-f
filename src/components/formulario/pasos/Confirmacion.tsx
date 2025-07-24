@@ -1,9 +1,13 @@
 'use client';
 
-import { CheckCircle, XCircle, Loader2, RotateCcw, Mail } from 'lucide-react';
-import { Card, CardContent } from '../../ui/card';
+import { CheckCircle, XCircle, Loader2, RotateCcw, Mail, Printer, Calendar, MapPin, Users, CreditCard, User, Phone, FileText, AlertTriangle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
+import { Separator } from '../../ui/separator';
 import { useState } from 'react';
+import { LinkFormulario } from '@/Types/link-formulario';
+import { CreateRegistroFormulario } from '@/Types/registro-formularioDto';
 
 interface ConfirmacionProps {
   isLoading: boolean;
@@ -11,18 +15,39 @@ interface ConfirmacionProps {
   isError: boolean;
   error?: Error | null;
   onRetry?: () => void;
+  linkFormulario?: LinkFormulario;
+  datosFormulario?: CreateRegistroFormulario;
+}
+
+interface ErrorDetail {
+  message: string;
+}
+
+interface ServerErrorResponse {
+  message: string;
+  error: string;
+  statusCode: number;
+}
+
+interface CustomError extends Error {
+  statusCode?: number;
+  errorType?: string;
+  serverResponse?: ServerErrorResponse;
 }
 
 /**
  * Componente que muestra el estado de confirmación del envío del formulario
  * Maneja los estados: cargando, éxito y error con feedback apropiado
+ * Incluye información detallada de la reserva y funcionalidad de impresión
  */
 export const Confirmacion = ({ 
   isLoading, 
   isSuccess, 
   isError, 
   error, 
-  onRetry
+  onRetry,
+  linkFormulario,
+  datosFormulario
 }: ConfirmacionProps) => {
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -30,14 +55,86 @@ export const Confirmacion = ({
     if (onRetry) {
       setIsRetrying(true);
       onRetry();
-      // El estado se limpiará cuando cambie isLoading o isError
     }
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   // Resetear estado de retry cuando cambian los props
   if ((isLoading && isRetrying) || (isSuccess && isRetrying) || (!isError && isRetrying)) {
     setIsRetrying(false);
   }
+
+  // Función para parsear errores detallados
+  const parseErrorDetails = (error: Error | null | undefined): ErrorDetail[] => {
+    if (!error) return [];
+
+    try {
+      // Verificar si es un error personalizado del servidor
+      const customError = error as CustomError;
+      if (customError.serverResponse) {
+        const serverResponse = customError.serverResponse;
+        return [{
+          message: serverResponse.message || error.message,
+        }];
+      }
+
+      // Verificar si es un error de validación
+      if (error.message.includes('validation') || error.message.includes('required')) {
+        return [{ message: error.message }];
+      }
+
+      // Verificar si es un error de red/conexión
+      if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+        return [{ 
+          message: 'Error de conexión. Verifique su conexión a internet y vuelva a intentar.', 
+        }];
+      }
+
+      // Verificar errores específicos del servidor por código de estado
+      if (error.message.includes('401')) {
+        return [{ 
+          message: error.message, 
+        }];
+      }
+
+      if (error.message.includes('403')) {
+        return [{ 
+          message: error.message, 
+        }];
+      }
+
+      if (error.message.includes('404')) {
+        return [{ 
+          message: 'El recurso solicitado no fue encontrado. Verifique que el enlace sea válido.', 
+        }];
+      }
+
+      if (error.message.includes('500')) {
+        return [{ 
+          message: 'Error interno del servidor. Por favor intente más tarde.', 
+        }];
+      }
+
+      // Error genérico
+      return [{ message: error.message }];
+    } catch {
+      return [{ message: 'Error desconocido al procesar la solicitud' }];
+    }
+  };
+
+  // Formatear fechas
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   // Estado de carga (inicial o retry)
   if (isLoading) {
@@ -69,57 +166,197 @@ export const Confirmacion = ({
   // Estado de éxito
   if (isSuccess) {
     return (
-      <Card className="mx-auto max-w-2xl border-green-200 dark:border-green-800">
-        <CardContent className="p-8 text-center">
-          <div className="flex flex-col items-center space-y-6">
-            <div className="relative">
-              <CheckCircle className="h-20 w-20 text-green-500" />
-              <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
+      <div className="space-y-6 print:space-y-4">
+        <Card className="mx-auto max-w-4xl border-green-200 dark:border-green-800 print:shadow-none print:border-gray-300">
+          <CardHeader className="text-center pb-4">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative print:hidden">
+                <CheckCircle className="h-20 w-20 text-green-500" />
+                <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
+              </div>
+              <div className="print:block hidden">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
+              </div>
+              
+              <div className="space-y-2">
+                <CardTitle className="text-3xl font-bold text-green-700 dark:text-green-400 print:text-2xl print:text-black">
+                  ¡Registro Completado!
+                </CardTitle>
+                <p className="text-lg text-gray-600 dark:text-gray-400 print:text-gray-800">
+                  Su información ha sido enviada exitosamente
+                </p>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold text-green-700 dark:text-green-400">
-                ¡Registro Completado!
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                Su información ha sido enviada exitosamente
-              </p>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {/* Información de la Reserva */}
+            {linkFormulario && (
+              <div className="bg-blue-50 dark:bg-blue-950/20 p-6 rounded-lg print:bg-gray-50 print:border print:border-gray-200">
+                <h3 className="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-4 flex items-center gap-2 print:text-black">
+                  <Calendar className="h-5 w-5" />
+                  Detalles de la Reserva
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-4 w-4 text-blue-600 print:text-gray-600" />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black">Habitación</p>
+                        <p className="text-blue-700 dark:text-blue-300 print:text-gray-800">#{linkFormulario.numeroHabitacion}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-4 w-4 text-blue-600 print:text-gray-600" />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black">Check-in</p>
+                        <p className="text-blue-700 dark:text-blue-300 print:text-gray-800">{formatDate(linkFormulario.fechaInicio)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="h-4 w-4 text-blue-600 print:text-gray-600" />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black">Costo Total</p>
+                        <p className="text-blue-700 dark:text-blue-300 font-semibold print:text-gray-800">${linkFormulario.costo.toLocaleString()}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-4 w-4 text-blue-600 print:text-gray-600" />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black">Check-out</p>
+                        <p className="text-blue-700 dark:text-blue-300 print:text-gray-800">{formatDate(linkFormulario.fechaFin)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Información del Huésped Principal */}
+            {datosFormulario && (
+              <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg print:bg-white print:border print:border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2 print:text-black">
+                  <User className="h-5 w-5" />
+                  Información del Huésped Principal
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black">Nombre Completo</p>
+                    <p className="text-gray-700 dark:text-gray-300 print:text-gray-800">
+                      {datosFormulario.nombres} {datosFormulario.primer_apellido} {datosFormulario.segundo_apellido}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black">Documento</p>
+                    <p className="text-gray-700 dark:text-gray-300 print:text-gray-800">
+                      {datosFormulario.tipo_documento}: {datosFormulario.numero_documento}
+                    </p>
+                  </div>
+                  
+                  {datosFormulario.telefono && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        Teléfono
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-300 print:text-gray-800">{datosFormulario.telefono}</p>
+                    </div>
+                  )}
+                  
+                  {datosFormulario.correo && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-gray-900 dark:text-gray-100 print:text-black flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Correo
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-300 print:text-gray-800">{datosFormulario.correo}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Acompañantes */}
+                {datosFormulario.huespedes_secundarios && datosFormulario.huespedes_secundarios.length > 0 && (
+                  <div className="mt-6">
+                    <Separator className="mb-4" />
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="h-5 w-5 text-gray-600" />
+                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 print:text-black">
+                        Acompañantes ({datosFormulario.huespedes_secundarios.length})
+                      </h4>
+                    </div>
+                    <div className="space-y-2">
+                      {datosFormulario.huespedes_secundarios.map((acompaniante, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Badge variant="outline" className="print:border-gray-400">
+                            {index + 1}
+                          </Badge>
+                          <span className="text-gray-700 dark:text-gray-300 print:text-gray-800">
+                            {acompaniante.nombres} {acompaniante.primer_apellido} {acompaniante.segundo_apellido}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Botones de acción */}
+            <div className="flex flex-col sm:flex-row gap-3 print:hidden">
+              <Button
+                onClick={handlePrint}
+                variant="outline"
+                className="flex-1"
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                Imprimir Confirmación
+              </Button>
             </div>
 
-            <div className="bg-green-50 dark:bg-green-950/20 p-6 rounded-lg w-full max-w-md space-y-3">
-              <h3 className="font-semibold text-green-800 dark:text-green-200 flex items-center gap-2">
+            {/* Información adicional */}
+            <div className="bg-green-50 dark:bg-green-950/20 p-6 rounded-lg print:bg-gray-50 print:border print:border-gray-200">
+              <h3 className="font-semibold text-green-800 dark:text-green-200 mb-3 flex items-center gap-2 print:text-black">
                 ✅ ¿Qué sigue ahora?
               </h3>
-              <ul className="text-sm text-green-700 dark:text-green-300 space-y-2 text-left">
+              <ul className="text-sm text-green-700 dark:text-green-300 space-y-2 print:text-gray-800">
                 <li>• Su registro ha sido procesado correctamente</li>
                 <li>• El hotel ha recibido su información</li>
                 <li>• Puede cerrar esta ventana de forma segura</li>
                 <li>• Recibirá confirmación por email si proporcionó uno</li>
+                <li>• Presente su documento de identidad al momento del check-in</li>
               </ul>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg max-w-md">
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg print:hidden">
               <p className="text-blue-700 dark:text-blue-300 text-sm">
                 📞 Si tiene alguna pregunta, puede contactar al hotel directamente.
               </p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   // Estado de error
   if (isError) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    const errorDetails = parseErrorDetails(error);
     
     return (
-      <Card className="mx-auto max-w-2xl border-red-200 dark:border-red-800">
-        <CardContent className="p-8 text-center">
+      <Card className="mx-auto max-w-3xl border-red-200 dark:border-red-800">
+        <CardContent className="p-8">
           <div className="flex flex-col items-center space-y-6">
             <XCircle className="h-20 w-20 text-red-500" />
             
-            <div className="space-y-2">
+            <div className="space-y-2 text-center">
               <h2 className="text-3xl font-bold text-red-700 dark:text-red-400">
                 Error en el envío
               </h2>
@@ -128,24 +365,41 @@ export const Confirmacion = ({
               </p>
             </div>
 
-            <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg w-full max-w-md">
-              <h3 className="font-semibold text-red-800 dark:text-red-200 mb-2">
-                Detalles del error:
-              </h3>
-              <p className="text-red-700 dark:text-red-300 text-sm bg-red-100 dark:bg-red-900/20 p-2 rounded">
-                {errorMessage}
-              </p>
-            </div>
+            {/* Detalles de errores */}
+            <div className="w-full max-w-2xl space-y-4">
+              <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg">
+                <h3 className="font-semibold text-red-800 dark:text-red-200 mb-3 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Detalles del error:
+                </h3>
+                <div className="space-y-2">
+                  {errorDetails.map((detail, index) => (
+                    <div key={index} className="bg-red-100 dark:bg-red-900/20 p-3 rounded border-l-4 border-red-400">
+                      <div className="flex items-start gap-2">
+                        <FileText className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-red-700 dark:text-red-300 text-sm font-medium">
+                            {detail.message}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-            <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg w-full max-w-md">
-              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2 flex items-center gap-2">
-                💡 ¿Qué puede hacer?
-              </h3>
-              <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1 text-left">
-                <li>• Verificar su conexión a internet</li>
-                <li>• Intentar enviar el formulario nuevamente</li>
-                <li>• Contactar al hotel si el problema persiste</li>
-              </ul>
+              {/* Pasos para solucionar */}
+              <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg">
+                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                  💡 Pasos para solucionar:
+                </h3>
+                <ol className="text-sm text-yellow-700 dark:text-yellow-300 space-y-2 list-decimal list-inside">
+                  <li>Verificar que todos los campos estén completos y correctos</li>
+                  <li>Comprobar su conexión a internet</li>
+                  <li>Intentar enviar el formulario nuevamente</li>
+                  <li>Si el problema persiste, contactar al hotel directamente</li>
+                </ol>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
@@ -160,7 +414,7 @@ export const Confirmacion = ({
               </Button>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg w-full max-w-md">
+            <div className="bg-blue-50 text-center dark:bg-blue-950/20 p-4 rounded-lg w-full max-w-md">
               <p className="text-blue-700 dark:text-blue-300 text-sm mb-2 font-medium">
                 📧 ¿Necesita ayuda adicional?
               </p>

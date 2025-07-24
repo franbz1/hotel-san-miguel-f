@@ -176,10 +176,9 @@ export const Formulario = ({
 
   function cleanFormData(data: FormFields): CreateRegistroFormulario {
     // Extraigo y descarto auxiliares del huésped principal
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
-      telefono_dial_code,
-      telefono_number,
+      telefono_dial_code: _telefono_dial_code, // eslint-disable-line @typescript-eslint/no-unused-vars
+      telefono_number: _telefono_number, // eslint-disable-line @typescript-eslint/no-unused-vars
       huespedes_secundarios,
       ...mainData
     } = data
@@ -187,10 +186,9 @@ export const Formulario = ({
     // Si hay secundarios, limpio sus auxiliares de la misma forma
     const cleanHuespedes = Array.isArray(huespedes_secundarios)
       ? huespedes_secundarios.map((huesped) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const {
-            telefono_dial_code: _,
-            telefono_number: __,
+            telefono_dial_code: _dial, // eslint-disable-line @typescript-eslint/no-unused-vars
+            telefono_number: _number, // eslint-disable-line @typescript-eslint/no-unused-vars
             ...cleanHuesped
           } = huesped
           return cleanHuesped
@@ -438,6 +436,8 @@ export const Formulario = ({
                     isError={createRegistroFormulario.isError}
                     error={createRegistroFormulario.error}
                     onRetry={handleRetry}
+                    linkFormulario={linkFormulario}
+                    datosFormulario={cleanFormData(methods.getValues())}
                   />
                 )}
               </FormProvider>

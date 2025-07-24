@@ -22,8 +22,18 @@ export const createRegistroFormulario = async (params: { token: string; data: Cr
     })
 
     if (!response.ok) {
-      console.log(await response.json())
-      throw new Error(`Error al crear registro: ${response.status}`)
+      // Intentar extraer el mensaje de error del servidor
+      let errorMessage: string;
+      
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || `Error ${response.status}: ${response.statusText}`;
+      } catch {
+        // Si no se puede parsear la respuesta, usar error genérico
+        errorMessage = `Error al crear registro: ${response.status} ${response.statusText}`;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     return await response.json()
