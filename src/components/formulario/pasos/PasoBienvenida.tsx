@@ -100,15 +100,15 @@ export const PasoBienvenida = ({linkFormulario}: {linkFormulario: LinkFormulario
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground mb-3">Período de Estadía</p>
                   <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-muted-foreground font-medium">ENTRADA:</span>
-                      <Badge variant="outline" className="font-medium text-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                      <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">ENTRADA:</span>
+                      <Badge variant="outline" className="font-medium text-xs break-words">
                         {formatDate(linkFormulario.fechaInicio)}
                       </Badge>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-muted-foreground font-medium">SALIDA:</span>
-                      <Badge variant="outline" className="font-medium text-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                      <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">SALIDA:</span>
+                      <Badge variant="outline" className="font-medium text-xs break-words">
                         {formatDate(linkFormulario.fechaFin)}
                       </Badge>
                     </div>
