@@ -10,7 +10,7 @@ export default function RegistroFormularioPage() {
   // Renderizar el formulario
   return (
     <FormularioGuard>
-      {({ linkFormulario }) => <Formulario linkFormulario={linkFormulario} />}
+      {({ linkFormulario, onTimeExpired }) => <Formulario linkFormulario={linkFormulario} onTimeExpired={onTimeExpired} />}
     </FormularioGuard>
   )
 } 
