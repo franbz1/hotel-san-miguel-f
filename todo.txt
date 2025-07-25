@@ -3,5 +3,8 @@ Implementar historial de aseo habitaciones
 ----
 Escribir flujo completo de aseo
 Verificar flujo completo de aseo
+En config de aseo al intentar escribir se escribe una letra y se pierde el foco del input text
+revisar formulario de registro aseo habitacion
+en config no se guardan areas aseo a intervenir
 ----
 Agregar dias con value 0 a las analititicas del front
