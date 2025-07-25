@@ -37,13 +37,13 @@ export function WizardControls({
   return (
     <div
       className={cn(
-        // Cambios responsive: en móvil, apilar vertical y full width
-        "flex flex-col gap-2 pt-2 border-t sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        // Cambios responsive: en móvil, apilar vertical y full width, y poner el bloque de acciones a la izquierda al final
+        "flex flex-col-reverse gap-2 pt-2 border-t sm:flex-row sm:items-center sm:justify-between sm:gap-4",
         className
       )}
     >
-      {/* Lado izquierdo - Botón Cancelar (opcional) o Atrás */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
+      {/* Lado izquierdo - Botón Anterior y Cancelar (en móvil, Cancelar va al final) */}
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
         {showCancel && onCancel && (
           <Button
             type="button"
