@@ -35,28 +35,33 @@ export function WizardControls({
   showCancel = false,
 }: WizardControlsProps) {
   return (
-    <div className={cn("flex items-center justify-between gap-4 pt-6 border-t", className)}>
+    <div
+      className={cn(
+        // Cambios responsive: en móvil, apilar vertical y full width
+        "flex flex-col gap-2 pt-2 border-t sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        className
+      )}
+    >
       {/* Lado izquierdo - Botón Cancelar (opcional) o Atrás */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
         {showCancel && onCancel && (
           <Button
             type="button"
             variant="ghost"
             onClick={onCancel}
             disabled={isLoading}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground w-full sm:w-auto"
           >
             {cancelLabel}
           </Button>
         )}
-        
         {!isFirst && (
           <Button
             type="button"
             variant="outline"
             onClick={goBack}
             disabled={isLoading}
-            className="min-w-24"
+            className="min-w-0 w-full sm:w-auto sm:min-w-24"
           >
             <ChevronLeftIcon className="w-4 h-4 mr-1" />
             {backLabel}
@@ -65,13 +70,13 @@ export function WizardControls({
       </div>
 
       {/* Lado derecho - Botón Siguiente/Finalizar */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
         <Button
           type="button"
           onClick={goNext}
           disabled={isLoading}
           className={cn(
-            "min-w-28 font-medium",
+            "min-w-0 w-full sm:w-auto sm:min-w-28 font-medium",
             isLast && "bg-green-600 hover:bg-green-700 focus:ring-green-500"
           )}
         >
