@@ -25,7 +25,21 @@ export interface ValidateLinkFormularioResponse {
   iat: number
 }
 
-export async function generateLinkFormulario(data: GenerateLinkFormularioDto): Promise<string> {
+// Keys para React Query
+export const LINK_FORMULARIO_KEYS = {
+  all: ['link-formulario'] as const,
+  lists: () => [...LINK_FORMULARIO_KEYS.all, 'list'] as const,
+  list: (limit: number, page: number) => [...LINK_FORMULARIO_KEYS.lists(), { limit, page }] as const,
+  listByHabitacion: (numeroHabitacion: number, limit: number, page: number) => 
+    [...LINK_FORMULARIO_KEYS.lists(), 'habitacion', numeroHabitacion, { limit, page }] as const,
+  details: () => [...LINK_FORMULARIO_KEYS.all, 'detail'] as const,
+  detail: (id: number) => [...LINK_FORMULARIO_KEYS.details(), id] as const,
+  validates: () => [...LINK_FORMULARIO_KEYS.all, 'validate'] as const,
+  validate: (token: string) => [...LINK_FORMULARIO_KEYS.validates(), token] as const,
+};
+
+// Función para generar link de formulario
+export const generateLinkFormularioFn = async (data: GenerateLinkFormularioDto): Promise<string> => {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -50,7 +64,8 @@ export async function generateLinkFormulario(data: GenerateLinkFormularioDto): P
   return url
 }
 
-export async function getLinksFormulario(limit: number, page: number): Promise<LinkFormularioResponse> {
+// Función para obtener links de formulario
+export const fetchLinksFormulario = async (limit: number, page: number): Promise<LinkFormularioResponse> => {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -70,7 +85,8 @@ export async function getLinksFormulario(limit: number, page: number): Promise<L
   return response.json()
 }
 
-export async function getLinksFormularioByHabitacion(numeroHabitacion: number, limit: number, page: number): Promise<LinkFormularioResponse> {
+// Función para obtener links por habitación
+export const fetchLinksFormularioByHabitacion = async (numeroHabitacion: number, limit: number, page: number): Promise<LinkFormularioResponse> => {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -91,7 +107,8 @@ export async function getLinksFormularioByHabitacion(numeroHabitacion: number, l
   return response.json()
 }
 
-export async function getLinkFormularioById(id: number): Promise<LinkFormulario> {
+// Función para obtener link por ID
+export const fetchLinkFormularioById = async (id: number): Promise<LinkFormulario> => {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -112,7 +129,8 @@ export async function getLinkFormularioById(id: number): Promise<LinkFormulario>
   return response.json()
 }
 
-export async function regenerateLinkFormulario(id: number): Promise<LinkFormulario> {
+// Función para regenerar link
+export const regenerateLinkFormularioFn = async (id: number): Promise<LinkFormulario> => {
   const token = getCookie(COOKIE_NAMES.TOKEN)
 
   if (!token) {
@@ -134,7 +152,8 @@ export async function regenerateLinkFormulario(id: number): Promise<LinkFormular
   return response.json()
 }
 
-export async function validateLinkFormulario(tokenUrl: string): Promise<ValidateLinkFormularioResponse> {
+// Función para validar link
+export const validateLinkFormularioFn = async (tokenUrl: string): Promise<ValidateLinkFormularioResponse> => {
   try {
     const response = await fetch(LINK_FORMULARIO_ENDPOINTS.VALIDATE(tokenUrl), {
       method: 'GET',
@@ -178,5 +197,30 @@ export async function validateLinkFormulario(tokenUrl: string): Promise<Validate
       throw new Error('Error de conexión al validar el formulario');
     }
   }
+}
+
+// Funciones legacy para compatibilidad (opcional, se pueden eliminar después de migrar todos los usos)
+export async function generateLinkFormulario(data: GenerateLinkFormularioDto): Promise<string> {
+  return generateLinkFormularioFn(data);
+}
+
+export async function getLinksFormulario(limit: number, page: number): Promise<LinkFormularioResponse> {
+  return fetchLinksFormulario(limit, page);
+}
+
+export async function getLinksFormularioByHabitacion(numeroHabitacion: number, limit: number, page: number): Promise<LinkFormularioResponse> {
+  return fetchLinksFormularioByHabitacion(numeroHabitacion, limit, page);
+}
+
+export async function getLinkFormularioById(id: number): Promise<LinkFormulario> {
+  return fetchLinkFormularioById(id);
+}
+
+export async function regenerateLinkFormulario(id: number): Promise<LinkFormulario> {
+  return regenerateLinkFormularioFn(id);
+}
+
+export async function validateLinkFormulario(tokenUrl: string): Promise<ValidateLinkFormularioResponse> {
+  return validateLinkFormularioFn(tokenUrl);
 }
 

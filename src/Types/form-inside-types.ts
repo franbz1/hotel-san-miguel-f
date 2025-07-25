@@ -1,6 +1,7 @@
 import { Genero } from "./enums/generos";
-import { TipoDoc } from "./enums/tiposDocumento";
 import { MotivosViajes } from "./enums/motivosViajes";
+import { TipoDoc } from "./enums/tiposDocumento";
+import { TipoDocumentoHuespedSecundario } from "./enums/tipoDocumentoHuespedSecundario";
 
 // Tipo base para formularios que incluyen campos de ubicación
 export interface LocationFormFields {
@@ -39,7 +40,7 @@ export interface PersonalInfoFormFields extends LocationFormFields {
 
 // Tipo para campos de huéspedes secundarios
 export interface CompanionFormFields extends LocationFormFields {
-  tipo_documento: TipoDoc;
+  tipo_documento: TipoDocumentoHuespedSecundario;
   numero_documento: string;
   primer_apellido: string;
   segundo_apellido?: string;

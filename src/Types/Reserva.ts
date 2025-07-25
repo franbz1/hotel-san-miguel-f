@@ -13,6 +13,7 @@ export interface Reserva {
   departamento_procedencia: string
   ciudad_procedencia: string
   pais_destino: string
+  ciudad_destino: string
   motivo_viaje: MotivosViajes
   check_in: Date
   check_out: Date

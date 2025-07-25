@@ -16,7 +16,6 @@ Este proyecto es únicamente el **frontend** que consume la API del backend disp
 - [👥 Sistema de Roles y Permisos](#-sistema-de-roles-y-permisos)
 - [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
 
-
 ## 🚀 Características Principales
 
 ### ✨ Vista Unificada de Gestión Hotelera

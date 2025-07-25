@@ -417,7 +417,6 @@ export default function HuespedDetailsPage() {
                           <SelectContent>
                             <SelectItem value={TipoDoc.CC}>Cédula de Ciudadanía</SelectItem>
                             <SelectItem value={TipoDoc.CE}>Cédula de Extranjería</SelectItem>
-                            <SelectItem value={TipoDoc.TI}>Tarjeta de Identidad</SelectItem>
                             <SelectItem value={TipoDoc.PASAPORTE}>Pasaporte</SelectItem>
                             <SelectItem value={TipoDoc.PPT}>PPT</SelectItem>
                             <SelectItem value={TipoDoc.PEP}>PEP</SelectItem>

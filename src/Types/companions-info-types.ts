@@ -1,11 +1,11 @@
 import { z } from "zod"
 import { Genero } from "./enums/generos"
-import { TipoDoc } from "./enums/tiposDocumento"
+import { TipoDocumentoHuespedSecundario } from "./enums/tipoDocumentoHuespedSecundario"
 
 
 // Schema Zod que refleja CreateHuespedSecundarioWithoutIdDto
 export const companionSchema = z.object({
-  tipo_documento: z.nativeEnum(TipoDoc, {
+  tipo_documento: z.nativeEnum(TipoDocumentoHuespedSecundario, {
     required_error: "Seleccione el tipo de documento",
   }),
   numero_documento: z.string().min(5, {
