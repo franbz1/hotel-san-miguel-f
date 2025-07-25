@@ -1,1 +1,7 @@
-Arreglar el guard del tiempo
+Implementar analitica de habitaciones
+Implementar historial de aseo habitaciones
+----
+Escribir flujo completo de aseo
+Verificar flujo completo de aseo
+----
+Agregar dias con value 0 a las analititicas del front
