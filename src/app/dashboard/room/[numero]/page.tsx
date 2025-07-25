@@ -1,9 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Header } from "@/components/layout/header"
-import { getHabitacionByNumero } from "@/lib/rooms/habitacion-service"
-import { Habitacion } from "@/Types/habitacion"
+import { useHabitacionByNumero } from "@/lib/rooms/habitacion-service"
 import { useParams } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -16,44 +14,34 @@ import { AdminOnly } from "@/components/auth/permission-guard"
 
 export default function RoomDetails() {
   const params = useParams()
-  const [habitacion, setHabitacion] = useState<Habitacion | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const numero = parseInt(params.numero as string)
 
-  useEffect(() => {
-    async function fetchHabitacion() {
-      try {
-        const numero = parseInt(params.numero as string)
-        if (isNaN(numero)) {
-          throw new Error("Número de habitación inválido")
-        }
-        
-        const data = await getHabitacionByNumero(numero)
-        setHabitacion(data)
-        setLoading(false)
-      } catch (err) {
-        console.error("Error al cargar los datos de la habitación:", err)
-        setError("No se pudo cargar la información de la habitación")
-        setLoading(false)
-      }
-    }
-
-    fetchHabitacion()
-  }, [params.numero])
+  const { 
+    data: habitacion, 
+    isLoading: loading, 
+    error,
+    refetch
+  } = useHabitacionByNumero(numero, !isNaN(numero))
 
   const handleRoomUpdated = async () => {
-    if (!params.numero) return;
-    
-    try {
-      setLoading(true)
-      const numero = parseInt(params.numero as string)
-      const data = await getHabitacionByNumero(numero)
-      setHabitacion(data)
-    } catch (err) {
-      console.error("Error al recargar los datos de la habitación:", err)
-    } finally {
-      setLoading(false)
-    }
+    await refetch()
+  }
+
+  if (isNaN(numero)) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="container mx-auto p-6 flex justify-center items-center">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6">
+              <div className="text-center text-red-500">
+                <p className="text-lg">Número de habitación inválido</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   if (error) {
@@ -64,7 +52,7 @@ export default function RoomDetails() {
           <Card className="w-full max-w-md">
             <CardContent className="p-6">
               <div className="text-center text-red-500">
-                <p className="text-lg">{error}</p>
+                <p className="text-lg">No se pudo cargar la información de la habitación</p>
               </div>
             </CardContent>
           </Card>

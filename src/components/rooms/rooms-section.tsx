@@ -5,7 +5,7 @@ import { Search, ChevronLeft, ChevronRight, BedDouble } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getHabitaciones, getHabitacionesCambios, HabitacionesCambio } from "@/lib/rooms/habitacion-service"
+import { useHabitaciones, getHabitacionesCambios, HabitacionesCambio } from "@/lib/rooms/habitacion-service"
 import { Habitacion } from "@/Types/habitacion"
 import { CreateRoomModal } from "./create-room-modal"
 import { AdminOnly } from "@/components/auth/permission-guard"
@@ -49,45 +49,20 @@ const RoomCard = ({ room, isAnimated = false }: { room: Habitacion, isAnimated?:
 }
 
 export function RoomsSection() {
-  const [habitaciones, setHabitaciones] = useState<Habitacion[]>([])
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [animatedRooms, setAnimatedRooms] = useState<number[]>([])
+  const limitPerPage = 6
 
-  const fetchHabitaciones = async () => {
-    try {
-      setIsLoading(true)
-      const response = await getHabitaciones(currentPage)
-      
-      setHabitaciones(response.data)
-      
-      // Manejar el caso cuando no hay habitaciones
-      const calculatedTotalPages = response.meta.lastPage > 0 ? response.meta.lastPage : 1
-      setTotalPages(calculatedTotalPages)
-      
-      // Si la página actual es mayor que el total de páginas disponibles, 
-      // redirigir a la primera página
-      if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
-        setCurrentPage(1)
-        return // Salir temprano, useEffect se activará de nuevo
-      }
-      
-      setError(null)
-    } catch (err) {
-      // Si hay error y la página actual es mayor que 1, intentar ir a la página 1
-      if (currentPage > 1) {
-        setCurrentPage(1)
-        setError(null) // Limpiar error temporalmente para permitir retry
-      } else {
-        setError('Error al cargar las habitaciones')
-        console.error(err)
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Usar el hook de TanStack Query
+  const { 
+    data: response, 
+    isLoading, 
+    error,
+    refetch
+  } = useHabitaciones(currentPage, limitPerPage)
+
+  const habitaciones = response?.data || []
+  const totalPages = response?.meta?.lastPage || 1
 
   const handlePreviousPage = () => {
     if (currentPage > 1 && !isLoading) {
@@ -101,9 +76,9 @@ export function RoomsSection() {
     }
   }
 
-  useEffect(() => {
-    fetchHabitaciones()
-  }, [currentPage])
+  const handleRoomCreated = async () => {
+    await refetch()
+  }
 
   // Actualizaciones en tiempo real con SSE
   useEffect(() => {
@@ -123,26 +98,10 @@ export function RoomsSection() {
           ),
           duration: 10000,
         });
+        
+        // Refrescar los datos para obtener los cambios
+        refetch();
       }
-      
-      // Actualizar habitaciones con nuevos estados
-      setHabitaciones(prevHabitaciones => {
-        return prevHabitaciones.map(habitacion => {
-          // Buscar si esta habitación tiene un cambio
-          const cambio = cambios.find(c => c.habitacionId === habitacion.id);
-          
-          // Si hay un cambio, actualizar el estado de la habitación
-          if (cambio) {
-            return {
-              ...habitacion,
-              estado: cambio.nuevoEstado
-            };
-          }
-          
-          // Si no hay cambio, mantener la habitación como está
-          return habitacion;
-        });
-      });
       
       // Activar animación
       setAnimatedRooms(changedRoomIds);
@@ -167,7 +126,7 @@ export function RoomsSection() {
         eventSource.close()
       }
     };
-  }, []);
+  }, [refetch]);
 
   // Calcular si hay habitaciones para mostrar mensaje apropiado
   const hasHabitaciones = habitaciones.length > 0
@@ -185,7 +144,7 @@ export function RoomsSection() {
             <Input type="search" placeholder="Buscar habitación..." className="pl-8 w-full" />
           </div>
           <AdminOnly>
-            <CreateRoomModal onRoomCreated={fetchHabitaciones} />
+            <CreateRoomModal onRoomCreated={handleRoomCreated} />
           </AdminOnly>
         </div>
       </div>
@@ -224,7 +183,7 @@ export function RoomsSection() {
           </div>
         ) : error ? (
           <div className="col-span-full text-center text-red-500">
-            {error}
+            Error al cargar las habitaciones
           </div>
         ) : showEmptyState ? (
           <div className="col-span-full text-center text-gray-500 py-12">
