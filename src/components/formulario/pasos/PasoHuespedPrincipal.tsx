@@ -482,7 +482,7 @@ export const PasoHuespedPrincipal = ({
               searchable={true}
               maxLevel='country'
               placeholders={{
-                country: 'Seleccionar país de nacionalidad',
+                country: 'País de nacionalidad',
               }}
               onSelectionChange={handleNacionalidadChange}
               defaultValues={getNacionalidadDefaultValues}
@@ -502,9 +502,9 @@ export const PasoHuespedPrincipal = ({
               searchable={true}
               maxLevel='city'
               placeholders={{
-                country: 'Seleccionar país de procedencia',
-                state: 'Seleccionar estado de procedencia',
-                city: 'Seleccionar ciudad de procedencia',
+                country: 'País de procedencia',
+                state: 'Estado de procedencia',
+                city: 'Ciudad de procedencia',
               }}
               onSelectionChange={handleProcedenciaChange}
               defaultValues={getProcedenciaDefaultValues}
@@ -530,9 +530,9 @@ export const PasoHuespedPrincipal = ({
               searchable={true}
               maxLevel='city'
               placeholders={{
-                country: 'Seleccionar país de residencia',
-                state: 'Seleccionar estado de residencia',
-                city: 'Seleccionar ciudad de residencia',
+                country: 'País de residencia',
+                state: 'Estado de residencia',
+                city: 'Ciudad de residencia',
               }}
               onSelectionChange={handleResidenciaChange}
               defaultValues={getResidenciaDefaultValues}
@@ -556,9 +556,9 @@ export const PasoHuespedPrincipal = ({
               searchable={true}
               maxLevel='city'
               placeholders={{
-                country: 'Seleccionar país de destino',
-                state: 'Seleccionar estado de destino',
-                city: 'Seleccionar ciudad de destino',
+                country: 'País de destino',
+                state: 'Estado de destino',
+                city: 'Ciudad de destino',
               }}
               onSelectionChange={handleDestinoChange}
               defaultValues={getDestinoDefaultValues}
@@ -577,7 +577,7 @@ export const PasoHuespedPrincipal = ({
                 <Label>Teléfono *</Label>
               </TooltipWrapper>
               <div className='flex gap-2'>
-                <div className='w-40'>
+                <div className='w-30'>
                   <Label
                     htmlFor='telefono_dial_code'
                     className='sr-only'
