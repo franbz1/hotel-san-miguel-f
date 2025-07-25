@@ -407,7 +407,7 @@ export const AcompanianteForm = ({
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger id='tipo_documento'>
-                        <SelectValue placeholder='Seleccionar tipo de documento' />
+                        <SelectValue placeholder='Tipo de documento' />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value={TipoDocumentoHuespedSecundario.CC}>
@@ -441,7 +441,7 @@ export const AcompanianteForm = ({
                 <Input
                   id='numero_documento'
                   {...register('numero_documento')}
-                  placeholder='Ingrese número de documento'
+                  placeholder='Número de documento'
                 />
                 <ErrorMessage message={errors.numero_documento?.message} />
               </div>
@@ -560,16 +560,12 @@ export const AcompanianteForm = ({
                 checked={reutilizarDatosHuespedPrincipal}
                 onCheckedChange={(checked) => setReutilizarDatosHuespedPrincipal(checked === true)}
               />
-              <TooltipWrapper
-                tooltip='Marque esta opción para usar la misma nacionalidad, procedencia, residencia y destino del huésped principal'
-              >
                 <label 
                   htmlFor='reutilizar-datos-huesped-principal'
                   className='text-sm font-medium cursor-pointer'
                 >
                   Usar la misma información de ubicación del huésped principal
                 </label>
-              </TooltipWrapper>
             </div>
 
             {/* Mensaje informativo cuando se reutilizan datos */}
@@ -594,7 +590,7 @@ export const AcompanianteForm = ({
                     searchable={true}
                     maxLevel='country'
                     placeholders={{
-                      country: 'Seleccionar país de nacionalidad',
+                      country: 'País de nacionalidad',
                     }}
                     onSelectionChange={handleNacionalidadChange}
                     defaultValues={getNacionalidadDefaultValues}
@@ -612,9 +608,9 @@ export const AcompanianteForm = ({
                     searchable={true}
                     maxLevel='city'
                     placeholders={{
-                      country: 'Seleccionar país de procedencia',
-                      state: 'Seleccionar estado de procedencia',
-                      city: 'Seleccionar ciudad de procedencia',
+                      country: 'País de procedencia',
+                      state: 'Estado de procedencia',
+                      city: 'Ciudad de procedencia',
                     }}
                     onSelectionChange={handleProcedenciaChange}
                     defaultValues={getProcedenciaDefaultValues}
@@ -633,9 +629,9 @@ export const AcompanianteForm = ({
                     searchable={true}
                     maxLevel='city'
                     placeholders={{
-                      country: 'Seleccionar país de residencia',
-                      state: 'Seleccionar estado de residencia',
-                      city: 'Seleccionar ciudad de residencia',
+                      country: 'País de residencia',
+                      state: 'Estado de residencia',
+                      city: 'Ciudad de residencia',
                     }}
                     onSelectionChange={handleResidenciaChange}
                     defaultValues={getResidenciaDefaultValues}
@@ -654,9 +650,9 @@ export const AcompanianteForm = ({
                     searchable={true}
                     maxLevel='city'
                     placeholders={{
-                      country: 'Seleccionar país de destino',
-                      state: 'Seleccionar estado de destino',
-                      city: 'Seleccionar ciudad de destino',
+                      country: 'País de destino',
+                      state: 'Estado de destino',
+                      city: 'Ciudad de destino',
                     }}
                     onSelectionChange={handleDestinoChange}
                     defaultValues={getDestinoDefaultValues}
@@ -680,7 +676,7 @@ export const AcompanianteForm = ({
                   <Label>Teléfono</Label>
                 </TooltipWrapper>
                 <div className='flex gap-2'>
-                  <div className='w-40'>
+                  <div className='w-28'>
                     <Label htmlFor='telefono_dial_code_acompaniante' className='sr-only'>
                       Código de país del acompañante
                     </Label>
@@ -741,30 +737,32 @@ export const AcompanianteForm = ({
           </div>
 
           {/* Botones de Acción */}
-          <div className='flex justify-end gap-2 pt-4'>
+          <div className='flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end sm:items-center'>
             <Button
               type='button'
               variant='outline'
               onClick={onCancel}
               disabled={isSubmitting}
+              className='w-full sm:w-auto'
             >
               <X className='h-4 w-4 mr-2' />
               Cancelar
             </Button>
-            
+
             {mode === 'edit' && onDelete && (
               <Button
                 type='button'
                 variant='destructive'
                 onClick={handleDelete}
                 disabled={isSubmitting}
+                className='w-full sm:w-auto'
               >
                 <Trash2 className='h-4 w-4 mr-2' />
                 Eliminar
               </Button>
             )}
-            
-            <Button type='submit' disabled={isSubmitting}>
+
+            <Button type='submit' disabled={isSubmitting} className='w-full sm:w-auto'>
               <Save className='h-4 w-4 mr-2' />
               {isSubmitting ? 'Guardando...' : (mode === 'create' ? 'Agregar' : 'Actualizar')}
             </Button>

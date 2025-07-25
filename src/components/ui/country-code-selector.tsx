@@ -166,13 +166,13 @@ export const CountryCodeSelector = ({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className="w-full justify-between text-sm px-3 py-2 sm:text-base"
             disabled={disabled}
           >
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 opacity-50" />
+            <div className="flex items-center gap-2 min-w-0 w-full">
+              <Phone className="h-4 w-4 opacity-50 flex-shrink-0" />
               <span className={cn(
-                "truncate",
+                "truncate block w-full text-left",
                 !selectedCountry && "text-muted-foreground"
               )}>
                 {getDisplayText(selectedCountry)}
@@ -181,9 +181,9 @@ export const CountryCodeSelector = ({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent className="w-full max-w-xs sm:max-w-md p-0 z-50" align="start" sideOffset={4} style={{ minWidth: 'min(100vw - 2rem, 320px)' }}>
           <Command>
-            <CommandInput placeholder="Buscar país o código..." />
+            <CommandInput placeholder="Buscar país o código..." className="text-sm" />
             <CommandEmpty>No se encontró el código de país.</CommandEmpty>
             <CommandGroup className="max-h-64 overflow-auto">
               {sortedCountries.map((country) => (
@@ -191,24 +191,25 @@ export const CountryCodeSelector = ({
                   key={country.code}
                   value={`${country.name} ${country.dial_code} ${country.code}`}
                   onSelect={() => handleSelect(country)}
+                  className="text-sm px-2 py-2"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 flex-shrink-0",
                       selectedCountry?.code === country.code
                         ? "opacity-100"
                         : "opacity-0"
                     )}
                   />
-                  <div className="flex items-center gap-2 flex-1">
-                    <span className="font-mono font-medium text-primary">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="font-mono font-medium text-primary flex-shrink-0">
                       {country.dial_code}
                     </span>
-                    <span className="truncate">
+                    <span className="truncate block w-full">
                       {country.name}
                     </span>
                     {isDefaultCountry(country) && (
-                      <span className="ml-auto text-xs text-muted-foreground">
+                      <span className="ml-auto text-xs text-muted-foreground flex-shrink-0">
                         Por defecto
                       </span>
                     )}

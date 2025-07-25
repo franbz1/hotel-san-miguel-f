@@ -96,15 +96,15 @@ export const CuentaRegresiva = ({ fechaVencimiento, onExpired }: CuentaRegresiva
   }
 
   return (
-    <div className={`text-sm sm:text-base lg:text-lg font-medium flex items-center gap-2 ${
-      esCritico 
-        ? 'text-red-600 dark:text-red-400' 
-        : 'text-gray-600 dark:text-gray-400'
-    }`}>
-      <p className=''>Tiempo para completar el formulario:</p>
-      <span className={esCritico ? 'animate-pulse' : ''}>
-        {obtenerTextoTiempo()}
-      </span>
+    <div
+      className={`text-sm sm:text-base lg:text-lg font-medium flex items-center gap-2 ${
+        esCritico
+          ? 'text-red-600 dark:text-red-400'
+          : 'text-gray-600 dark:text-gray-400'
+      }`}
+    >
+      <p className='hidden sm:inline'>Tiempo para completar el formulario:</p>
+      <span className={esCritico ? 'animate-pulse' : ''}>{obtenerTextoTiempo()}</span>
     </div>
   )
 } 
