@@ -1,6 +1,10 @@
-# 🏨 Hotel San Miguel - Sistema de Gestión Hotelera
+# 🏨 Hotel San Miguel - Frontend del Sistema de Gestión Hotelera
 
-Sistema integral de gestión hotelera desarrollado con Next.js 15, React 19 y TypeScript. Diseñado específicamente para el Hotel San Miguel, incluye módulos completos de reservas, gestión de huéspedes, sistema de aseo y analíticas avanzadas.
+**🚧 Proyecto en desarrollo activo 🚧**
+
+Aplicación frontend desarrollada con Next.js 15, React 19 y TypeScript para la gestión integral de hoteles. El objetivo principal es permitir la administración completa de un hotel desde un solo vistazo: habitaciones, reservas, generación de formularios únicos, manejo de analíticas, gestión de huéspedes y control de aseo según normativas hoteleras.
+
+Este proyecto es únicamente el **frontend** que consume la API del backend disponible en: [hotel-san-miguel](https://github.com/franbz1/hotel-san-miguel)
 
 ## 📋 Tabla de Contenidos
 
@@ -11,45 +15,38 @@ Sistema integral de gestión hotelera desarrollado con Next.js 15, React 19 y Ty
 - [🎯 Módulos del Sistema](#-módulos-del-sistema)
 - [👥 Sistema de Roles y Permisos](#-sistema-de-roles-y-permisos)
 - [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
-- [📊 Base de Datos](#-base-de-datos)
-- [🔐 Seguridad](#-seguridad)
-- [📈 Analytics y Reportes](#-analytics-y-reportes)
-- [🧪 Testing](#-testing)
-- [🚀 Despliegue](#-despliegue)
 
 ## 🚀 Características Principales
 
-### ✨ Gestión Integral de Reservas
-- **Dashboard administrativo** con vista en tiempo real
-- **Sistema de reservas avanzado** con validaciones automáticas
-- **Gestión de habitaciones** con estados dinámicos
-- **Control de ocupación** y disponibilidad
+### ✨ Vista Unificada de Gestión Hotelera
+Permite administrar todo el hotel desde una sola interfaz: visualizar habitaciones en tiempo real, gestionar reservas activas, controlar el estado del aseo y monitorear analíticas de rendimiento.
 
-### 👤 Gestión de Huéspedes
-- **Registro digital de huéspedes** con formularios paso a paso
-- **Base de datos de clientes** con historial completo
-- **Validación de documentos** internacionales
-- **Soporte para huéspedes secundarios** y acompañantes
+![image](https://github.com/user-attachments/assets/bcfacc78-5e9e-4bcc-95c5-e5bf829300ab)
 
-### 🧹 Sistema de Aseo y Mantenimiento
-- **Gestión de limpieza de habitaciones** con programación automática
-- **Control de zonas comunes** y áreas especiales
-- **Rotación programada de colchones** con alertas preventivas
-- **Reportes diarios de aseo** con métricas de rendimiento
-- **Configuración flexible** de procedimientos y horarios
+### 🏨 Gestión de Habitaciones y Reservas
+Control completo del estado de habitaciones con sistemas de reservas que incluyen validaciones automáticas, asignación inteligente y seguimiento de ocupación.
 
-### 📊 Analíticas y Reportes
-- **Dashboard de métricas** en tiempo real
-- **Análisis de ingresos** por períodos personalizables
-- **Reportes de ocupación** y tendencias
-- **Exportación a Excel** de datos detallados
-- **Gráficos interactivos** con Recharts
+![image](https://github.com/user-attachments/assets/55d8fb35-584a-495f-bd2c-746db38bd9fc)
 
-### 🔐 Sistema de Autenticación y Permisos
-- **Autenticación basada en JWT** con cookies seguras
-- **Control de acceso por roles** (Administrador, Cajero, Aseo)
-- **Middleware de protección** de rutas
-- **Gestión de sesiones** con expiración automática
+### 👥 Administración de Huéspedes
+Registro digital completo con formularios únicos generados por token, validación de documentos internacionales y gestión de acompañantes.
+
+![image](https://github.com/user-attachments/assets/00601880-ba4b-4c51-b908-dd18ab7d2bb8)
+
+### 🧹 Control de Aseo según Normativas
+Sistema especializado para cumplir con normativas hoteleras de limpieza, incluyendo programación automática, rotación de colchones y reportes de cumplimiento.
+
+![image](https://github.com/user-attachments/assets/6d646c6b-f72e-4940-b78d-d499cf267d3b)
+
+### 📊 Analíticas de Rendimiento
+Dashboard con métricas clave del hotel, análisis de ingresos, reportes de ocupación y exportación de datos para toma de decisiones.
+
+![image](https://github.com/user-attachments/assets/2c55ebb0-d367-4c2a-ac33-898d0a2fa1fb)
+
+### 🔐 Sistema de Roles y Seguridad
+Autenticación segura con diferentes niveles de acceso según el rol del usuario, protegiendo la información sensible del hotel.
+
+![image](https://github.com/user-attachments/assets/39d273c0-df01-4c41-a18e-9fc4f7257a53)
 
 ## 🏗️ Arquitectura del Sistema
 
@@ -131,22 +128,14 @@ pnpm install
 bun install
 ```
 
-3. **Configurar variables de entorno**
-```bash
-# Crear archivo .env.local
-cp .env.example .env.local
+3. **Configurar la URL del backend**
+```typescript
+//Ir al archivo src\lib\common\api.ts
+//configurar la constante a la ruta donde se esta ejecutando el backend de nestjs
+export const API_BASE_URL = 'http://localhost:3001' 
 ```
 
-Configurar las siguientes variables:
-```env
-# URL del backend API
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
-
-# Configuración de cookies
-NEXT_PUBLIC_COOKIE_DOMAIN=localhost
-
-# Otras configuraciones necesarias
-```
+**Nota**: Asegúrate de tener el backend ejecutándose del repositorio [hotel-san-miguel](https://github.com/franbz1/hotel-san-miguel)
 
 4. **Ejecutar en modo desarrollo**
 ```bash
@@ -182,73 +171,28 @@ npm run lint
 
 ## 🎯 Módulos del Sistema
 
-### 1. 📊 Dashboard Principal
-**Ubicación**: `/dashboard`
+### 📊 Dashboard Principal (`/dashboard`)
+Centro de control unificado que ofrece una vista completa del estado del hotel. Permite acceder rápidamente a la gestión de habitaciones, reservas activas y métricas principales del negocio.
 
-- **Vista general** del estado del hotel
-- **Gestión de habitaciones** con estados en tiempo real
-- **Panel de reservas** con filtros avanzados
-- **Acceso rápido** a todas las funcionalidades
+### 👥 Gestión de Huéspedes (`/dashboard/huespedes`)
+Administración completa de la base de datos de clientes con funcionalidades de registro, validación de documentos internacionales, gestión de acompañantes y exportación de información.
 
-### 2. 👥 Gestión de Huéspedes
-**Ubicación**: `/dashboard/huespedes`
+### 🏨 Gestión de Reservas (`/dashboard/reservas`)
+Control integral del ciclo de vida de las reservas, desde la creación hasta la finalización, incluyendo asignación de habitaciones, cálculo de costos y generación de formularios únicos por token.
 
-- **Registro completo** de información personal
-- **Validación de documentos** (CC, CE, Pasaporte, PPT, PEP, DNI)
-- **Gestión de acompañantes** con datos individuales
-- **Historial de reservas** por huésped
-- **Exportación de datos** a Excel
+### 🧹 Sistema de Aseo (`/aseo`)
+Módulo especializado para cumplir con normativas hoteleras de limpieza que incluye:
+- Programación automática de tareas de aseo
+- Control de limpieza de habitaciones y zonas comunes
+- Rotación programada de colchones
+- Generación de reportes de cumplimiento
+- Configuración de procedimientos y horarios
 
-### 3. 🏨 Gestión de Reservas
-**Ubicación**: `/dashboard/reservas`
+### 📈 Analíticas (`/dashboard/analytics`)
+Dashboard de métricas de negocio con análisis de ingresos, reportes de ocupación, gráficos de tendencias y capacidad de exportación de datos para la toma de decisiones estratégicas.
 
-- **Estados de reserva**: Reservado, Cancelado, Finalizado, Pendiente
-- **Asignación automática** de habitaciones
-- **Cálculo de costos** dinámico
-- **Gestión de fechas** con validaciones
-- **Formularios de registro** con tokens únicos
-
-### 4. 🧹 Sistema de Aseo
-**Ubicación**: `/aseo`
-
-#### Características principales:
-- **Gestión de habitaciones para aseo**
-  - Programación automática según checkout
-  - Control de tipos de aseo (Limpieza, Desinfección, Rotación de colchones)
-  - Estados específicos (En limpieza, En desinfección)
-
-- **Zonas comunes**
-  - Registro de limpieza de áreas públicas
-  - Programación de mantenimiento
-  - Control de productos utilizados
-
-- **Reportes automatizados**
-  - Generación diaria de reportes
-  - Métricas de productividad
-  - Seguimiento de cumplimiento
-
-- **Configuración flexible**
-  - Horarios de aseo personalizables
-  - Elementos de trabajo configurables
-  - Procedimientos estándar definibles
-
-### 5. 📈 Analíticas Avanzadas
-**Ubicación**: `/dashboard/analytics`
-
-- **Análisis de ingresos** por períodos
-- **Métricas de ocupación** y rendimiento
-- **Gráficos interactivos** de tendencias
-- **Exportación completa** de datos
-- **Filtros personalizables** de fecha
-
-### 6. 📝 Formulario de Registro
-**Ubicación**: `/registro-formulario/[token]`
-
-- **Proceso paso a paso** guiado
-- **Validación en tiempo real** con Zod
-- **Soporte multiidioma** para documentos
-- **Guardado automático** de progreso
-- **Interfaz responsive** optimizada
+### 📝 Formularios de Registro (`/registro-formulario/[token]`)
+Interfaz especializada para el registro de huéspedes con proceso guiado paso a paso, validación en tiempo real y formularios únicos generados por token de reserva.
 
 ## 👥 Sistema de Roles y Permisos
 
@@ -297,6 +241,7 @@ npm run lint
 - **Tailwind CSS 4** - Framework de utilidades CSS
 - **Radix UI** - Componentes accesibles y primitivos
 - **Lucide React** - Iconografía moderna
+- **Shadcn** - Libreria de componentes
 - **Recharts** - Gráficos y visualizaciones
 
 ### Validación y Tipos
@@ -314,151 +259,6 @@ npm run lint
 - **TypeScript** - Verificación de tipos
 - **PostCSS** - Procesamiento de CSS
 
-## 📊 Base de Datos
-
-### Entidades Principales
-
-#### Huéspedes
-- Información personal completa
-- Documentos de identificación
-- Datos de contacto y residencia
-- Historial de reservas
-
-#### Reservas
-- Fechas de estadía
-- Habitaciones asignadas
-- Estados y costos
-- Información de facturación
-
-#### Habitaciones
-- Números y tipos
-- Estados de ocupación
-- Historial de aseo
-- Configuraciones específicas
-
-#### Aseo
-- Registros de limpieza
-- Tipos de aseo realizados
-- Personal asignado
-- Tiempos y productos utilizados
-
-#### Configuraciones
-- Parámetros del sistema
-- Horarios y frecuencias
-- Elementos de trabajo
-- Procedimientos estándar
-
-## 🔐 Seguridad
-
-### Autenticación
-- **JWT tokens** almacenados en cookies httpOnly
-- **Validación automática** en cada solicitud
-- **Expiración configurable** de sesiones
-- **Refresh token** automático
-
-### Autorización
-- **Control granular** por rutas y funciones
-- **Middleware de verificación** en tiempo real
-- **Roles jerárquicos** con herencia de permisos
-- **Protección CSRF** automática
-
-### Validación de Datos
-- **Schemas Zod** en frontend y backend
-- **Sanitización automática** de inputs
-- **Validación de tipos** TypeScript
-- **Rate limiting** en endpoints sensibles
-
-## 📈 Analytics y Reportes
-
-### Métricas Disponibles
-- **Ingresos totales** por período
-- **Ocupación promedio** y picos
-- **Análisis de temporadas** altas y bajas
-- **Rendimiento por habitación**
-- **Eficiencia del personal de aseo**
-
-### Exportación de Datos
-- **Excel completo** con datos detallados
-- **Filtros personalizables** por fecha
-- **Múltiples hojas** organizadas por tipo
-- **Formateo automático** de monedas y fechas
-
-### Visualizaciones
-- **Gráficos de barras** para ingresos mensuales
-- **Líneas de tendencia** para ocupación
-- **Métricas KPI** en tiempo real
-- **Comparativas** entre períodos
-
-## 🧪 Testing
-
-### Estructura de Testing
-```bash
-# Ejecutar todos los tests
-npm run test
-
-# Tests en modo watch
-npm run test:watch
-
-# Coverage de tests
-npm run test:coverage
-```
-
-### Tipos de Tests
-- **Unit tests** para funciones puras
-- **Integration tests** para hooks y servicios
-- **Component tests** para UI components
-- **E2E tests** para flujos completos
-
-## 🚀 Despliegue
-
-### Preparación para Producción
-```bash
-# Construir la aplicación
-npm run build
-
-# Verificar la construcción
-npm run start
-```
-
-### Variables de Entorno de Producción
-```env
-# API URL de producción
-NEXT_PUBLIC_API_URL=https://api.hotelsanmiguel.com
-
-# Dominio de cookies
-NEXT_PUBLIC_COOKIE_DOMAIN=hotelsanmiguel.com
-
-# Configuraciones de seguridad
-NEXT_PUBLIC_SECURE_COOKIES=true
-```
-
-### Plataformas Recomendadas
-- **Vercel** - Despliegue automático optimizado para Next.js
-- **Netlify** - Alternativa con excelente CI/CD
-- **Railway** - Para aplicaciones full-stack
-- **AWS/Azure** - Para infraestructura empresarial
-
-## 📞 Soporte y Contribución
-
-### Contacto
-- **Email**: soporte@hotelsanmiguel.com
-- **Teléfono**: +57 (XXX) XXX-XXXX
-
-### Contribuir al Proyecto
-1. Fork del repositorio
-2. Crear una rama para la funcionalidad
-3. Implementar cambios con tests
-4. Crear Pull Request con descripción detallada
-
-### Reporte de Bugs
-Utilizar el sistema de Issues de GitHub con:
-- Descripción detallada del problema
-- Pasos para reproducir
-- Screenshots si es necesario
-- Información del navegador/sistema
-
 ---
-
-**Desarrollado con ❤️ para Hotel San Miguel**
 
 > Este sistema está diseñado específicamente para optimizar las operaciones hoteleras, mejorar la experiencia del huésped y proporcionar insights valiosos para la toma de decisiones estratégicas.
