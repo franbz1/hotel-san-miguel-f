@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertCircle, Clock, Bell, RotateCcw, Brush, Shield, Beaker, Bed, Bath, FileText, X } from "lucide-react";
+import { AlertCircle, Clock, Bell, RotateCcw, Brush, Shield, Beaker, Bed, Bath, FileText, X, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -264,6 +264,40 @@ export function ConfiguracionAseoComponent() {
     };
 
     updateConfiguracion(dataToSend);
+  };
+
+  // Restablecer a valores por defecto
+  const handleRestoreDefaults = () => {
+    const defaultValues: UpdateConfiguracionAseoDto = {
+      hora_limite_aseo: '17:00',
+      hora_proceso_nocturno_utc: '05:00',
+      frecuencia_rotacion_colchones: 180,
+      dias_aviso_rotacion_colchones: 5,
+      habilitar_notificaciones: false,
+      email_notificaciones: "",
+      elementos_aseo_default: [],
+      elementos_proteccion_default: [],
+      productos_quimicos_default: [],
+      areas_intervenir_habitacion_default: [],
+      areas_intervenir_banio_default: [],
+      procedimiento_aseo_habitacion_default: "",
+      procedimiento_desinfeccion_habitacion_default: "",
+      procedimiento_rotacion_colchones_default: "",
+      procedimiento_limieza_zona_comun_default: "",
+      procedimiento_desinfeccion_zona_comun_default: "",
+    };
+    
+    setFormData(defaultValues);
+    setHasChanges(true);
+    
+    // Limpiar los campos de nuevos elementos
+    setNewElementoAseo("");
+    setNewElementoProteccion("");
+    setNewProductoQuimico("");
+    setNewAreaHabitacion("");
+    setNewAreaBanio("");
+    
+    toast.info("Configuración restablecida a valores por defecto");
   };
 
   // Reiniciar formulario
@@ -649,29 +683,42 @@ export function ConfiguracionAseoComponent() {
         </Card>
 
         {/* Botones de acción */}
-        <div className="flex items-center justify-end gap-4 pt-4 border-t">
+        <div className="flex items-center justify-between gap-4 pt-4 border-t">
           <Button
             type="button"
-            variant="outline"
-            onClick={handleReset}
-            disabled={!hasChanges || isUpdating}
+            variant="secondary"
+            onClick={handleRestoreDefaults}
+            disabled={isUpdating}
+            className="flex items-center gap-2"
           >
-            Cancelar
+            <RefreshCw className="w-4 h-4" />
+            Restablecer por defecto
           </Button>
-          <Button
-            type="submit"
-            disabled={!hasChanges || isUpdating}
-            className="min-w-[120px]"
-          >
-            {isUpdating ? (
-              <>
-                <LoadingSpinner className="w-4 h-4 mr-2" />
-                Guardando...
-              </>
-            ) : (
-              'Guardar Cambios'
-            )}
-          </Button>
+          
+          <div className="flex items-center gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleReset}
+              disabled={!hasChanges || isUpdating}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={!hasChanges || isUpdating}
+              className="min-w-[120px]"
+            >
+              {isUpdating ? (
+                <>
+                  <LoadingSpinner className="w-4 h-4 mr-2" />
+                  Guardando...
+                </>
+              ) : (
+                'Guardar Cambios'
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
