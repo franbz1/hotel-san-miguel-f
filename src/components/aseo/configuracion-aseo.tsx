@@ -14,6 +14,90 @@ import { AlertCircle, Clock, Bell, RotateCcw, Brush, Shield, Beaker, Bed, Bath, 
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 
+// Componente para manejar arrays de elementos (movido fuera para evitar recreación)
+const ArrayFieldComponent = ({ 
+  title, 
+  field, 
+  items, 
+  newValue, 
+  setNewValue, 
+  placeholder,
+  icon: Icon,
+  addElementToArray,
+  removeElementFromArray
+}: {
+  title: string;
+  field: keyof UpdateConfiguracionAseoDto;
+  items: string[];
+  newValue: string;
+  setNewValue: (value: string) => void;
+  placeholder: string;
+  icon: React.ComponentType<{ className?: string }>;
+  addElementToArray: (field: keyof UpdateConfiguracionAseoDto, newElement: string, setter: (value: string) => void) => void;
+  removeElementFromArray: (field: keyof UpdateConfiguracionAseoDto, index: number) => void;
+}) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <Icon className="w-5 h-5" />
+        {title}
+      </CardTitle>
+      <CardDescription>
+        Configura los elementos por defecto para {title.toLowerCase()}
+      </CardDescription>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      <div className="flex gap-2">
+        <Input
+          placeholder={placeholder}
+          value={newValue}
+          onChange={(e) => setNewValue(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addElementToArray(field, newValue, setNewValue);
+            }
+          }}
+          className="flex-1"
+        />
+        <Button
+          type="button"
+          onClick={() => addElementToArray(field, newValue, setNewValue)}
+          disabled={!newValue.trim()}
+        >
+          Agregar
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+          >
+            <span className="text-sm truncate">{item}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => removeElementFromArray(field, index)}
+              className="h-6 w-6 p-0 hover:bg-red-100"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      
+      {items.length === 0 && (
+        <p className="text-sm text-gray-500 italic">
+          No hay elementos configurados
+        </p>
+      )}
+    </CardContent>
+  </Card>
+);
+
 export function ConfiguracionAseoComponent() {
   const {
     configuracion,
@@ -255,86 +339,6 @@ export function ConfiguracionAseoComponent() {
     );
   }
 
-  // Componente para manejar arrays de elementos
-  const ArrayFieldComponent = ({ 
-    title, 
-    field, 
-    items, 
-    newValue, 
-    setNewValue, 
-    placeholder,
-    icon: Icon 
-  }: {
-    title: string;
-    field: keyof UpdateConfiguracionAseoDto;
-    items: string[];
-    newValue: string;
-    setNewValue: (value: string) => void;
-    placeholder: string;
-    icon: React.ComponentType<{ className?: string }>;
-  }) => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon className="w-5 h-5" />
-          {title}
-        </CardTitle>
-        <CardDescription>
-          Configura los elementos por defecto para {title.toLowerCase()}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-2">
-          <Input
-            placeholder={placeholder}
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addElementToArray(field, newValue, setNewValue);
-              }
-            }}
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            onClick={() => addElementToArray(field, newValue, setNewValue)}
-            disabled={!newValue.trim()}
-          >
-            Agregar
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-            >
-              <span className="text-sm truncate">{item}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeElementFromArray(field, index)}
-                className="h-6 w-6 p-0 hover:bg-red-100"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          ))}
-        </div>
-        
-        {items.length === 0 && (
-          <p className="text-sm text-gray-500 italic">
-            No hay elementos configurados
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  );
-
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -489,6 +493,8 @@ export function ConfiguracionAseoComponent() {
           setNewValue={setNewElementoAseo}
           placeholder="Ej: Escoba, Trapeador, Aspiradora..."
           icon={Brush}
+          addElementToArray={addElementToArray}
+          removeElementFromArray={removeElementFromArray}
         />
 
         {/* Elementos de Protección */}
@@ -500,6 +506,8 @@ export function ConfiguracionAseoComponent() {
           setNewValue={setNewElementoProteccion}
           placeholder="Ej: Guantes, Mascarilla, Gafas..."
           icon={Shield}
+          addElementToArray={addElementToArray}
+          removeElementFromArray={removeElementFromArray}
         />
 
         {/* Productos Químicos */}
@@ -511,6 +519,8 @@ export function ConfiguracionAseoComponent() {
           setNewValue={setNewProductoQuimico}
           placeholder="Ej: Desinfectante, Detergente, Jabón..."
           icon={Beaker}
+          addElementToArray={addElementToArray}
+          removeElementFromArray={removeElementFromArray}
         />
 
         {/* Áreas Habitación */}
@@ -522,6 +532,8 @@ export function ConfiguracionAseoComponent() {
           setNewValue={setNewAreaHabitacion}
           placeholder="Ej: Cama, Escritorio, Armario..."
           icon={Bed}
+          addElementToArray={addElementToArray}
+          removeElementFromArray={removeElementFromArray}
         />
 
         {/* Áreas Baño */}
@@ -533,6 +545,8 @@ export function ConfiguracionAseoComponent() {
           setNewValue={setNewAreaBanio}
           placeholder="Ej: Inodoro, Lavamanos, Ducha..."
           icon={Bath}
+          addElementToArray={addElementToArray}
+          removeElementFromArray={removeElementFromArray}
         />
 
         {/* Procedimientos */}
