@@ -9,7 +9,7 @@ export const createRegistroAseoZonaComunDtoSchema: z.ZodType<CreateRegistroAseoZ
   tipos_realizados: z.array(z.nativeEnum(TiposAseo)).min(1, "Debe seleccionar al menos un tipo de aseo"),
   objetos_perdidos: z.boolean().default(false),
   rastros_de_animales: z.boolean().default(false),
-  observaciones: z.string().min(5, "Las observaciones deben tener al menos 5 caracteres").max(1000, "Las observaciones no pueden exceder 1000 caracteres").optional(),
+  observaciones: z.string().max(1000, "Las observaciones no pueden exceder 1000 caracteres").optional(),
 });
 
 export const updateRegistroAseoZonaComunDtoSchema: z.ZodType<UpdateRegistroAseoZonaComunDto> = z.object({
@@ -19,7 +19,7 @@ export const updateRegistroAseoZonaComunDtoSchema: z.ZodType<UpdateRegistroAseoZ
   tipos_realizados: z.array(z.nativeEnum(TiposAseo)).min(1, "Debe seleccionar al menos un tipo de aseo").optional(),
   objetos_perdidos: z.boolean().optional(),
   rastros_de_animales: z.boolean().optional(),
-  observaciones: z.string().min(5, "Las observaciones deben tener al menos 5 caracteres").max(1000, "Las observaciones no pueden exceder 1000 caracteres").optional(),
+  observaciones: z.string().max(1000, "Las observaciones no pueden exceder 1000 caracteres").optional(),
 });
 
 export const filtrosRegistroAseoZonaComunDtoSchema: z.ZodType<FiltrosRegistroAseoZonaComunDto> = z.object({

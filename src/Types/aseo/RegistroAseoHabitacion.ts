@@ -29,8 +29,8 @@ export interface CreateRegistroAseoHabitacionDto {
   usuarioId: number; // Obligatorio, > 0
   habitacionId: number; // Obligatorio, > 0
   fecha_registro: string; // ISO date string, obligatorio
-  areas_intervenidas: string[]; // Mín 1 elemento, 2-100 chars c/u
-  areas_intervenidas_banio: string[]; // Mín 1 elemento, 2-100 chars c/u
+  areas_intervenidas?: string[]; // Máx 50 elementos, 1-100 chars c/u
+  areas_intervenidas_banio?: string[]; // Máx 50 elementos, 1-100 chars c/u
   procedimiento_rotacion_colchones?: string; // 10-500 chars, opcional
   tipos_realizados: TiposAseo[]; // Mín 1 elemento, obligatorio
   objetos_perdidos?: boolean; // Opcional, default: false
@@ -42,8 +42,8 @@ export interface UpdateRegistroAseoHabitacionDto {
   usuarioId?: number; // > 0, opcional
   habitacionId?: number; // > 0, opcional
   fecha_registro?: string; // ISO date string, opcional
-  areas_intervenidas?: string[]; // Mín 1 elemento, 2-100 chars c/u, opcional
-  areas_intervenidas_banio?: string[]; // Mín 1 elemento, 2-100 chars c/u, opcional
+  areas_intervenidas?: string[]; // Máx 50 elementos, 1-100 chars c/u, opcional
+  areas_intervenidas_banio?: string[]; // Máx 50 elementos, 1-100 chars c/u, opcional
   procedimiento_rotacion_colchones?: string; // 10-500 chars, opcional
   tipos_realizados?: TiposAseo[]; // Mín 1 elemento, opcional
   objetos_perdidos?: boolean; // Opcional
