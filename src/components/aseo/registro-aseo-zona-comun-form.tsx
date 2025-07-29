@@ -192,7 +192,8 @@ export function RegistroAseoZonaComunForm({
                         field.onChange("");
                       }
                     }}
-                    className="w-full"
+                    className="w-full bg-gray-50"
+                    readOnly
                   />
                 )}
               />
