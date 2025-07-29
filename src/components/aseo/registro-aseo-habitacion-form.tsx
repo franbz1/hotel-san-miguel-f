@@ -19,6 +19,93 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, CheckSquare, RotateCcw, X, Plus } from "lucide-react";
 import { toast } from "sonner";
 
+// Componente para manejar arrays de áreas (movido fuera para evitar recreación)
+const AreasFieldComponent = ({ 
+  title, 
+  type, 
+  newValue, 
+  setNewValue, 
+  placeholder,
+  areas,
+  fieldError,
+  addArea,
+  removeArea
+}: {
+  title: string;
+  type: 'habitacion' | 'banio';
+  newValue: string;
+  setNewValue: (value: string) => void;
+  placeholder: string;
+  areas: string[] | undefined;
+  fieldError: { message?: string } | undefined;
+  addArea: (type: 'habitacion' | 'banio', value: string) => void;
+  removeArea: (type: 'habitacion' | 'banio', index: number) => void;
+}) => {
+  return (
+    <div className="space-y-4">
+      <Label>{title}</Label>
+      
+      <div className="flex gap-2">
+        <Input
+          placeholder={placeholder}
+          value={newValue}
+          onChange={(e) => setNewValue(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addArea(type, newValue);
+            }
+          }}
+          className="flex-1"
+        />
+        <Button
+          type="button"
+          onClick={() => addArea(type, newValue)}
+          disabled={!newValue.trim()}
+          size="icon"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {fieldError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {fieldError.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        {(areas || []).map((area, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+          >
+            <span className="text-sm truncate">{area}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => removeArea(type, index)}
+              className="h-6 w-6 p-0 hover:bg-red-100"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {(!areas || areas.length === 0) && (
+        <p className="text-sm text-gray-500 italic">
+          No se han agregado áreas
+        </p>
+      )}
+    </div>
+  );
+};
+
 interface RegistroAseoHabitacionFormProps {
   habitacionId: number;
   usuarioId: number;
@@ -89,18 +176,7 @@ export function RegistroAseoHabitacionForm({
   const tiposRealizados = watch('tipos_realizados');
   const procedimientoRotacion = watch('procedimiento_rotacion_colchones');
 
-  // Log para monitorear cambios en el formulario
-  useEffect(() => {
-    console.log('🔄 Estado del formulario actualizado:', {
-      areasIntervenidas,
-      areasIntervenidasBanio,
-      tiposRealizados,
-      procedimientoRotacion,
-      isDirty,
-      isValid,
-      errors: Object.keys(errors).length > 0 ? errors : 'Sin errores'
-    });
-  }, [areasIntervenidas, areasIntervenidasBanio, tiposRealizados, procedimientoRotacion, isDirty, isValid, errors]);
+
 
   // Estados para nuevos elementos de arrays
   const [newAreaHabitacion, setNewAreaHabitacion] = useState("");
@@ -118,21 +194,10 @@ export function RegistroAseoHabitacionForm({
 
   // Efecto para cargar valores por defecto de la configuración SOLO UNA VEZ
   useEffect(() => {
-    console.log('⚙️ Configuración cargada:', {
-      configuracion: configuracion ? 'Disponible' : 'No disponible',
-      isLoadingConfig,
-      defaultValuesLoaded,
-      areasIntervenidas: areasIntervenidas?.length || 0,
-      areasIntervenidasBanio: areasIntervenidasBanio?.length || 0
-    });
-
     if (configuracion && !isLoadingConfig && !defaultValuesLoaded) {
-      console.log('📝 Cargando valores por defecto de configuración...');
-      
       // Solo cargar si no hay valores previos (formulario limpio)
       if (configuracion.areas_intervenir_habitacion_default && 
           (!areasIntervenidas || areasIntervenidas.length === 0)) {
-        console.log('🏠 Cargando áreas habitación por defecto:', configuracion.areas_intervenir_habitacion_default);
         setValue('areas_intervenidas', configuracion.areas_intervenir_habitacion_default, { 
           shouldDirty: false 
         });
@@ -140,7 +205,6 @@ export function RegistroAseoHabitacionForm({
       
       if (configuracion.areas_intervenir_banio_default && 
           (!areasIntervenidasBanio || areasIntervenidasBanio.length === 0)) {
-        console.log('🚿 Cargando áreas baño por defecto:', configuracion.areas_intervenir_banio_default);
         setValue('areas_intervenidas_banio', configuracion.areas_intervenir_banio_default, { 
           shouldDirty: false 
         });
@@ -148,14 +212,12 @@ export function RegistroAseoHabitacionForm({
 
       if (configuracion.procedimiento_rotacion_colchones_default && 
           !procedimientoRotacion) {
-        console.log('🔄 Cargando procedimiento rotación por defecto:', configuracion.procedimiento_rotacion_colchones_default);
         setValue('procedimiento_rotacion_colchones', configuracion.procedimiento_rotacion_colchones_default, { 
           shouldDirty: false 
         });
       }
       
       setDefaultValuesLoaded(true);
-      console.log('✅ Valores por defecto cargados exitosamente');
     }
   }, [configuracion, isLoadingConfig, defaultValuesLoaded, setValue]);
 
@@ -167,12 +229,10 @@ export function RegistroAseoHabitacionForm({
     const fieldName = type === 'habitacion' ? 'areas_intervenidas' : 'areas_intervenidas_banio';
 
     if (currentAreas?.includes(value.trim())) {
-      console.log('⚠️ Área ya existe:', value.trim());
       toast.error("Esta área ya está en la lista");
       return;
     }
 
-    console.log(`➕ Agregando área ${type}:`, value.trim());
     setValue(fieldName, [...(currentAreas || []), value.trim()], { 
       shouldDirty: true, 
       shouldValidate: true 
@@ -192,7 +252,6 @@ export function RegistroAseoHabitacionForm({
     const fieldName = type === 'habitacion' ? 'areas_intervenidas' : 'areas_intervenidas_banio';
     const updatedAreas = (currentAreas || []).filter((_, i) => i !== index);
     
-    console.log(`➖ Removiendo área ${type} en índice ${index}:`, currentAreas?.[index]);
     setValue(fieldName, updatedAreas, { 
       shouldDirty: true, 
       shouldValidate: true 
@@ -202,8 +261,6 @@ export function RegistroAseoHabitacionForm({
   // Función para manejar tipos de aseo
   const handleTipoAseoChange = (tipo: TiposAseo, checked: boolean) => {
     const currentTipos = tiposRealizados || [];
-    
-    console.log(`🎯 Cambiando tipo de aseo: ${tipo} -> ${checked ? 'activado' : 'desactivado'}`);
     
     if (checked) {
       setValue('tipos_realizados', [...currentTipos, tipo], { 
@@ -220,31 +277,26 @@ export function RegistroAseoHabitacionForm({
 
   // Manejar envío del formulario
   const onSubmit = handleSubmit(async (data) => {
-    console.log('🚀 Enviando formulario:', data);
     const dataToSend = {
       ...data,
       fecha_registro: data.fecha_registro
     };
     
-    console.log('📤 Datos a enviar:', dataToSend);
     createRegistro(dataToSend);
   });
 
   // Manejar reset del formulario
   const handleReset = () => {
-    console.log('🔄 Reseteando formulario...');
     resetForm();
     resetMutation();
     setNewAreaHabitacion("");
     setNewAreaBanio("");
     setDefaultValuesLoaded(false); // Permitir recargar valores por defecto
-    console.log('✅ Formulario reseteado');
   };
 
   // Efectos para notificaciones
   useEffect(() => {
     if (isSuccess && createdRegistro) {
-      console.log('✅ Registro creado exitosamente:', createdRegistro);
       toast.success("Registro de aseo creado exitosamente");
       handleReset();
       onSuccess?.();
@@ -253,7 +305,6 @@ export function RegistroAseoHabitacionForm({
 
   useEffect(() => {
     if (isError && error) {
-      console.log('❌ Error al crear registro:', error);
       toast.error(error);
     }
   }, [isError, error]);
@@ -281,89 +332,6 @@ export function RegistroAseoHabitacionForm({
       setConfigNotificationsShown(prev => ({ ...prev, loading: true }));
     }
   }, [isLoadingConfig, configNotificationsShown.loading]);
-
-  // Componente para manejar arrays de áreas
-  const AreasFieldComponent = ({ 
-    title, 
-    type, 
-    newValue, 
-    setNewValue, 
-    placeholder 
-  }: {
-    title: string;
-    type: 'habitacion' | 'banio';
-    newValue: string;
-    setNewValue: (value: string) => void;
-    placeholder: string;
-  }) => {
-    const areas = type === 'habitacion' ? areasIntervenidas : areasIntervenidasBanio;
-    const fieldName = type === 'habitacion' ? 'areas_intervenidas' : 'areas_intervenidas_banio';
-    const fieldError = errors[fieldName];
-
-    return (
-      <div className="space-y-4">
-        <Label>{title}</Label>
-        
-        <div className="flex gap-2">
-          <Input
-            placeholder={placeholder}
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addArea(type, newValue);
-              }
-            }}
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            onClick={() => addArea(type, newValue)}
-            disabled={!newValue.trim()}
-            size="icon"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {fieldError && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {fieldError.message}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          {(areas || []).map((area, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-            >
-              <span className="text-sm truncate">{area}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeArea(type, index)}
-                className="h-6 w-6 p-0 hover:bg-red-100"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          ))}
-        </div>
-
-        {(!areas || areas.length === 0) && (
-          <p className="text-sm text-gray-500 italic">
-            No se han agregado áreas
-          </p>
-        )}
-      </div>
-    );
-  };
 
   return (
     <Card className="max-w-4xl mx-auto">
@@ -428,7 +396,8 @@ export function RegistroAseoHabitacionForm({
                           field.onChange("");
                         }
                       }}
-                      className="w-full"
+                      className="w-full bg-gray-50"
+                      readOnly
                     />
                   );
                 }}
@@ -482,6 +451,10 @@ export function RegistroAseoHabitacionForm({
               newValue={newAreaHabitacion}
               setNewValue={setNewAreaHabitacion}
               placeholder="Ej: Cama, Escritorio, Armario..."
+              areas={areasIntervenidas}
+              fieldError={errors.areas_intervenidas}
+              addArea={addArea}
+              removeArea={removeArea}
             />
 
             <AreasFieldComponent
@@ -490,6 +463,10 @@ export function RegistroAseoHabitacionForm({
               newValue={newAreaBanio}
               setNewValue={setNewAreaBanio}
               placeholder="Ej: Inodoro, Lavamanos, Ducha..."
+              areas={areasIntervenidasBanio}
+              fieldError={errors.areas_intervenidas_banio}
+              addArea={addArea}
+              removeArea={removeArea}
             />
           </div>
 
