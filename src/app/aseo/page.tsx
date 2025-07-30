@@ -5,16 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Users, 
-  ClipboardList, 
   CheckCircle, 
   AlertTriangle, 
   BarChart3,
   Settings,
-  Plus
+  Plus,
+  Building
 } from 'lucide-react';
 import Link from 'next/link';
 import { useHabitacionesAseoDashboard } from '@/hooks/aseo/useHabitacionesAseo';
 import { useReportesAseoDashboard } from '@/hooks/aseo/useReportesAseo';
+import { useZonasRequierenAseo } from '@/hooks/aseo/useZonasComunes';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -37,7 +38,19 @@ export default function AseoDashboardPage() {
     isGenerating
   } = useReportesAseoDashboard();
 
+  const {
+    zonasRequierenAseo,
+    isLoading: isLoadingZonas,
+    isError: hasErrorZonas,
+    error: errorZonas
+  } = useZonasRequierenAseo();
+
   const { user } = useAuth();
+
+  // Calcular contadores combinados de habitaciones + zonas comunes
+  const countAseoTotal = countAseoHoy + (zonasRequierenAseo?.filter(zona => zona.requerido_aseo_hoy)?.length || 0);
+  const countDesinfeccionTotal = countDesinfeccionHoy + (zonasRequierenAseo?.filter(zona => zona.requerido_desinfeccion_hoy)?.length || 0);
+  const zonasAseoHoy = zonasRequierenAseo?.filter(zona => zona.requerido_aseo_hoy || zona.requerido_desinfeccion_hoy) || [];
 
   return (
     <div className="p-6 space-y-6">
@@ -56,16 +69,16 @@ export default function AseoDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Habitaciones Requieren Aseo
+              Aseo pendiente para hoy
             </CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
-              {isLoadingHabitaciones ? <LoadingSpinner /> : countAseoHoy}
+              {(isLoadingHabitaciones || isLoadingZonas) ? <LoadingSpinner /> : countAseoTotal}
             </div>
             <p className="text-xs text-muted-foreground">
-              Pendientes para hoy
+              Habitaciones y zonas comunes
             </p>
           </CardContent>
         </Card>
@@ -79,10 +92,10 @@ export default function AseoDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-500">
-              {isLoadingHabitaciones ? <LoadingSpinner /> : countDesinfeccionHoy}
+              {(isLoadingHabitaciones || isLoadingZonas) ? <LoadingSpinner /> : countDesinfeccionTotal}
             </div>
             <p className="text-xs text-muted-foreground">
-              Requieren desinfección
+              Habitaciones y zonas comunes
             </p>
           </CardContent>
         </Card>
@@ -179,10 +192,10 @@ export default function AseoDashboardPage() {
               </Button>
             </Link>
             
-            <Link href="/aseo/registros" className="block">
+            <Link href="/aseo/zonas-comunes" className="block">
               <Button variant="outline" className="w-full justify-start">
-                <ClipboardList className="h-4 w-4 mr-2" />
-                Registros de Aseo
+                <Building className="h-4 w-4 mr-2" />
+                Gestionar zonas comunes
               </Button>
             </Link>
             
@@ -196,25 +209,35 @@ export default function AseoDashboardPage() {
         </Card>
       </div>
 
-      {/* Lista de habitaciones prioritarias */}
-      {!isLoadingHabitaciones && countAseoHoy > 0 && (
+      {/* Lista de áreas prioritarias */}
+      {!isLoadingHabitaciones && !isLoadingZonas && (countAseoHoy > 0 || zonasAseoHoy.length > 0) && (
         <Card>
           <CardHeader>
-            <CardTitle>Habitaciones Prioritarias</CardTitle>
+            <CardTitle>Áreas Prioritarias</CardTitle>
             <CardDescription>
-              Habitaciones que requieren atención inmediata
+              Habitaciones y zonas comunes que requieren atención inmediata
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {hasErrorHabitaciones ? (
-              <p className="text-destructive text-sm">
-                Error al cargar habitaciones: {errorHabitaciones}
-              </p>
+            {(hasErrorHabitaciones || hasErrorZonas) ? (
+              <div className="space-y-2">
+                {hasErrorHabitaciones && (
+                  <p className="text-destructive text-sm">
+                    Error al cargar habitaciones: {errorHabitaciones}
+                  </p>
+                )}
+                {hasErrorZonas && (
+                  <p className="text-destructive text-sm">
+                    Error al cargar zonas comunes: {errorZonas}
+                  </p>
+                )}
+              </div>
             ) : (
               <div className="space-y-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {habitacionesAseoHoy.slice(0, 6).map((habitacion) => (
-                    <div key={habitacion.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  {/* Habitaciones prioritarias */}
+                  {habitacionesAseoHoy.slice(0, 4).map((habitacion) => (
+                    <div key={`hab-${habitacion.id}`} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-2">
                         <Link href={`/aseo/habitaciones/registrar?habitacionId=${habitacion.id}&usuarioId=${user?.id || 1}&usuarioNombre=${user?.nombre || ''}&numeroHabitacion=${habitacion.numero_habitacion}`}>
                           <span className="font-medium hover:underline">Hab. {habitacion.numero_habitacion}</span>
@@ -231,15 +254,44 @@ export default function AseoDashboardPage() {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Zonas comunes prioritarias */}
+                  {zonasAseoHoy.slice(0, 4).map((zona) => (
+                    <div key={`zona-${zona.id}`} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
+                      <div className="flex items-center gap-2">
+                        <Link href={`/aseo/zonas-comunes/registrar/${zona.id}?usuarioId=${user?.id || 1}&usuarioNombre=${user?.nombre || ''}`}>
+                          <span className="font-medium hover:underline">{zona.nombre}</span>
+                          <Badge variant="outline">Piso {zona.piso}</Badge>
+                        </Link>
+                      </div>
+                      <div className="flex gap-1">
+                        {zona.requerido_aseo_hoy && (
+                          <Badge variant="destructive" className="text-xs">Aseo</Badge>
+                        )}
+                        {zona.requerido_desinfeccion_hoy && (
+                          <Badge variant="outline" className="text-xs">Desinfección</Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
                 
-                {countAseoHoy > 6 && (
-                  <div className="pt-2">
-                    <Link href="/aseo/habitaciones?filter=aseo_hoy">
-                      <Button variant="ghost" size="sm">
-                        Ver todas las habitaciones ({countAseoHoy})
-                      </Button>
-                    </Link>
+                {(countAseoHoy > 4 || zonasAseoHoy.length > 4) && (
+                  <div className="pt-2 space-x-2">
+                    {countAseoHoy > 4 && (
+                      <Link href="/aseo/habitaciones?filter=aseo_hoy">
+                        <Button variant="ghost" size="sm">
+                          Ver todas las habitaciones ({countAseoHoy})
+                        </Button>
+                      </Link>
+                    )}
+                    {zonasAseoHoy.length > 4 && (
+                      <Link href="/aseo/zonas-comunes">
+                        <Button variant="ghost" size="sm">
+                          Ver todas las zonas comunes ({zonasAseoHoy.length})
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
