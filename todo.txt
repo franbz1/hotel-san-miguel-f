@@ -32,56 +32,50 @@ Escribir flujo completo de aseo
  Verificar que el estado de esos espacios se marca como “pendiente hoy”. ⭕
 
 🔁 3.2 Proceso de generación de reporte (hora principal)
- Confirmar que se genera el reporte diario con todos los registros del día.
+ Confirmar que se genera el reporte diario con todos los registros del día. ✅
 
- Validar que el reporte se archiva en el historial.
+ Validar que el reporte se archiva en el historial. ✅
 
- Comprobar que los espacios sin aseo se marcan como “requiere aseo mañana”.
+ Comprobar que los espacios sin aseo se marcan como “requiere aseo mañana”. ✅
 
- Confirmar que el correo con el reporte completo se envía (si está activado).
+ Hay que agregar campos de reporte aseo a config ✅
 
 ✅ 4. Revisar funcionalidades del panel de control
- Acceder al panel de control desde rol Aseo y Admin.
+ Acceder al panel de control desde rol Aseo y Admin. ✅
 
- Ver que se muestran todos los espacios.
+ Ver que se muestran todos los espacios. ✅
 
- Confirmar que los estados de aseo se actualizan dinámicamente:
+ Confirmar que los estados de aseo se actualizan dinámicamente ✅
 
-✓ Ya aseado hoy
-
-! Pendiente hoy
-
-🕒 Requiere aseo mañana
-
- Validar filtros por tipo de espacio, estado y fecha.
+ Validar filtros por tipo de espacio, estado y fecha. ✅
 
 ✅ 5. Comprobar historial de aseos (por espacio)
- Seleccionar una habitación o zona común.
+ Seleccionar una habitación o zona común. ✅
 
- Ver historial de registros en orden cronológico.
+ Ver historial de registros en orden cronológico. ✅
 
  Como admin, probar acciones de:
 
- Crear un registro manual.
+ Crear un registro manual. ✅
 
- Editar uno existente.
+ Editar uno existente. ⭕ error en fecha al editar
 
- Eliminar uno.
+ Eliminar uno. ✅
 
 ✅ 6. Comprobar historial de reportes diarios
  Acceder a “Historial de reportes diarios”.
 
- Validar que se listan por fecha.
+ Validar que se listan por fecha. ✅
 
- Ver detalles de cada reporte.
+ Ver detalles de cada reporte. ✅
 
  Como admin, realizar:
 
  Creación manual (si está habilitada).
 
- Edición de reporte.
+ Edición de reporte. ⭕ error en fecha al editar
 
- Eliminación.
+ Eliminación. ✅
 
 ✅ 7. Validar permisos por rol
  Verificar que el rol Aseo no tiene acceso a acciones de edición o eliminación de reportes o registros ajenos.
