@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -17,13 +18,14 @@ interface RoomCleaningHistoryProps {
   loading: boolean
 }
 
-export function RoomCleaningHistory({ 
-  habitacion, 
-  loading 
+export function RoomCleaningHistory({
+  habitacion,
+  loading
 }: RoomCleaningHistoryProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [expandedRecord, setExpandedRecord] = useState<number | null>(null)
   const pageSize = 5
+  const router = useRouter()
 
   // Obtener registros de aseo de la habitación con paginación
   const {
@@ -34,28 +36,28 @@ export function RoomCleaningHistory({
     error,
     refetch
   } = useRegistrosAseoHabitacion(
-    pageSize, 
-    currentPage, 
+    pageSize,
+    currentPage,
     habitacion?.id ? { habitacionId: habitacion.id } : undefined
   )
 
   const isDataLoading = loading || registrosLoading
 
-  // Función para obtener el color del badge según el tipo de aseo
-  const getTipoAseoBadgeVariant = (tipo: TiposAseo) => {
+  // Colores coherentes con la página de detalles
+  const getTipoAseoBadgeColor = (tipo: TiposAseo) => {
     switch (tipo) {
       case TiposAseo.LIMPIEZA:
-        return "default"
+        return "bg-green-100 text-green-800 hover:bg-green-200"
       case TiposAseo.DESINFECCION:
-        return "secondary"
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200"
       case TiposAseo.ROTACION_COLCHONES:
-        return "outline"
+        return "bg-purple-100 text-purple-800 hover:bg-purple-200"
       case TiposAseo.LIMPIEZA_BANIO:
-        return "default"
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
       case TiposAseo.DESINFECCION_BANIO:
-        return "secondary"
+        return "bg-orange-100 text-orange-800 hover:bg-orange-200"
       default:
-        return "outline"
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200"
     }
   }
 
@@ -112,7 +114,7 @@ export function RoomCleaningHistory({
           )}
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-4">
         {isDataLoading ? (
           <div className="space-y-3">
@@ -124,9 +126,9 @@ export function RoomCleaningHistory({
           <div className="text-center py-8">
             <p className="text-red-500 text-sm mb-2">Error al cargar el historial</p>
             <p className="text-xs text-muted-foreground mb-3">{error}</p>
-            <Button 
-              size="sm" 
-              variant="outline" 
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => refetch()}
             >
               Reintentar
@@ -136,9 +138,19 @@ export function RoomCleaningHistory({
           <>
             <div className="space-y-3 mb-4">
               {registros.map((registro) => (
-                <div 
-                  key={registro.id} 
-                  className="border rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                <div
+                  key={registro.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => router.push(`/aseo/habitaciones/registros/${registro.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      router.push(`/aseo/habitaciones/registros/${registro.id}`)
+                    }
+                  }}
+                  className="border rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                  title="Ver detalles del registro"
                 >
                   {/* Header del registro */}
                   <div className="flex items-center justify-between mb-2">
@@ -151,7 +163,10 @@ export function RoomCleaningHistory({
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => toggleExpanded(registro.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleExpanded(registro.id)
+                      }}
                       className="h-6 w-6 p-0"
                     >
                       <Eye className="h-3 w-3" />
@@ -161,23 +176,22 @@ export function RoomCleaningHistory({
                   {/* Tipos de aseo realizados */}
                   <div className="flex flex-wrap gap-1 mb-2">
                     {registro.tipos_realizados.map((tipo, index) => (
-                      <Badge 
-                        key={index} 
-                        variant={getTipoAseoBadgeVariant(tipo)}
-                        className="text-xs"
+                      <Badge
+                        key={index}
+                        className={`text-xs ${getTipoAseoBadgeColor(tipo)}`}
                       >
                         {formatTipoAseo(tipo)}
                       </Badge>
                     ))}
                   </div>
 
-                                     {/* Usuario */}
-                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                     <User className="h-3 w-3" />
-                     <span>
-                       {registro.usuario.nombre}
-                     </span>
-                   </div>
+                  {/* Usuario */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <User className="h-3 w-3" />
+                    <span>
+                      {registro.usuario.nombre}
+                    </span>
+                  </div>
 
                   {/* Alertas de objetos perdidos o rastros de animales */}
                   {(registro.objetos_perdidos || registro.rastros_de_animales) && (
@@ -251,7 +265,7 @@ export function RoomCleaningHistory({
             {meta && meta.lastPage > 1 && (
               <div className="flex items-center justify-between">
                 <div className="text-xs text-muted-foreground">
-                  Página {meta.page} de {meta.lastPage} 
+                  Página {meta.page} de {meta.lastPage}
                   ({meta.total} registros)
                 </div>
                 <div className="flex gap-2">

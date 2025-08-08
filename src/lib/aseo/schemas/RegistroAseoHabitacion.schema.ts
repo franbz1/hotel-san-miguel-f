@@ -5,7 +5,7 @@ import { z } from "zod";
 export const createRegistroAseoHabitacionDtoSchema: z.ZodType<CreateRegistroAseoHabitacionDto> = z.object({
   usuarioId: z.number().int().positive("El ID del usuario debe ser un número positivo"),
   habitacionId: z.number().int().positive("El ID de la habitación debe ser un número positivo"),
-  fecha_registro: z.string().datetime("Debe ser una fecha válida en formato ISO"),
+  fecha_registro: z.string(),
   areas_intervenidas: z.array(
     z.string().max(100, "Cada área no puede exceder 100 caracteres")
   ).max(50, "No puede tener más de 50 áreas").optional(),
@@ -25,7 +25,7 @@ export const createRegistroAseoHabitacionDtoSchema: z.ZodType<CreateRegistroAseo
 export const updateRegistroAseoHabitacionDtoSchema: z.ZodType<UpdateRegistroAseoHabitacionDto> = z.object({
   usuarioId: z.number().int().positive("El ID del usuario debe ser un número positivo").optional(),
   habitacionId: z.number().int().positive("El ID de la habitación debe ser un número positivo").optional(),
-  fecha_registro: z.string().datetime("Debe ser una fecha válida en formato ISO").optional(),
+  fecha_registro: z.string().optional(),
   areas_intervenidas: z.array(
     z.string().min(1, "Cada área debe tener al menos 1 caracter").max(100, "Cada área no puede exceder 100 caracteres")
   ).max(50, "No puede tener más de 50 áreas").optional(),

@@ -18,6 +18,7 @@ import { useReportesAseoDashboard } from '@/hooks/aseo/useReportesAseo';
 import { useZonasRequierenAseo } from '@/hooks/aseo/useZonasComunes';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useAuth } from '@/contexts/auth-context';
+import { usePermissions } from '@/hooks';
 
 export default function AseoDashboardPage() {
   const {
@@ -46,6 +47,7 @@ export default function AseoDashboardPage() {
   } = useZonasRequierenAseo();
 
   const { user } = useAuth();
+  const { isAdmin } = usePermissions();
 
   // Calcular contadores combinados de habitaciones + zonas comunes
   const countAseoTotal = countAseoHoy + (zonasRequierenAseo?.filter(zona => zona.requerido_aseo_hoy)?.length || 0);

@@ -5,7 +5,7 @@ import { z } from "zod";
 export const createRegistroAseoZonaComunDtoSchema: z.ZodType<CreateRegistroAseoZonaComunDto> = z.object({
   usuarioId: z.number().int().positive("El ID del usuario debe ser un número positivo"),
   zonaComunId: z.number().int().positive("El ID de la zona común debe ser un número positivo"),
-  fecha_registro: z.string().datetime("Debe ser una fecha válida en formato ISO"),
+  fecha_registro: z.string(),
   tipos_realizados: z.array(z.nativeEnum(TiposAseo)).min(1, "Debe seleccionar al menos un tipo de aseo"),
   objetos_perdidos: z.boolean().default(false),
   rastros_de_animales: z.boolean().default(false),
@@ -15,7 +15,7 @@ export const createRegistroAseoZonaComunDtoSchema: z.ZodType<CreateRegistroAseoZ
 export const updateRegistroAseoZonaComunDtoSchema: z.ZodType<UpdateRegistroAseoZonaComunDto> = z.object({
   usuarioId: z.number().int().positive("El ID del usuario debe ser un número positivo").optional(),
   zonaComunId: z.number().int().positive("El ID de la zona común debe ser un número positivo").optional(),
-  fecha_registro: z.string().datetime("Debe ser una fecha válida en formato ISO").optional(),
+  fecha_registro: z.string().optional(),
   tipos_realizados: z.array(z.nativeEnum(TiposAseo)).min(1, "Debe seleccionar al menos un tipo de aseo").optional(),
   objetos_perdidos: z.boolean().optional(),
   rastros_de_animales: z.boolean().optional(),

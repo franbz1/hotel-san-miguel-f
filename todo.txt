@@ -58,7 +58,7 @@ Escribir flujo completo de aseo
 
  Crear un registro manual. ✅
 
- Editar uno existente. ⭕ error en fecha al editar
+ Editar uno existente. ✅ error en fecha al editar
 
  Eliminar uno. ✅
 
@@ -73,7 +73,7 @@ Escribir flujo completo de aseo
 
  Creación manual (si está habilitada).
 
- Edición de reporte. ⭕ error en fecha al editar
+ Edición de reporte. ✅ error en fecha al editar
 
  Eliminación. ✅
 
