@@ -102,8 +102,6 @@ export default function DetalleRegistroAseoZonaComunPage() {
   useEffect(() => {
     if (registro) {
       form.reset({
-        usuarioId: registro.usuarioId,
-        zonaComunId: registro.zonaComunId,
         fecha_registro: new Date(registro.fecha_registro).toISOString().slice(0, 16),
         tipos_realizados: registro.tipos_realizados || [],
         objetos_perdidos: registro.objetos_perdidos || false,
@@ -373,34 +371,6 @@ export default function DetalleRegistroAseoZonaComunPage() {
               {isEditing ? (
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleUpdate)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="usuarioId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Usuario ID</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="zonaComunId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Zona Común ID</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
 
                     <FormField
                       control={form.control}
