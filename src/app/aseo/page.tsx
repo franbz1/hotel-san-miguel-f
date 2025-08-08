@@ -158,7 +158,7 @@ export default function AseoDashboardPage() {
                 </div>
                 <Button 
                   onClick={generarReporteHoy} 
-                  disabled={isGenerating}
+                  disabled={isGenerating || !isAdmin()}
                   size="sm"
                 >
                   {isGenerating ? (

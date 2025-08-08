@@ -14,6 +14,7 @@ import { TiposAseo } from "@/Types/aseo/tiposAseoEnum"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter } from "next/navigation"
+import { usePermissions } from "@/hooks"
 
 export default function RegistrosAseoZonasComunesPage() {
   const [selectedZonaComun, setSelectedZonaComun] = useState<string>("")
@@ -21,6 +22,7 @@ export default function RegistrosAseoZonasComunesPage() {
   const [selectedFecha, setSelectedFecha] = useState<string>("")
   const [selectedTipoAseo, setSelectedTipoAseo] = useState<string>("")
   const router = useRouter()
+  const { isAdmin } = usePermissions()
 
   const {
     registros,
@@ -119,10 +121,12 @@ export default function RegistrosAseoZonasComunesPage() {
             <RefreshCcw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
+          {isAdmin() && (
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          )}
         </div>
       </div>
 
