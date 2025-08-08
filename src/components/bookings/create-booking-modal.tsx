@@ -34,8 +34,7 @@ import {
 import { Calendar } from "lucide-react"
 import { generateLinkFormulario } from "@/lib/formulario/link-formulario-service"
 import { toast } from "sonner"
-import { getHabitacionesDisponibles } from "@/lib/rooms/habitacion-service"
-import { Habitacion } from "@/Types/habitacion"
+import { useHabitacionesDisponibles } from "@/lib/rooms/habitacion-service"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { DateTimePicker } from "../ui/dateTimePicker"
 
@@ -60,7 +59,6 @@ interface CreateBookingModalProps {
 
 export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps) {
   const [open, setOpen] = useState(false)
-  const [habitaciones, setHabitaciones] = useState<Habitacion[]>([])
   const [costoSugerido, setCostoSugerido] = useState<number>(0)
   const [diasEstancia, setDiasEstancia] = useState<number>(0)
 
@@ -82,14 +80,22 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
   const watchFechaFin = form.watch("fechaFin")
   const watchNumeroHabitacion = form.watch("numeroHabitacion")
 
-  const fetchHabitaciones = async () => {
-    try {
-      const data = await getHabitacionesDisponibles(
-        new Date(watchFechaInicio), 
-        new Date(watchFechaFin)
-      )
-      setHabitaciones(data)
-    } catch (error) {
+  // Usar el hook de TanStack Query para obtener habitaciones disponibles
+  const { 
+    data: habitaciones = [], 
+    error,
+    refetch 
+  } = useHabitacionesDisponibles(
+    {
+      fechaInicio: new Date(watchFechaInicio),
+      fechaFin: new Date(watchFechaFin)
+    },
+    true // enabled
+  )
+
+  // Mostrar error si no se pueden cargar las habitaciones
+  useEffect(() => {
+    if (error) {
       toast.error("Error", {
         description: (
           <div className="mt-2">
@@ -102,7 +108,7 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
         ),
       })
     }
-  }
+  }, [error])
 
   // Calcular días de estancia y costo sugerido
   useEffect(() => {
@@ -122,17 +128,14 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
         }
       }
     }
-  }, [watchFechaInicio, watchFechaFin, watchNumeroHabitacion, habitaciones])
+  }, [watchFechaInicio, watchFechaFin, watchNumeroHabitacion, habitaciones, form])
 
-  // Cargar habitaciones disponibles cuando cambien las fechas
+  // Refrescar habitaciones cuando se abra la modal
   useEffect(() => {
-    fetchHabitaciones()
-  }, [watchFechaInicio, watchFechaFin])
-
-  // Hacer fetch siempre que la modal se abra
-  useEffect(() => {
-    fetchHabitaciones()
-  }, [open])
+    if (open) {
+      refetch()
+    }
+  }, [open, refetch])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {

@@ -36,7 +36,7 @@ import {
 import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { TipoHabitacion } from "@/Types/enums/tiposHabitacion"
 import { Habitacion, UpdateHabitacionDto } from "@/Types/habitacion"
-import { updateHabitacion, deleteHabitacion } from "@/lib/rooms/habitacion-service"
+import { useUpdateHabitacion, useDeleteHabitacion } from "@/lib/rooms/habitacion-service"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Reserva } from "@/Types/Reserva"
@@ -65,8 +65,11 @@ const updateFormSchema = z.object({
 export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoEditorProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
+  
+  // Hooks de mutación
+  const updateMutation = useUpdateHabitacion()
+  const deleteMutation = useDeleteHabitacion()
 
   const form = useForm<z.infer<typeof updateFormSchema>>({
     resolver: zodResolver(updateFormSchema),
@@ -122,12 +125,8 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
       return
     }
 
-    // ID del toast de carga
-    const loadingToastId = "updating-room"
-    
     try {
-      toast.loading("Actualizando habitación...", { id: loadingToastId })
-      await updateHabitacion(habitacion.id, changedFields)
+      await updateMutation.mutateAsync({ id: habitacion.id, data: changedFields })
       
       toast.success("Habitación actualizada", {
         description: "Los datos han sido actualizados correctamente",
@@ -139,8 +138,6 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
       toast.error("Error al actualizar", {
         description: error instanceof Error ? error.message : "No se pudo actualizar la habitación",
       })
-    } finally {
-      toast.dismiss(loadingToastId)
     }
   }
 
@@ -150,20 +147,19 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
       return
     }
 
-    setIsDeleting(true)
-
     try {
-      await deleteHabitacion(habitacion.id)
+      await deleteMutation.mutateAsync(habitacion.id)
+      
       toast.success("Habitación eliminada", {
         description: "Los datos han sido eliminados correctamente",
       })
+      
       router.push("/dashboard")
     } catch (error) {
       toast.error("Error al eliminar", {
         description: error instanceof Error ? error.message : "No se pudo eliminar la habitación",
       })
     } finally {
-      setIsDeleting(false)
       setDeleteDialogOpen(false)
     }
   }
@@ -180,7 +176,7 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
                 variant="outline" 
                 size="sm" 
                 className="cursor-pointer h-8 gap-1"
-                disabled={loading}
+                disabled={loading || updateMutation.isPending}
               >
                 <Pencil className="h-3.5 w-3.5" />
                 <span>Editar</span>
@@ -281,8 +277,13 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
                   />
 
                   <DialogFooter>
-                    <Button type="submit" className="mt-4">
-                      <Check className="mr-2 h-4 w-4" /> Guardar cambios
+                    <Button 
+                      type="submit" 
+                      className="mt-4"
+                      disabled={updateMutation.isPending}
+                    >
+                      <Check className="mr-2 h-4 w-4" /> 
+                      {updateMutation.isPending ? "Guardando..." : "Guardar cambios"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -296,7 +297,7 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
                 variant="destructive"
                 size="sm" 
                 className="cursor-pointer h-8 gap-1"
-                disabled={loading || isDeleting}
+                disabled={loading || deleteMutation.isPending}
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Eliminar</span>
@@ -313,16 +314,16 @@ export function RoomInfoEditor({ habitacion, loading, onRoomUpdated }: RoomInfoE
                 <Button 
                   variant="outline" 
                   onClick={() => setDeleteDialogOpen(false)}
-                  disabled={isDeleting}
+                  disabled={deleteMutation.isPending}
                 >
                   Cancelar
                 </Button>
                 <Button 
                   variant="destructive"
                   onClick={handleDelete}
-                  disabled={isDeleting}
+                  disabled={deleteMutation.isPending}
                 >
-                  {isDeleting ? "Eliminando..." : "Eliminar"}
+                  {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
                 </Button>
               </DialogFooter>
             </DialogContent>

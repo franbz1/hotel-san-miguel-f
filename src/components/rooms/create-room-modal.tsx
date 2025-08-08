@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { createHabitacion } from "@/lib/rooms/habitacion-service"
+import { useCreateHabitacion } from "@/lib/rooms/habitacion-service"
 import { EstadoHabitacion } from "@/Types/enums/estadosHabitacion"
 import { TipoHabitacion } from "@/Types/enums/tiposHabitacion"
 import { toast } from "sonner"
@@ -49,6 +49,7 @@ interface CreateRoomModalProps {
 
 export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
   const [open, setOpen] = useState(false)
+  const createMutation = useCreateHabitacion()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,7 +63,8 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await createHabitacion(values)
+      await createMutation.mutateAsync(values)
+      
       toast.success("Habitación creada", {
         description: (
           <div className="mt-2">
@@ -70,6 +72,7 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
           </div>
         ),
       })
+      
       setOpen(false)
       form.reset()
       onRoomCreated?.()
@@ -79,9 +82,7 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
           description: (
             <div className="mt-2">
               <p className="text-sm text-black">Hubo un error al crear la habitación.</p>
-              {error instanceof Error && (
-                <p className="mt-2 text-sm text-red-600">{error.message}</p>
-              )}
+              <p className="mt-2 text-sm text-red-600">{error.message}</p>
               <p className="mt-2 text-sm text-red-600">¡Intenta nuevamente!</p>
             </div>
           ),
@@ -167,7 +168,13 @@ export function CreateRoomModal({ onRoomCreated }: CreateRoomModalProps) {
               )}
             />
             <DialogFooter>
-              <Button type="submit" className="cursor-pointer">Guardar</Button>
+              <Button 
+                type="submit" 
+                className="cursor-pointer"
+                disabled={createMutation.isPending}
+              >
+                {createMutation.isPending ? "Guardando..." : "Guardar"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

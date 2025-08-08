@@ -13,16 +13,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from "@/components/ui/form"
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -31,12 +31,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { 
-  ArrowLeft, 
-  Edit3, 
-  Trash2, 
-  Save, 
-  X, 
+import {
+  ArrowLeft,
+  Edit3,
+  Trash2,
+  Save,
+  X,
   Calendar,
   User,
   Home,
@@ -44,49 +44,52 @@ import {
   AlertTriangle,
   CheckCircle
 } from "lucide-react"
-import { 
-  useRegistroAseoHabitacion, 
-  useUpdateRegistroAseoHabitacion, 
-  useDeleteRegistroAseoHabitacion 
+import {
+  useRegistroAseoHabitacion,
+  useUpdateRegistroAseoHabitacion,
+  useDeleteRegistroAseoHabitacion
 } from "@/hooks/aseo/useRegistrosAseoHabitacion"
 import { TiposAseo } from "@/Types/aseo/tiposAseoEnum"
 import { UpdateRegistroAseoHabitacionDto } from "@/Types/aseo/RegistroAseoHabitacion"
 import { updateRegistroAseoHabitacionDtoSchema } from "@/lib/aseo/schemas/RegistroAseoHabitacion.schema"
 import { toast } from "sonner"
+import { usePermissions } from "@/hooks"
 
 export default function DetalleRegistroAseoPage() {
   const params = useParams()
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  
+
   const registroId = parseInt(params.id as string)
-  
-  const { 
-    registro, 
-    isLoading, 
-    isError, 
-    error, 
-    refetch 
+
+  const {
+    registro,
+    isLoading,
+    isError,
+    error,
+    refetch
   } = useRegistroAseoHabitacion(registroId)
-  
-  const { 
-    updateRegistro, 
-    isUpdating, 
-    isError: updateError, 
+
+  const {
+    updateRegistro,
+    isUpdating,
+    isError: updateError,
     error: updateErrorMessage,
     isSuccess: updateSuccess,
     reset: resetUpdate
   } = useUpdateRegistroAseoHabitacion()
-  
-  const { 
-    deleteRegistro, 
-    isDeleting, 
-    isError: deleteError, 
+
+  const {
+    deleteRegistro,
+    isDeleting,
+    isError: deleteError,
     error: deleteErrorMessage,
     isSuccess: deleteSuccess,
     reset: resetDelete
   } = useDeleteRegistroAseoHabitacion()
+
+  const { isAdmin } = usePermissions()
 
   const form = useForm<UpdateRegistroAseoHabitacionDto>({
     resolver: zodResolver(updateRegistroAseoHabitacionDtoSchema),
@@ -104,8 +107,6 @@ export default function DetalleRegistroAseoPage() {
   useEffect(() => {
     if (registro) {
       form.reset({
-        usuarioId: registro.usuarioId,
-        habitacionId: registro.habitacionId,
         fecha_registro: new Date(registro.fecha_registro).toISOString().slice(0, 16),
         areas_intervenidas: registro.areas_intervenidas || [],
         areas_intervenidas_banio: registro.areas_intervenidas_banio || [],
@@ -229,8 +230,8 @@ export default function DetalleRegistroAseoPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => router.back()}
             size="sm"
           >
@@ -244,55 +245,57 @@ export default function DetalleRegistroAseoPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {!isEditing ? (
-            <>
-              <Button 
-                onClick={() => setIsEditing(true)}
+        {isAdmin() && (
+          <div className="flex items-center gap-2">
+            {!isEditing ? (
+              <>
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  variant="outline"
+                >
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+                <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Eliminar
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>¿Confirmar eliminación?</DialogTitle>
+                      <DialogDescription>
+                        Esta acción no se puede deshacer. El registro será eliminado permanentemente.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                        Cancelar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? "Eliminando..." : "Eliminar"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </>
+            ) : (
+              <Button
+                onClick={() => setIsEditing(false)}
                 variant="outline"
               >
-                <Edit3 className="h-4 w-4 mr-2" />
-                Editar
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
               </Button>
-              <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Eliminar
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>¿Confirmar eliminación?</DialogTitle>
-                    <DialogDescription>
-                      Esta acción no se puede deshacer. El registro será eliminado permanentemente.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-                      Cancelar
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                    >
-                      {isDeleting ? "Eliminando..." : "Eliminar"}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            <Button 
-              onClick={() => setIsEditing(false)}
-              variant="outline"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Contenido Principal */}
@@ -384,34 +387,6 @@ export default function DetalleRegistroAseoPage() {
               {isEditing ? (
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleUpdate)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="usuarioId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Usuario ID</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="habitacionId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Habitación ID</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
 
                     <FormField
                       control={form.control}

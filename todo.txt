@@ -2,6 +2,92 @@ Implementar analitica de habitaciones
 Implementar historial de aseo habitaciones
 ----
 Escribir flujo completo de aseo
+###
+
+!Flujo de aseo:
+✅ verificado ❌ falla ⭕ Pendiente
+
+ 1. Verificar configuración inicial
+ Crear habitaciones y zonas comunes desde el rol Admin. ✅
+
+ Crear una configuración de aseo válida ✅ Los campos de texto pierden el foco tras escribir un caracter seguramente debido a re render del form, 
+
+2. Validar registro manual de aseo (rol Aseo)
+ Acceder como usuario del rol Aseo.
+
+ Registrar un aseo en una habitación. ✅
+
+ Registrar un aseo en una zona común. ✅
+
+ Verificar que el estado del espacio cambia a “ya aseado hoy”. ✅
+
+ Validar que el formulario guarda comentarios y adjuntos (si aplica). ✅
+
+3. Evaluar procesos automáticos diarios
+🔁 3.1 Proceso de notificación (hora límite)
+ Simular que hay espacios sin asear hasta la hora límite. ⭕
+
+ Confirmar que el sistema envía el correo de alerta con los espacios pendientes. ⭕
+
+ Verificar que el estado de esos espacios se marca como “pendiente hoy”. ⭕
+
+🔁 3.2 Proceso de generación de reporte (hora principal)
+ Confirmar que se genera el reporte diario con todos los registros del día. ✅
+
+ Validar que el reporte se archiva en el historial. ✅
+
+ Comprobar que los espacios sin aseo se marcan como “requiere aseo mañana”. ✅
+
+ Hay que agregar campos de reporte aseo a config ✅
+
+✅ 4. Revisar funcionalidades del panel de control
+ Acceder al panel de control desde rol Aseo y Admin. ✅
+
+ Ver que se muestran todos los espacios. ✅
+
+ Confirmar que los estados de aseo se actualizan dinámicamente ✅
+
+ Validar filtros por tipo de espacio, estado y fecha. ✅
+
+✅ 5. Comprobar historial de aseos (por espacio)
+ Seleccionar una habitación o zona común. ✅
+
+ Ver historial de registros en orden cronológico. ✅
+
+ Como admin, probar acciones de:
+
+ Crear un registro manual. ✅
+
+ Editar uno existente. ✅ error en fecha al editar
+
+ Eliminar uno. ✅
+
+✅ 6. Comprobar historial de reportes diarios
+ Acceder a “Historial de reportes diarios”.
+
+ Validar que se listan por fecha. ✅
+
+ Ver detalles de cada reporte. ✅
+
+ Como admin, realizar:
+
+ Creación manual (si está habilitada).
+
+ Edición de reporte. ✅ error en fecha al editar
+
+ Eliminación. ✅
+
+✅ 7. Validar permisos por rol
+ Verificar que el rol Aseo no tiene acceso a acciones de edición o eliminación de reportes o registros ajenos.
+
+ Verificar que el rol Admin tiene control total sobre todas las funcionalidades del módulo.
+
+
+
+###
 Verificar flujo completo de aseo
+En config de aseo al intentar escribir se escribe una letra y se pierde el foco del input text
+revisar formulario de registro aseo habitacion
+en config no se guardan areas aseo a intervenir
 ----
 Agregar dias con value 0 a las analititicas del front

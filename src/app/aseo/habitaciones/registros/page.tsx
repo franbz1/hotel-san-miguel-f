@@ -8,12 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
-import { FilterIcon, RefreshCcw, Search, Download, Eye } from "lucide-react"
+import { FilterIcon, RefreshCcw, Search, Eye, Download } from "lucide-react"
 import { useRegistrosAseoHabitacionManager } from "@/hooks/aseo/useRegistrosAseoHabitacion"
 import { TiposAseo } from "@/Types/aseo/tiposAseoEnum"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter } from "next/navigation"
+import { usePermissions } from "@/hooks"
 
 export default function RegistrosAseoHabitacionesPage() {
   const [selectedHabitacion, setSelectedHabitacion] = useState<string>("")
@@ -21,6 +22,7 @@ export default function RegistrosAseoHabitacionesPage() {
   const [selectedFecha, setSelectedFecha] = useState<string>("")
   const [selectedTipoAseo, setSelectedTipoAseo] = useState<string>("")
   const router = useRouter()
+  const { isAdmin } = usePermissions()
 
   const {
     registros,
@@ -125,10 +127,12 @@ export default function RegistrosAseoHabitacionesPage() {
             <RefreshCcw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
+          {isAdmin() && (
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          )}
         </div>
       </div>
 
