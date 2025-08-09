@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -135,6 +134,12 @@ export function LoginForm() {
       setIsLoading(false)
     }
   }
+  
+  const handleSendEmail = () => {
+    const subject = encodeURIComponent("Solicitud de restablecimiento de contraseña")
+    const body = encodeURIComponent(`Hola,\nOlvidé mi contraseña.\nUsuario: ${formData.nombre || ""}`)
+    window.location.href = `mailto:franciscorualesp15@gmail.com?subject=${subject}&body=${body}`
+  }
 
   // Si está cargando la autenticación, mostrar un indicador de carga
   if (isLoading) {
@@ -167,12 +172,13 @@ export function LoginForm() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Contraseña</Label>
-          <Link
-            href="/forgot-password"
-            className="text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          <button
+            type="button"
+            onClick={handleSendEmail}
+            className="text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 cursor-pointer"
           >
-            ¿Olvidaste tu contraseña?
-          </Link>
+            Olvidaste tu contraseña?
+          </button>
         </div>
         <div className="relative">
           <Input
