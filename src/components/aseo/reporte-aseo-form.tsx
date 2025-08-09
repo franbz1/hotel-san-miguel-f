@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,7 @@ import {
   ReporteAseoDiario 
 } from '@/Types/aseo/ReporteAseoDiario';
 import { 
-  createReporteAseoDiarioDtoSchema, 
-  updateReporteAseoDiarioDtoSchema 
+  createReporteAseoDiarioDtoSchema
 } from '@/lib/aseo/schemas/ReporteAseoDiario.schema';
 import { format } from 'date-fns';
 
@@ -36,15 +35,16 @@ export default function ReporteAseoForm({
   onCancel
 }: ReporteAseoFormProps) {
   const isEditMode = mode === 'edit';
-  const schema = isEditMode ? updateReporteAseoDiarioDtoSchema : createReporteAseoDiarioDtoSchema;
 
   const {
     register,
-    control,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors }
-  } = useForm<CreateReporteAseoDiarioDto | UpdateReporteAseoDiarioDto>({
-    resolver: zodResolver(schema),
+  } = useForm<CreateReporteAseoDiarioDto>({
+    // Validamos siempre con el esquema de creación para tener un shape completo del formulario
+    resolver: zodResolver(createReporteAseoDiarioDtoSchema),
     defaultValues: reporte ? {
       fecha: format(new Date(reporte.fecha), 'yyyy-MM-dd'),
       elementos_aseo: reporte.elementos_aseo,
@@ -77,34 +77,11 @@ export default function ReporteAseoForm({
     }
   });
 
-  const {
-    fields: elementosAseoFields,
-    append: appendElementoAseo,
-    remove: removeElementoAseo
-  } = useFieldArray({
-    control,
-    name: 'elementos_aseo' as any
-  });
+  const elementosAseoValues = watch('elementos_aseo') || [];
+  const elementosProteccionValues = watch('elementos_proteccion') || [];
+  const productosQuimicosValues = watch('productos_quimicos') || [];
 
-  const {
-    fields: elementosProteccionFields,
-    append: appendElementoProteccion,
-    remove: removeElementoProteccion
-  } = useFieldArray({
-    control,
-    name: 'elementos_proteccion' as any
-  });
-
-  const {
-    fields: productosQuimicosFields,
-    append: appendProductoQuimico,
-    remove: removeProductoQuimico
-  } = useFieldArray({
-    control,
-    name: 'productos_quimicos' as any
-  });
-
-  const handleFormSubmit = (data: CreateReporteAseoDiarioDto | UpdateReporteAseoDiarioDto) => {
+  const handleFormSubmit = (data: CreateReporteAseoDiarioDto) => {
     // Limpiar arrays de strings vacíos y convertir fecha
     const cleanData = {
       ...data,
@@ -158,7 +135,7 @@ export default function ReporteAseoForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => appendElementoAseo('')}
+                  onClick={() => setValue('elementos_aseo', [...elementosAseoValues, ''])}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Agregar
@@ -166,19 +143,19 @@ export default function ReporteAseoForm({
               </div>
               
               <div className="space-y-2">
-                {elementosAseoFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2">
+                {elementosAseoValues.map((_, index) => (
+                  <div key={index} className="flex items-center gap-2">
                     <Input
                       {...register(`elementos_aseo.${index}` as const)}
                       placeholder="Ej: Escoba, Trapeador, Aspiradora..."
                       className="bg-gray-50"
                     />
-                    {elementosAseoFields.length > 1 && (
+                    {elementosAseoValues.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeElementoAseo(index)}
+                        onClick={() => setValue('elementos_aseo', elementosAseoValues.filter((_, i) => i !== index))}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -204,7 +181,7 @@ export default function ReporteAseoForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => appendElementoProteccion('')}
+                  onClick={() => setValue('elementos_proteccion', [...elementosProteccionValues, ''])}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Agregar
@@ -212,19 +189,19 @@ export default function ReporteAseoForm({
               </div>
               
               <div className="space-y-2">
-                {elementosProteccionFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2">
+                {elementosProteccionValues.map((_, index) => (
+                  <div key={index} className="flex items-center gap-2">
                     <Input
                       {...register(`elementos_proteccion.${index}` as const)}
                       placeholder="Ej: Guantes, Mascarilla, Gafas de protección..."
                       className="bg-gray-50"
                     />
-                    {elementosProteccionFields.length > 1 && (
+                    {elementosProteccionValues.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeElementoProteccion(index)}
+                        onClick={() => setValue('elementos_proteccion', elementosProteccionValues.filter((_, i) => i !== index))}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -247,7 +224,7 @@ export default function ReporteAseoForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => appendProductoQuimico('')}
+                  onClick={() => setValue('productos_quimicos', [...productosQuimicosValues, ''])}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Agregar
@@ -255,19 +232,19 @@ export default function ReporteAseoForm({
               </div>
               
               <div className="space-y-2">
-                {productosQuimicosFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2">
+                {productosQuimicosValues.map((_, index) => (
+                  <div key={index} className="flex items-center gap-2">
                     <Input
                       {...register(`productos_quimicos.${index}` as const)}
                       placeholder="Ej: Detergente, Desinfectante, Limpiador multiusos..."
                       className="bg-gray-50"
                     />
-                    {productosQuimicosFields.length > 1 && (
+                    {productosQuimicosValues.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeProductoQuimico(index)}
+                        onClick={() => setValue('productos_quimicos', productosQuimicosValues.filter((_, i) => i !== index))}
                       >
                         <X className="h-4 w-4" />
                       </Button>
