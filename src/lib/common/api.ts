@@ -1,5 +1,9 @@
 // URL base de la API
-export const API_BASE_URL = 'http://localhost:3001'
+// Prioriza variables de entorno de Next para cliente y servidor.
+// Fallback a localhost para desarrollo si no están definidas.
+export const API_BASE_URL =
+  process.env.API_BASE_URL ||
+  'http://localhost:3001'
 
 // Endpoints de autenticación
 export const AUTH_ENDPOINTS = {
