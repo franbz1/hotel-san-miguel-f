@@ -26,7 +26,7 @@ export default function DashboardPage() {
             <RoomsSection />
 
             {/* Bookings Panel */}
-            <BookingsSection title="Formularios de reservas" />
+            <BookingsSection showFilters={false} title="Formularios de reservas" />
           </div>
 
         </div>
