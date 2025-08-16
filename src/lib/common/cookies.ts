@@ -12,8 +12,8 @@ export const COOKIE_NAMES = {
 /**
  * Establece una cookie con el nombre, valor y tiempo de expiración especificados
  */
-export function setCookie(name: string, value: string, days: number = COOKIE_EXPIRATION_DAYS): void {
-  Cookies.set(name, value, { expires: days })
+export function setCookie(name: string, value: string, days: number = COOKIE_EXPIRATION_DAYS, options?: Cookies.CookieAttributes): void {
+  Cookies.set(name, value, { expires: days, ...options })
 }
 
 /**
@@ -42,7 +42,12 @@ export function saveAuthCookies(
 ) {
   const expirationDays = rememberMe ? COOKIE_EXPIRATION_DAYS : 1
 
-  setCookie(COOKIE_NAMES.TOKEN, token, expirationDays)
+  const options = {
+    secure: true,
+    sameSite: 'None' as const
+  }
+
+  setCookie(COOKIE_NAMES.TOKEN, token, expirationDays, options)
   setCookie(COOKIE_NAMES.USER_ID, userId, expirationDays)
   setCookie(COOKIE_NAMES.USER_NAME, username, expirationDays)
   setCookie(COOKIE_NAMES.USER_ROLE, role, expirationDays)
