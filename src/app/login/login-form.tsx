@@ -84,6 +84,7 @@ export function LoginForm() {
     try {
       const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
