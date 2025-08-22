@@ -107,22 +107,29 @@ export default function RegistrosAseoZonasComunesPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Registros de Aseo - Zonas Comunes</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold break-words">Registros de Aseo - Zonas Comunes</h1>
+          <p className="text-muted-foreground break-words">
             Gestiona y consulta todos los registros de aseo de zonas comunes
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+
+        <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
             <RefreshCcw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
+
           {isAdmin() && (
-            <Button variant="outline">
+            <Button variant="outline" className="w-full sm:w-auto">
               <Download className="h-4 w-4 mr-2" />
               Exportar
             </Button>
@@ -141,45 +148,49 @@ export default function RegistrosAseoZonasComunesPage() {
             Utiliza los filtros para encontrar registros específicos
           </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {/* Filtro por Zona Común */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Zona Común ID</label>
               <Input
                 type="number"
                 placeholder="ID de zona común"
                 value={selectedZonaComun}
                 onChange={(e) => setSelectedZonaComun(e.target.value)}
+                className="w-full"
               />
             </div>
 
             {/* Filtro por Usuario */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Usuario ID</label>
               <Input
                 type="number"
                 placeholder="ID del usuario"
                 value={selectedUsuario}
                 onChange={(e) => setSelectedUsuario(e.target.value)}
+                className="w-full"
               />
             </div>
 
             {/* Filtro por Fecha */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Fecha</label>
               <Input
                 type="date"
                 value={selectedFecha}
                 onChange={(e) => setSelectedFecha(e.target.value)}
+                className="w-full"
               />
             </div>
 
             {/* Filtro por Tipo de Aseo */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Tipo de Aseo</label>
               <Select value={selectedTipoAseo} onValueChange={setSelectedTipoAseo}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -192,19 +203,24 @@ export default function RegistrosAseoZonasComunesPage() {
 
           <Separator className="my-4" />
 
-          <div className="flex items-center gap-2">
-            <Button onClick={handleFilter} disabled={isLoading}>
-              <Search className="h-4 w-4 mr-2" />
-              Aplicar Filtros
-            </Button>
-            <Button variant="outline" onClick={handleClearFilters}>
-              Limpiar Filtros
-            </Button>
-            {Object.keys(filters).length > 0 && (
-              <Badge variant="secondary">
-                {Object.keys(filters).length} filtro{Object.keys(filters).length > 1 ? 's' : ''} activo{Object.keys(filters).length > 1 ? 's' : ''}
-              </Badge>
-            )}
+          <div className="flex w-full flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="flex w-full sm:w-auto gap-2 flex-col sm:flex-row">
+              <Button onClick={handleFilter} disabled={isLoading} className="w-full sm:w-auto">
+                <Search className="h-4 w-4 mr-2" />
+                Aplicar Filtros
+              </Button>
+              <Button variant="outline" onClick={handleClearFilters} className="w-full sm:w-auto">
+                Limpiar Filtros
+              </Button>
+            </div>
+
+            <div className="mt-2 sm:mt-0 sm:ml-4">
+              {Object.keys(filters).length > 0 && (
+                <Badge variant="secondary">
+                  {Object.keys(filters).length} filtro{Object.keys(filters).length > 1 ? 's' : ''} activo{Object.keys(filters).length > 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -212,17 +228,18 @@ export default function RegistrosAseoZonasComunesPage() {
       {/* Tabla de Registros */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
             <div>
               <CardTitle>Registros Encontrados</CardTitle>
               <CardDescription>
-                {meta?.total ? `${meta.total} registro${meta.total > 1 ? 's' : ''} total${meta.total > 1 ? 'es' : ''}` : 'Cargando...'}
+                {meta?.total ? `${meta.total} registro${meta.total > 1 ? 's' : ''}` : 'Cargando...'}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Mostrar:</span>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-sm text-muted-foreground hidden sm:inline">Mostrar:</span>
               <Select value={limit.toString()} onValueChange={(value) => setLimit(parseInt(value))}>
-                <SelectTrigger className="w-20">
+                <SelectTrigger className="w-full sm:w-20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -235,6 +252,7 @@ export default function RegistrosAseoZonasComunesPage() {
             </div>
           </div>
         </CardHeader>
+
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -251,7 +269,8 @@ export default function RegistrosAseoZonasComunesPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
+              {/* Desktop / Tablet: Tabla */}
+              <div className="hidden md:block overflow-x-auto rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -260,24 +279,25 @@ export default function RegistrosAseoZonasComunesPage() {
                       <TableHead>Usuario</TableHead>
                       <TableHead>Tipo de Aseo</TableHead>
                       <TableHead>Fecha Registro</TableHead>
-                      <TableHead>Hallazgos</TableHead>
-                      <TableHead>Observaciones</TableHead>
+                      <TableHead className="hidden lg:table-cell">Hallazgos</TableHead>
+                      <TableHead className="hidden lg:table-cell">Observaciones</TableHead>
                       <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {registros.map((registro) => (
                       <TableRow key={registro.id}>
                         <TableCell className="font-medium">#{registro.id}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4 text-muted-foreground" />
-                            <Badge variant="outline">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <Badge variant="outline" className="truncate">
                               {registro.zonaComun?.nombre || `Zona ${registro.zonaComunId}`}
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="max-w-[12rem] truncate">
                           {registro.usuario?.nombre || `Usuario ${registro.usuarioId}`}
                         </TableCell>
                         <TableCell>
@@ -289,35 +309,32 @@ export default function RegistrosAseoZonasComunesPage() {
                             ))}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          {formatearFechaLocal(registro.fecha_registro)}
-                        </TableCell>
-                        <TableCell>
+                        <TableCell>{formatearFechaLocal(registro.fecha_registro)}</TableCell>
+
+                        <TableCell className="hidden lg:table-cell">
                           <div className="flex flex-col gap-1">
                             {registro.objetos_perdidos && (
-                              <Badge variant="destructive" className="text-xs">
-                                Objetos perdidos
-                              </Badge>
+                              <Badge variant="destructive" className="text-xs">Objetos perdidos</Badge>
                             )}
                             {registro.rastros_de_animales && (
-                              <Badge variant="destructive" className="text-xs">
-                                Rastros animales
-                              </Badge>
+                              <Badge variant="destructive" className="text-xs">Rastros animales</Badge>
                             )}
                             {!registro.objetos_perdidos && !registro.rastros_de_animales && (
                               <span className="text-muted-foreground text-sm">Sin hallazgos</span>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
+
+                        <TableCell className="hidden lg:table-cell">
                           <div className="max-w-xs truncate" title={registro.observaciones || "Sin observaciones"}>
                             {registro.observaciones || "Sin observaciones"}
                           </div>
                         </TableCell>
+
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => handleViewDetails(registro.id)}
                               title="Ver detalles"
@@ -332,44 +349,96 @@ export default function RegistrosAseoZonasComunesPage() {
                 </Table>
               </div>
 
+              {/* Mobile: Lista de tarjetas */}
+              <div className="md:hidden space-y-3">
+                {registros.map((registro) => (
+                  <Card key={registro.id} className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium truncate">#{registro.id} — {registro.zonaComun?.nombre || `Zona ${registro.zonaComunId}`}</div>
+                        </div>
+
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          {registro.usuario?.nombre || `Usuario ${registro.usuarioId}`} • {formatearFechaLocal(registro.fecha_registro)}
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          {registro.tipos_realizados.map((tipo, i) => (
+                            <Badge key={i} className={getTipoAseoBadgeColor(tipo as TiposAseo)}>{tipo}</Badge>
+                          ))}
+
+                          {registro.objetos_perdidos && <Badge variant="destructive" className="text-xs">Objetos perdidos</Badge>}
+                          {registro.rastros_de_animales && <Badge variant="destructive" className="text-xs">Rastros animales</Badge>}
+                        </div>
+
+                        <div className="mt-2 text-sm text-muted-foreground max-w-full">
+                          <div className="truncate" title={registro.observaciones || "Sin observaciones"}>
+                            {registro.observaciones || "Sin observaciones"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(registro.id)}
+                          title="Ver detalles"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
               {/* Paginación */}
               {meta && meta.lastPage > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-muted-foreground">
-                    Mostrando {((page - 1) * limit) + 1} a {Math.min(page * limit, meta.total)} de {meta.total} registros
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page - 1)}
-                      disabled={page <= 1}
-                    >
-                      Anterior
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, meta.lastPage) }, (_, i) => {
-                        const pageNum = i + 1;
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={page === pageNum ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setPage(pageNum)}
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
+                <div className="mt-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-sm text-muted-foreground">
+                      Mostrando {((page - 1) * limit) + 1} a {Math.min(page * limit, meta.total)} de {meta.total} registros
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page + 1)}
-                      disabled={page >= meta.lastPage}
-                    >
-                      Siguiente
-                    </Button>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page - 1)}
+                        disabled={page <= 1}
+                        className="w-full sm:w-auto"
+                      >
+                        Anterior
+                      </Button>
+
+                      <div className="flex gap-1">
+                        {Array.from({ length: Math.min(5, meta.lastPage) }, (_, i) => {
+                          const pageNum = Math.max(1, Math.min(meta.lastPage - 4, page - 2)) + i;
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={pageNum === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setPage(pageNum)}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page + 1)}
+                        disabled={page >= meta.lastPage}
+                        className="w-full sm:w-auto"
+                      >
+                        Siguiente
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -378,5 +447,6 @@ export default function RegistrosAseoZonasComunesPage() {
         </CardContent>
       </Card>
     </div>
+
   )
 } 

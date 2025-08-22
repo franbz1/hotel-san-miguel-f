@@ -6,15 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from "@/components/ui/form"
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -33,19 +33,19 @@ interface ZonaComunDialogProps {
   onCreateZona?: (data: CreateZonaComunDto) => void
   isCreating?: boolean
   resetCreate?: () => void
-  
+
   // Props para edición
   zona?: ZonaComun | null
   onUpdateZona?: (id: number, data: UpdateZonaComunDto) => void
   isUpdating?: boolean
   resetUpdate?: () => void
-  
+
   // Props para controlar el modal externamente (para edición)
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }
 
-export function ZonaComunDialog({ 
+export function ZonaComunDialog({
   onCreateZona,
   isCreating = false,
   resetCreate,
@@ -98,7 +98,7 @@ export function ZonaComunDialog({
       onCreateZona(data as CreateZonaComunDto)
       toast.success("Zona común creada exitosamente")
     }
-    
+
     handleClose()
   }
 
@@ -106,7 +106,7 @@ export function ZonaComunDialog({
   const handleClose = () => {
     setOpen(false)
     form.reset()
-    
+
     if (isEditMode && resetUpdate) {
       resetUpdate()
     } else if (!isEditMode && resetCreate) {
@@ -120,13 +120,13 @@ export function ZonaComunDialog({
     <Dialog open={isOpen} onOpenChange={setOpen}>
       {!isEditMode && (
         <DialogTrigger asChild>
-          <Button>
+          <Button className="w-full">
             <Plus className="h-4 w-4 mr-2" />
             Nueva Zona
           </Button>
         </DialogTrigger>
       )}
-      
+
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -143,13 +143,13 @@ export function ZonaComunDialog({
             )}
           </DialogTitle>
           <DialogDescription>
-            {isEditMode 
-              ? "Modifica los datos de la zona común" 
+            {isEditMode
+              ? "Modifica los datos de la zona común"
               : "Agrega una nueva zona común al sistema"
             }
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
@@ -165,7 +165,7 @@ export function ZonaComunDialog({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="piso"
@@ -173,8 +173,8 @@ export function ZonaComunDialog({
                 <FormItem>
                   <FormLabel>Piso</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       placeholder="0"
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
@@ -184,7 +184,7 @@ export function ZonaComunDialog({
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
