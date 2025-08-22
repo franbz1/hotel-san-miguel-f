@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { usePermissions } from "@/hooks/usePermissions"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useIsMobile } from "@/hooks/useIsMobile"
 
 // Componente para elementos de menú con Link
 interface MenuItemProps {
@@ -116,7 +117,10 @@ interface AseoSectionProps {
 }
 
 function AseoSection({ canViewAseo, isActive }: AseoSectionProps) {
+  const isMobile = useIsMobile()
+
   if (!canViewAseo) return null
+
 
   return (
     <>
@@ -126,7 +130,10 @@ function AseoSection({ canViewAseo, isActive }: AseoSectionProps) {
           <SoapDispenserDroplet className="mr-2 h-4 w-4" />
           <span>Gestión de Aseo</span>
         </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-56">
+        <DropdownMenuSubContent className={`
+            ${isMobile ? "w-full left-0 right-0 max-w-[calc(100vw-1rem)]" : "w-56"}
+            overflow-auto max-h-[70vh]
+          `}>
           <MenuItem
             href="/aseo"
             icon={<SoapDispenserDroplet className="mr-2 h-4 w-4" />}
@@ -222,7 +229,7 @@ export function UserNav() {
       <DropdownMenuContent align="end" className="w-56">
         <UserProfile user={user} />
         <DropdownMenuSeparator />
-        
+
         <DashboardSection
           canAccessDashboard={canAccessDashboard}
           canViewAnalytics={canViewAnalytics}
@@ -230,11 +237,11 @@ export function UserNav() {
           canViewHuespedes={canViewHuespedes}
           isActive={isActive}
         />
-        
+
         <AseoSection canViewAseo={canViewAseo} isActive={isActive} />
-        
+
         <ConfigSection isAdmin={isAdmin} isActive={isActive} />
-        
+
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />

@@ -113,22 +113,31 @@ export default function RegistrosAseoHabitacionesPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Registros de Aseo - Habitaciones</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold break-words">
+            Registros de Aseo - Habitaciones
+          </h1>
+          <p className="text-muted-foreground break-words">
             Gestiona y consulta todos los registros de aseo de habitaciones
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+
+        <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
             <RefreshCcw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
+
           {isAdmin() && (
-            <Button variant="outline">
+            <Button variant="outline" className="w-full sm:w-auto">
               <Download className="h-4 w-4 mr-2" />
               Exportar
             </Button>
@@ -143,49 +152,51 @@ export default function RegistrosAseoHabitacionesPage() {
             <FilterIcon className="h-5 w-5" />
             Filtros de Búsqueda
           </CardTitle>
-          <CardDescription>
-            Utiliza los filtros para encontrar registros específicos
-          </CardDescription>
+          <CardDescription>Utiliza los filtros para encontrar registros específicos</CardDescription>
         </CardHeader>
+
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Filtro por Habitación */}
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Habitación */}
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Habitación</label>
               <Input
                 type="number"
                 placeholder="Número de habitación"
                 value={selectedHabitacion}
                 onChange={(e) => setSelectedHabitacion(e.target.value)}
+                className="w-full"
               />
             </div>
 
-            {/* Filtro por Usuario */}
-            <div className="space-y-2">
+            {/* Usuario */}
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Usuario ID</label>
               <Input
                 type="number"
                 placeholder="ID del usuario"
                 value={selectedUsuario}
                 onChange={(e) => setSelectedUsuario(e.target.value)}
+                className="w-full"
               />
             </div>
 
-            {/* Filtro por Fecha */}
-            <div className="space-y-2">
+            {/* Fecha */}
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Fecha</label>
               <Input
                 type="date"
                 value={selectedFecha}
                 onChange={(e) => setSelectedFecha(e.target.value)}
+                className="w-full"
               />
             </div>
 
-            {/* Filtro por Tipo de Aseo */}
-            <div className="space-y-2">
+            {/* Tipo de Aseo */}
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Tipo de Aseo</label>
               <Select value={selectedTipoAseo} onValueChange={setSelectedTipoAseo}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -201,19 +212,24 @@ export default function RegistrosAseoHabitacionesPage() {
 
           <Separator className="my-4" />
 
-          <div className="flex items-center gap-2">
-            <Button onClick={handleFilter} disabled={isLoading}>
-              <Search className="h-4 w-4 mr-2" />
-              Aplicar Filtros
-            </Button>
-            <Button variant="outline" onClick={handleClearFilters}>
-              Limpiar Filtros
-            </Button>
-            {Object.keys(filters).length > 0 && (
-              <Badge variant="secondary">
-                {Object.keys(filters).length} filtro{Object.keys(filters).length > 1 ? 's' : ''} activo{Object.keys(filters).length > 1 ? 's' : ''}
-              </Badge>
-            )}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="flex gap-2 w-full flex-col sm:flex-row sm:w-auto">
+              <Button onClick={handleFilter} disabled={isLoading} className="w-full sm:w-auto">
+                <Search className="h-4 w-4 mr-2" />
+                Aplicar Filtros
+              </Button>
+              <Button variant="outline" onClick={handleClearFilters} className="w-full sm:w-auto">
+                Limpiar Filtros
+              </Button>
+            </div>
+
+            <div className="mt-2 sm:mt-0 sm:ml-4">
+              {Object.keys(filters).length > 0 && (
+                <Badge variant="secondary">
+                  {Object.keys(filters).length} filtro{Object.keys(filters).length > 1 ? 's' : ''} activo{Object.keys(filters).length > 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -221,17 +237,18 @@ export default function RegistrosAseoHabitacionesPage() {
       {/* Tabla de Registros */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
             <div>
               <CardTitle>Registros Encontrados</CardTitle>
               <CardDescription>
                 {meta?.total ? `${meta.total} registro${meta.total > 1 ? 's' : ''} total${meta.total > 1 ? 'es' : ''}` : 'Cargando...'}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Mostrar:</span>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-sm text-muted-foreground hidden sm:inline">Mostrar:</span>
               <Select value={limit.toString()} onValueChange={(value) => setLimit(parseInt(value))}>
-                <SelectTrigger className="w-20">
+                <SelectTrigger className="w-full sm:w-20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -244,6 +261,7 @@ export default function RegistrosAseoHabitacionesPage() {
             </div>
           </div>
         </CardHeader>
+
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -253,13 +271,12 @@ export default function RegistrosAseoHabitacionesPage() {
           ) : registros.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No se encontraron registros con los filtros aplicados</p>
-              <Button variant="outline" onClick={handleClearFilters} className="mt-4">
-                Limpiar Filtros
-              </Button>
+              <Button variant="outline" onClick={handleClearFilters} className="mt-4">Limpiar Filtros</Button>
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
+              {/* Table desktop (md+) */}
+              <div className="hidden md:block overflow-x-auto rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -267,44 +284,32 @@ export default function RegistrosAseoHabitacionesPage() {
                       <TableHead>Habitación</TableHead>
                       <TableHead>Usuario</TableHead>
                       <TableHead>Tipo de Aseo</TableHead>
-                      <TableHead>Fecha Registro</TableHead>
-                      <TableHead>Observaciones</TableHead>
+                      <TableHead className="hidden lg:table-cell">Fecha Registro</TableHead>
+                      <TableHead className="hidden lg:table-cell">Observaciones</TableHead>
                       <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {registros.map((registro) => (
                       <TableRow key={registro.id}>
                         <TableCell className="font-medium">#{registro.id}</TableCell>
                         <TableCell>
-                          <Badge variant="outline">
-                            Hab. {registro.habitacion?.numero_habitacion || registro.habitacionId}
-                          </Badge>
+                          <Badge variant="outline">Hab. {registro.habitacion?.numero_habitacion || registro.habitacionId}</Badge>
                         </TableCell>
+                        <TableCell className="max-w-xs truncate">{registro.usuario?.nombre || `Usuario ${registro.usuarioId}`}</TableCell>
                         <TableCell>
-                          {registro.usuario?.nombre || `Usuario ${registro.usuarioId}`}
+                          <Badge className={getTipoAseoBadgeColor(registro.tipos_realizados[0] as TiposAseo)}>{registro.tipos_realizados[0]}</Badge>
                         </TableCell>
-                        <TableCell>
-                          <Badge className={getTipoAseoBadgeColor(registro.tipos_realizados[0] as TiposAseo)}>
-                            {registro.tipos_realizados[0]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {formatearFechaLocal(registro.fecha_registro)}
-                        </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden lg:table-cell">{formatearFechaLocal(registro.fecha_registro)}</TableCell>
+                        <TableCell className="hidden lg:table-cell">
                           <div className="max-w-xs truncate" title={registro.observaciones || "Sin observaciones"}>
                             {registro.observaciones || "Sin observaciones"}
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleViewDetails(registro.id)}
-                              title="Ver detalles"
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleViewDetails(registro.id)} title="Ver detalles">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </div>
@@ -315,44 +320,67 @@ export default function RegistrosAseoHabitacionesPage() {
                 </Table>
               </div>
 
+              {/* Mobile: Cards list */}
+              <div className="md:hidden space-y-3">
+                {registros.map((registro) => (
+                  <Card key={registro.id} className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium">#{registro.id}</div>
+                            <Badge variant="outline" className="text-xs">Hab. {registro.habitacion?.numero_habitacion || registro.habitacionId}</Badge>
+                          </div>
+
+                          <div className="text-sm text-muted-foreground">{formatearFechaLocal(registro.fecha_registro)}</div>
+                        </div>
+
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <Badge className={getTipoAseoBadgeColor(registro.tipos_realizados[0] as TiposAseo)}>{registro.tipos_realizados[0]}</Badge>
+                          <div className="text-sm text-muted-foreground truncate max-w-[50vw]" title={registro.usuario?.nombre || `Usuario ${registro.usuarioId}`}>
+                            {registro.usuario?.nombre || `Usuario ${registro.usuarioId}`}
+                          </div>
+                        </div>
+
+                        <div className="mt-2 text-sm text-muted-foreground max-w-full truncate" title={registro.observaciones || "Sin observaciones"}>
+                          {registro.observaciones || "Sin observaciones"}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleViewDetails(registro.id)} title="Ver detalles">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
               {/* Paginación */}
               {meta && meta.total > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-muted-foreground">
-                    Mostrando {((page - 1) * limit) + 1} a {Math.min(page * limit, meta.lastPage)} de {meta.lastPage} registros
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page - 1)}
-                      disabled={page <= 1}
-                    >
-                      Anterior
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, meta.lastPage) }, (_, i) => {
-                        const pageNum = i + 1;
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={page === pageNum ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setPage(pageNum)}
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
+                <div className="mt-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-sm text-muted-foreground">
+                      Mostrando {((page - 1) * limit) + 1} a {Math.min(page * limit, meta.total)} de {meta.total} registros
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page + 1)}
-                      disabled={page >= meta.lastPage}
-                    >
-                      Siguiente
-                    </Button>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <Button variant="outline" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>Anterior</Button>
+
+                      <div className="flex gap-1">
+                        {Array.from({ length: Math.min(5, meta.lastPage) }, (_, i) => {
+                          const pageNum = Math.max(1, Math.min(meta.lastPage - 4, page - 2)) + i;
+                          return (
+                            <Button key={pageNum} variant={pageNum === page ? "default" : "outline"} size="sm" onClick={() => setPage(pageNum)}>
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+
+                      <Button variant="outline" size="sm" onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage}>Siguiente</Button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -361,5 +389,6 @@ export default function RegistrosAseoHabitacionesPage() {
         </CardContent>
       </Card>
     </div>
+
   )
 } 

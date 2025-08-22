@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Separator } from "@/components/ui/separator"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -18,11 +18,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { 
-  FilterIcon, 
-  RefreshCcw, 
-  Search, 
-  Edit, 
+import {
+  FilterIcon,
+  RefreshCcw,
+  Search,
+  Edit,
   Trash2,
   Building,
   Calendar,
@@ -41,7 +41,7 @@ import { useAuth } from "@/contexts/auth-context"
 export default function ZonasComunesPage() {
   const router = useRouter()
   const { user } = useAuth()
-  
+
   // Estados para filtros
   const [selectedPiso, setSelectedPiso] = useState<string>("")
   const [selectedRequiereAseo, setSelectedRequiereAseo] = useState<string>("")
@@ -171,13 +171,13 @@ export default function ZonasComunesPage() {
       toast.error("Debes estar autenticado para registrar aseo")
       return
     }
-    
+
     const params = new URLSearchParams({
       usuarioId: user.id.toString(),
       usuarioNombre: user.nombre,
       nombreZonaComun: zona.nombre
     })
-    
+
     router.push(`/aseo/zonas-comunes/registrar/${zona.id}?${params.toString()}`)
   }
 
@@ -195,25 +195,34 @@ export default function ZonasComunesPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Gestión de Zonas Comunes</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold break-words">Gestión de Zonas Comunes</h1>
+          <p className="text-muted-foreground break-words">
             Administra las zonas comunes del hotel y su estado de aseo
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+
+        <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
             <RefreshCcw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
-          <ZonaComunDialog
-            onCreateZona={handleCreate}
-            isCreating={isCreating}
-            resetCreate={resetCreate}
-          />
+
+          <div className="w-full sm:w-auto">
+            <ZonaComunDialog
+              onCreateZona={handleCreate}
+              isCreating={isCreating}
+              resetCreate={resetCreate}
+            />
+          </div>
         </div>
       </div>
 
@@ -224,28 +233,31 @@ export default function ZonasComunesPage() {
             <FilterIcon className="h-5 w-5" />
             Filtros de Búsqueda
           </CardTitle>
-          <CardDescription>
-            Utiliza los filtros para encontrar zonas específicas
-          </CardDescription>
+          <CardDescription>Utiliza los filtros para encontrar zonas específicas</CardDescription>
         </CardHeader>
+
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Filtro por Piso */}
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Piso */}
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Piso</label>
               <Input
                 type="number"
                 placeholder="Número de piso"
                 value={selectedPiso}
                 onChange={(e) => setSelectedPiso(e.target.value)}
+                className="w-full"
               />
             </div>
 
-            {/* Filtro por Requiere Aseo */}
-            <div className="space-y-2">
+            {/* Requiere Aseo */}
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Requiere Aseo Hoy</label>
-              <Select value={selectedRequiereAseo} onValueChange={setSelectedRequiereAseo}>
-                <SelectTrigger>
+              <Select
+                value={selectedRequiereAseo}
+                onValueChange={setSelectedRequiereAseo}
+              >
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
                 <SelectContent>
@@ -255,11 +267,11 @@ export default function ZonasComunesPage() {
               </Select>
             </div>
 
-            {/* Filtro por Tipo de Aseo */}
-            <div className="space-y-2">
+            {/* Tipo Aseo */}
+            <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Último Tipo de Aseo</label>
               <Select value={selectedTipoAseo} onValueChange={setSelectedTipoAseo}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -272,19 +284,24 @@ export default function ZonasComunesPage() {
 
           <Separator className="my-4" />
 
-          <div className="flex items-center gap-2">
-            <Button onClick={handleFilter} disabled={isLoading}>
-              <Search className="h-4 w-4 mr-2" />
-              Aplicar Filtros
-            </Button>
-            <Button variant="outline" onClick={handleClearFilters}>
-              Limpiar Filtros
-            </Button>
-            {Object.keys(filters).length > 0 && (
-              <Badge variant="secondary">
-                {Object.keys(filters).length} filtro{Object.keys(filters).length > 1 ? 's' : ''} activo{Object.keys(filters).length > 1 ? 's' : ''}
-              </Badge>
-            )}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="flex gap-2 w-full flex-col sm:flex-row sm:w-auto">
+              <Button onClick={handleFilter} disabled={isLoading} className="w-full sm:w-auto">
+                <Search className="h-4 w-4 mr-2" />
+                Aplicar Filtros
+              </Button>
+              <Button variant="outline" onClick={handleClearFilters} className="w-full sm:w-auto">
+                Limpiar Filtros
+              </Button>
+            </div>
+
+            <div className="mt-2 sm:mt-0 sm:ml-4">
+              {Object.keys(filters).length > 0 && (
+                <Badge variant="secondary">
+                  {Object.keys(filters).length} filtro{Object.keys(filters).length > 1 ? 's' : ''} activo{Object.keys(filters).length > 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -292,17 +309,18 @@ export default function ZonasComunesPage() {
       {/* Tabla de Zonas Comunes */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
             <div>
               <CardTitle>Zonas Comunes</CardTitle>
               <CardDescription>
                 {meta?.total ? `${meta.total} zona${meta.total > 1 ? 's' : ''} encontrada${meta.total > 1 ? 's' : ''}` : 'Cargando...'}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Mostrar:</span>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-sm text-muted-foreground hidden sm:inline">Mostrar:</span>
               <Select value={limit.toString()} onValueChange={(value) => setLimit(parseInt(value))}>
-                <SelectTrigger className="w-20">
+                <SelectTrigger className="w-full sm:w-20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -315,6 +333,7 @@ export default function ZonasComunesPage() {
             </div>
           </div>
         </CardHeader>
+
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -325,13 +344,12 @@ export default function ZonasComunesPage() {
             <div className="text-center py-12">
               <Building className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">No se encontraron zonas comunes</p>
-              <Button variant="outline" onClick={handleClearFilters} className="mt-4">
-                Limpiar Filtros
-              </Button>
+              <Button variant="outline" onClick={handleClearFilters} className="mt-4">Limpiar Filtros</Button>
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
+              {/* Table para desktop (md+) */}
+              <div className="hidden md:block overflow-x-auto rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -339,42 +357,41 @@ export default function ZonasComunesPage() {
                       <TableHead>Nombre</TableHead>
                       <TableHead>Piso</TableHead>
                       <TableHead>Requiere Aseo</TableHead>
-                      <TableHead>Último Aseo</TableHead>
-                      <TableHead>Tipo Aseo</TableHead>
+                      <TableHead className="hidden lg:table-cell">Último Aseo</TableHead>
+                      <TableHead className="hidden lg:table-cell">Tipo Aseo</TableHead>
                       <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {zonas.map((zona) => (
                       <TableRow key={zona.id}>
                         <TableCell className="font-medium">#{zona.id}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4 text-muted-foreground" />
-                            {zona.nombre}
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{zona.nombre}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">
-                            Piso {zona.piso}
-                          </Badge>
+                          <Badge variant="outline">Piso {zona.piso}</Badge>
                         </TableCell>
                         <TableCell>
                           <Badge variant={zona.requerido_aseo_hoy ? "destructive" : "secondary"}>
                             {zona.requerido_aseo_hoy ? (
-                              <>
+                              <span className="inline-flex items-center">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
                                 Sí
-                              </>
+                              </span>
                             ) : (
-                              <>
+                              <span className="inline-flex items-center">
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 No
-                              </>
+                              </span>
                             )}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden lg:table-cell">
                           {zona.ultimo_aseo_fecha ? (
                             <div className="flex items-center gap-1 text-sm">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -384,7 +401,7 @@ export default function ZonasComunesPage() {
                             <span className="text-muted-foreground text-sm">Sin registro</span>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden lg:table-cell">
                           {zona.ultimo_aseo_tipo ? (
                             <Badge className={getTipoAseoBadgeColor(zona.ultimo_aseo_tipo)}>
                               {zona.ultimo_aseo_tipo}
@@ -395,26 +412,21 @@ export default function ZonasComunesPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleRegistroAseo(zona)}
                               title="Registrar Aseo"
                               className="text-blue-600 hover:text-blue-700"
                             >
                               <ClipboardList className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleEdit(zona)}
-                              title="Editar"
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleEdit(zona)} title="Editar">
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               className="text-red-600 hover:text-red-700"
                               onClick={() => confirmDelete(zona)}
                               title="Eliminar"
@@ -429,44 +441,86 @@ export default function ZonasComunesPage() {
                 </Table>
               </div>
 
+              {/* Mobile: cards list */}
+              <div className="md:hidden space-y-3">
+                {zonas.map((zona) => (
+                  <Card key={zona.id} className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Building className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{zona.nombre}</div>
+                            <div className="text-sm text-muted-foreground">
+                              Piso {zona.piso} • {zona.ultimo_aseo_fecha ? formatearFechaLocal(zona.ultimo_aseo_fecha) : 'Sin registro'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <Badge variant={zona.requerido_aseo_hoy ? "destructive" : "secondary"}>
+                            {zona.requerido_aseo_hoy ? 'Aseo requerido' : 'Sin Aseo'}
+                          </Badge>
+
+                          {zona.ultimo_aseo_tipo && (
+                            <Badge className={getTipoAseoBadgeColor(zona.ultimo_aseo_tipo)}>{zona.ultimo_aseo_tipo}</Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRegistroAseo(zona)}
+                            title="Registrar Aseo"
+                          >
+                            <ClipboardList className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(zona)} title="Editar">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => confirmDelete(zona)}
+                            title="Eliminar"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
               {/* Paginación */}
               {meta && meta.lastPage > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-muted-foreground">
-                    Mostrando {((page - 1) * limit) + 1} a {Math.min(page * limit, meta.total)} de {meta.total} zonas
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page - 1)}
-                      disabled={page <= 1}
-                    >
-                      Anterior
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, meta.lastPage) }, (_, i) => {
-                        const pageNum = i + 1;
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={page === pageNum ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setPage(pageNum)}
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
+                <div className="mt-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-sm text-muted-foreground">
+                      Mostrando {((page - 1) * limit) + 1} a {Math.min(page * limit, meta.total)} de {meta.total} zonas
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page + 1)}
-                      disabled={page >= meta.lastPage}
-                    >
-                      Siguiente
-                    </Button>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <Button variant="outline" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>Anterior</Button>
+
+                      <div className="flex gap-1">
+                        {Array.from({ length: Math.min(5, meta.lastPage) }, (_, i) => {
+                          const pageNum = Math.max(1, Math.min(meta.lastPage - 4, page - 2)) + i;
+                          return (
+                            <Button key={pageNum} variant={pageNum === page ? "default" : "outline"} size="sm" onClick={() => setPage(pageNum)}>
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+
+                      <Button variant="outline" size="sm" onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage}>Siguiente</Button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -475,17 +529,18 @@ export default function ZonasComunesPage() {
         </CardContent>
       </Card>
 
-      {/* Modal de Edición */}
-      <ZonaComunDialog
-        zona={selectedZona}
-        onUpdateZona={handleUpdate}
-        isUpdating={isUpdating}
-        resetUpdate={resetUpdate}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
+      {/* Modales (mantengo tus Dialogs/Dialogs) */}
+      <div className="hidden">
+        <ZonaComunDialog
+          zona={selectedZona}
+          onUpdateZona={handleUpdate}
+          isUpdating={isUpdating}
+          resetUpdate={resetUpdate}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+        />
+      </div>
 
-      {/* Modal de Confirmación de Eliminación */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -495,14 +550,8 @@ export default function ZonasComunesPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
               {isDeleting ? (
                 <>
                   <LoadingSpinner className="mr-2 h-4 w-4" />
@@ -516,5 +565,6 @@ export default function ZonasComunesPage() {
         </DialogContent>
       </Dialog>
     </div>
+
   )
 } 

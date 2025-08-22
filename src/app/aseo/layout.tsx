@@ -8,10 +8,10 @@ interface AseoLayoutProps {
 export default function AseoLayout({ children }: AseoLayoutProps) {
   return (
     <AseoGuard>
-      <div className="container mx-auto px-4 py-6">
+      <div className="flex min-h-screen w-full">
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 w-full p-0 sm:p-2 md:p-8">
           {/* Header */}
           <Header />
 
