@@ -49,10 +49,10 @@ export function DateTimePicker({ onChange, initialDate }: DateTimePickerProps) {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-start text-left font-normal"
+            className="w-full justify-start text-left font-normal text-xs sm:text-sm"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span className="text-muted-foreground">Selecciona una fecha</span>}
+            {date ? format(date, "P") : <span className="text-muted-foreground">Selecciona una fecha</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" onClick={(e) => e.stopPropagation()}>
@@ -65,8 +65,9 @@ export function DateTimePicker({ onChange, initialDate }: DateTimePickerProps) {
       </Popover>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium text-gray-700">Hora</label>
+        <label className="font-medium text-gray-700 text-xs sm:text-sm">Hora</label>
         <Input
+          className="text-xs sm:text-sm"
           type="time"
           value={time}
           onChange={handleTimeChange}

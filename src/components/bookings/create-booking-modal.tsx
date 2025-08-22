@@ -217,7 +217,7 @@ export function CreateBookingModal({ onBookingCreated }: CreateBookingModalProps
                     </FormControl>
                     <SelectContent>
                       <ScrollArea className="h-[200px]">
-                        {habitaciones.map((habitacion) => (
+                        {habitaciones.length > 0 && habitaciones.map((habitacion) => (
                           <SelectItem 
                             key={habitacion.numero_habitacion} 
                             value={habitacion.numero_habitacion.toString()}

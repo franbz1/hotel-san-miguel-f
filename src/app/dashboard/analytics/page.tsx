@@ -268,11 +268,11 @@ export default function AnalyticsPage() {
 
           {/* Contenido principal con tabs */}
           <Tabs
-            defaultValue='overview'
+            defaultValue='charts'
             className='space-y-6'
           >
             <div className='flex items-center justify-between'>
-              <TabsList className='grid grid-cols-3'>
+              <TabsList className='grid grid-cols-2'>
                 <TabsTrigger
                   value='charts'
                   className='flex items-center gap-2'
