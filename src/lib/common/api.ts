@@ -79,7 +79,7 @@ export const BOOKING_ENDPOINTS = {
 } as const
 
 export const SSE_ENDPOINTS = {
-  HABITACIONES_CAMBIOS: `${API_BASE_URL}/sse/habitaciones-cambios`,
+  HABITACIONES_CAMBIOS: (token: string) => `${API_BASE_URL}/sse/habitaciones-cambios?token=${token}`,
 } as const
 
 // Endpoints de huespedes secundarios

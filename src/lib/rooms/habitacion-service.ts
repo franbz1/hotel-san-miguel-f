@@ -270,7 +270,7 @@ export function getHabitacionesCambios(
     throw new Error('No hay token de autenticación');
   }
 
-  const es = new EventSource(SSE_ENDPOINTS.HABITACIONES_CAMBIOS, {withCredentials: true});
+  const es = new EventSource(SSE_ENDPOINTS.HABITACIONES_CAMBIOS(token));
 
   es.onerror = (event) => {
     console.error('Error en EventSource', event);
